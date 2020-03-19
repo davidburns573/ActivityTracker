@@ -25,7 +25,7 @@ class Statistics(val sessions: MutableList<Session>) {
         return totalTime.dividedBy(numDays.toLong())
     }
 
-    fun getHashMapOfDaysAndTime(): HashMap<LocalDate, Duration> {
+    private fun getHashMapOfDaysAndTime(): HashMap<LocalDate, Duration> {
         val daysTotalTime: HashMap<LocalDate, Duration> = HashMap()
         sessions.forEach {
             if (daysTotalTime.containsKey(it.day)) {
