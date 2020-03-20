@@ -2,7 +2,12 @@ package tech.davidburns.activitytracker
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.DialogFragment
 import androidx.navigation.Navigation
+import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -12,6 +17,5 @@ class MainActivity : AppCompatActivity() {
 
         Navigation.findNavController(findViewById(R.id.nav_host_fragment)).
             setGraph(R.navigation.nav_graph)
-
     }
 }

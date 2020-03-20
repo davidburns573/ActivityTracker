@@ -1,14 +1,17 @@
 package tech.davidburns.activitytracker
 
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.PopupWindow
-
+import android.view.Window
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.activity_view.*
-import kotlinx.android.synthetic.main.enter_name_popup.*
+import kotlinx.android.synthetic.main.enter_name_dialog.*
+
 
 class ActivityViewController : Fragment() {
 
@@ -32,8 +35,38 @@ class ActivityViewController : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         btnAddActivity.setOnClickListener {
-            val enterName = PopupWindow(enterNamePopup)
-            enterName.showAsDropDown(it)
+            val fragmentTransaction = activity?.supportFragmentManager?.beginTransaction()
+            val prev = activity?.supportFragmentManager?.findFragmentByTag("dialog")
+            if (prev != null) {
+                fragmentTransaction?.remove(prev)
+            }
+            fragmentTransaction?.addToBackStack(null)
+            val dialogFragment = MyDialog() //here MyDialog is my custom dialog
+            dialogFragment.show(fragmentTransaction, "dialog")
+        }
+    }
+}
+
+class MyDialog : DialogFragment() {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        val view = inflater.inflate(R.layout.enter_name_dialog, container, false)
+        if (dialog != null && dialog.window != null) {
+            dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT));
+            dialog.window?.requestFeature(Window.FEATURE_NO_TITLE);
+        }
+        return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        btnEnterName.setOnClickListener {
+            val activityName: String = txtEnterName.text.toString()
+
+            dismiss()
         }
     }
 }

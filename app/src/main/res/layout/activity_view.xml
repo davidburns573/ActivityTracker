@@ -10,14 +10,18 @@
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnAddActivity"
-        android:layout_width="62dp"
-        android:layout_height="65dp"
-        android:layout_marginEnd="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:clickable="true"
-        android:background="@android:drawable/ic_menu_add"
+        android:longClickable="true"
+
+        android:scaleType="center"
+        android:scaleX="1"
+        android:scaleY="1"
+        android:src="@android:drawable/ic_menu_add"
+        app:backgroundTint="#FFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.975"
-        app:srcCompat="@android:drawable/ic_menu_add" />
+        app:maxImageSize="74dp"
+        app:useCompatPadding="true" />
 </androidx.constraintlayout.widget.ConstraintLayout>
