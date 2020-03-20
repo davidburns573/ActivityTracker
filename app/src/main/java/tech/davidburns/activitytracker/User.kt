@@ -15,12 +15,18 @@ import com.google.firebase.auth.FirebaseUser
 //}
 
 object User {
-    var name: String = "UNNAMED"
+    val name: String
+        get() = "UNNAMED"
+
     var firebaseUser: FirebaseUser? = null
 
     val activities: MutableList<Activity> = mutableListOf()
 
-    fun addActivity(name: String) {
+    fun newActivity(name: String) {
         activities.add(Activity(name))
+    }
+
+    fun getActivities() {
+
     }
 }
