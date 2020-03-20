@@ -14,8 +14,5 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        Navigation.findNavController(findViewById(R.id.nav_host_fragment)).
-            setGraph(R.navigation.nav_graph)
     }
 }

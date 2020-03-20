@@ -1,5 +1,6 @@
 package tech.davidburns.activitytracker
 
+import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -7,8 +8,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
+import androidx.core.view.marginBottom
+import androidx.core.view.setPadding
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
+import kotlinx.android.synthetic.main.activity.view.*
 import kotlinx.android.synthetic.main.activity_view.*
 import kotlinx.android.synthetic.main.enter_name_dialog.*
 
@@ -42,12 +46,33 @@ class ActivityViewController : Fragment() {
             }
             fragmentTransaction?.addToBackStack(null)
             val dialogFragment = MyDialog() //here MyDialog is my custom dialog
+            dialogFragment.setActivityViewController(this)
             dialogFragment.show(fragmentTransaction, "dialog")
         }
+    }
+
+    fun addActivity(name: String) {
+        val layoutInflater: LayoutInflater = activity?.applicationContext?.
+            getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val view: View = layoutInflater.inflate(R.layout.activity, null)
+        view.name.text = name
+        val activity = Activity(name)
+        activity.initView(view)
+        val viewGroup = activityLayout
+        viewGroup.addView(view, 0)
     }
 }
 
 class MyDialog : DialogFragment() {
+
+    private var fragment: ActivityViewController? = null
+    fun setActivityViewController(actViewCont: ActivityViewController) {
+        fragment = actViewCont
+    }
+
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+    }
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -65,8 +90,12 @@ class MyDialog : DialogFragment() {
         super.onViewCreated(view, savedInstanceState)
         btnEnterName.setOnClickListener {
             val activityName: String = txtEnterName.text.toString()
-
-            dismiss()
+            if (activityName == "") {
+                txtEnterName?.hint = "Cannot be empty!";
+            } else {
+                dismiss()
+                fragment?.addActivity(activityName)
+            }
         }
     }
 }
