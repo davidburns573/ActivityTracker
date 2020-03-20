@@ -15,7 +15,7 @@ class Statistics(val sessions: MutableList<Session>) {
         return total
     }
 
-    fun averageTimePerDay() : Duration {
-
-    }
+//    fun averageTimePerDay() : Duration {
+//
+//    }
 }
