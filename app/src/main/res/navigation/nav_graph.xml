@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/activityViewController">
+
+    <fragment
+        android:id="@+id/activityViewController"
+        android:name="tech.davidburns.activitytracker.ActivityViewController"
+        android:label="activity_view"
+        tools:layout="@layout/activity_view" />
+</navigation>
