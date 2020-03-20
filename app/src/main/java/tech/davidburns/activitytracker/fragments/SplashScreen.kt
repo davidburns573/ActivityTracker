@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
 import tech.davidburns.activitytracker.R
+import tech.davidburns.activitytracker.enums.LoginState
 
 const val DELAY = 3000L
 
@@ -55,8 +56,4 @@ class SplashScreen : Fragment() {
             ) ?: LoginState.NEW_USER.name
         )
     }
-}
-
-enum class LoginState {
-    LOGGED_IN, DENIED_DATABASE, NEW_USER
 }

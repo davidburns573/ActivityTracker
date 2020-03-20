@@ -3,4 +3,6 @@
     <string name="login">Login</string>
     <string name="todo">TODO</string>
     <string name="login_key">login_key</string>
+    <string name="deny_google_access">Deny Google access</string>
+    <string name="unnamed">UNNAMED</string>
 </resources>
