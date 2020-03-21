@@ -1,6 +1,5 @@
 package tech.davidburns.activitytracker.fragments
 
-import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.view.LayoutInflater
@@ -10,7 +9,9 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
 import tech.davidburns.activitytracker.R
+import tech.davidburns.activitytracker.User
 import tech.davidburns.activitytracker.enums.LoginState
+import tech.davidburns.activitytracker.util.Authentication
 
 const val DELAY = 3000L
 
@@ -35,25 +36,27 @@ class SplashScreen : Fragment() {
         Handler().postDelayed({
             val action = when (loginState()) {
                 LoginState.NEW_USER -> SplashScreenDirections.actionSplashScreenToLoginScreen()
-                LoginState.LOGGED_IN, LoginState.DENIED_DATABASE -> TODO() // Need to implement starting screen
+                LoginState.LOGGED_IN -> {
+                    SplashScreenDirections.actionSplashScreenToActivityViewController()
+                }
+                LoginState.DENIED_DATABASE -> SplashScreenDirections.actionSplashScreenToActivityViewController()
             }
             findNavController().navigate(action)
         }, DELAY)
     }
 
     // Check if authenticated with Google
-    // Otherwise, check if they have denied access to the use of a Google
+    // Otherwise, check if they have denied access to the use of an external database
     private fun loginState(): LoginState {
-        if (auth.currentUser != null) {
-            return LoginState.LOGGED_IN
+        val user = auth.currentUser
+        return if (user != null) {
+            User.authenticate = user
+            LoginState.LOGGED_IN
+        } else {
+            when (Authentication.isDatabaseEnabled(activity)) {
+                true -> LoginState.NEW_USER
+                false -> LoginState.DENIED_DATABASE
+            }
         }
-        val sharedPref =
-            activity?.getPreferences(Context.MODE_PRIVATE) ?: return LoginState.NEW_USER
-        return LoginState.valueOf(
-            sharedPref.getString(
-                getString(R.string.login_key),
-                null
-            ) ?: LoginState.NEW_USER.name
-        )
     }
 }

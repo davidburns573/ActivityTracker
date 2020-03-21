@@ -47,7 +47,9 @@ class ActivityViewController : Fragment() {
             fragmentTransaction?.addToBackStack(null)
             val dialogFragment = MyDialog() //here MyDialog is my custom dialog
             dialogFragment.setActivityViewController(this)
-            dialogFragment.show(fragmentTransaction, "dialog")
+            if (fragmentTransaction != null) {
+                dialogFragment.show(fragmentTransaction, "dialog")
+            }
         }
     }
 
@@ -70,18 +72,15 @@ class MyDialog : DialogFragment() {
         fragment = actViewCont
     }
 
-    override fun onAttach(context: Context?) {
-        super.onAttach(context)
-    }
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.enter_name_dialog, container, false)
-        if (dialog != null && dialog.window != null) {
-            dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT));
-            dialog.window?.requestFeature(Window.FEATURE_NO_TITLE);
+        if (dialog != null && dialog?.window != null) {
+            dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT));
+            dialog?.window?.requestFeature(Window.FEATURE_NO_TITLE);
         }
         return view
     }
