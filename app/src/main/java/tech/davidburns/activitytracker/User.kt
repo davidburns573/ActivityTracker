@@ -16,8 +16,7 @@ import com.google.firebase.auth.FirebaseUser
 
 object User {
     var authenticate: FirebaseUser? = null
-    val name: String
-        get() = "UNNAMED"
+    var name: String = "UNNAMED"
 
     var firebaseUser: FirebaseUser? = null
 

@@ -26,7 +26,7 @@
     </fragment>
     <fragment
         android:id="@+id/activityViewController"
-        android:name="tech.davidburns.activitytracker.ActivityViewController"
+        android:name="tech.davidburns.activitytracker.fragments.ActivityViewController"
         android:label="activity_view"
         tools:layout="@layout/activity_view" />
 </navigation>

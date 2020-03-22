@@ -22,9 +22,10 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.login_screen.*
 import tech.davidburns.activitytracker.R
 import tech.davidburns.activitytracker.User
+import tech.davidburns.activitytracker.interfaces.Dialogable
 import tech.davidburns.activitytracker.util.Authentication
 
-class Login : Fragment() {
+class Login : Fragment(), Dialogable {
     private lateinit var auth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
 
@@ -47,8 +48,27 @@ class Login : Fragment() {
         }
 
         cancel_button.setOnClickListener {
-            Authentication.denyDatabase(activity)
-            updateUI(null)
+            createDialog()
+        }
+    }
+
+
+    /**
+     * Create a dialog that requests username
+     * Called only if deny Google access
+     */
+    private fun createDialog() {
+        val fragmentTransaction = activity?.supportFragmentManager?.beginTransaction()
+        val prev = activity?.supportFragmentManager?.findFragmentByTag("dialog")
+        if (prev != null) {
+            fragmentTransaction?.remove(prev)
+        }
+        fragmentTransaction?.addToBackStack(null)
+        val dialogFragment =
+            MyDialog(R.string.enter_username) //here MyDialog is my custom dialog
+        dialogFragment.setFragment(this)
+        if (fragmentTransaction != null) {
+            dialogFragment.show(fragmentTransaction, "dialog")
         }
     }
 
@@ -116,5 +136,11 @@ class Login : Fragment() {
     companion object {
         private const val TAG = "GoogleActivity"
         private const val RC_SIGN_IN = 9001
+    }
+
+    override fun dialogString(str: String) {
+        User.name = str
+        Authentication.denyDatabase(activity)
+        updateUI(null)
     }
 }
