@@ -1,7 +1,6 @@
 package tech.davidburns.activitytracker.fragments
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -9,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -16,13 +16,16 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.login_screen.*
 import tech.davidburns.activitytracker.R
-import tech.davidburns.activitytracker.enums.LoginState
+import tech.davidburns.activitytracker.User
+import tech.davidburns.activitytracker.interfaces.Dialogable
+import tech.davidburns.activitytracker.util.Authentication
 
-class Login : Fragment() {
+class Login : Fragment(), Dialogable {
     private lateinit var auth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
 
@@ -45,11 +48,27 @@ class Login : Fragment() {
         }
 
         cancel_button.setOnClickListener {
-            val sharedPref = activity!!.getPreferences(Context.MODE_PRIVATE)
-            with (sharedPref.edit()) {
-                putString(getString(R.string.login_key), LoginState.DENIED_DATABASE.name)
-                apply()
-            }
+            createDialog()
+        }
+    }
+
+
+    /**
+     * Create a dialog that requests username
+     * Called only if deny Google access
+     */
+    private fun createDialog() {
+        val fragmentTransaction = activity?.supportFragmentManager?.beginTransaction()
+        val prev = activity?.supportFragmentManager?.findFragmentByTag("dialog")
+        if (prev != null) {
+            fragmentTransaction?.remove(prev)
+        }
+        fragmentTransaction?.addToBackStack(null)
+        val dialogFragment =
+            MyDialog(R.string.enter_username) //here MyDialog is my custom dialog
+        dialogFragment.setFragment(this)
+        if (fragmentTransaction != null) {
+            dialogFragment.show(fragmentTransaction, "dialog")
         }
     }
 
@@ -79,15 +98,21 @@ class Login : Fragment() {
                 if (task.isSuccessful) {
                     // Sign in success, update UI with the signed-in user's information
                     Log.d(TAG, "signInWithCredential:success")
-                    val user = auth.currentUser
-//                    updateUI(null)
+                    updateUI(auth.currentUser)
                 } else {
                     // If sign in fails, display a message to the user.
                     Log.w(TAG, "signInWithCredential:failure", task.exception)
-                    Snackbar.make(activity_main, "Authentication Failed.", Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(activity_main, "Authentication Failed.", Snackbar.LENGTH_SHORT)
+                        .show()
 //                    updateUI(null)
                 }
             }
+    }
+
+    private fun updateUI(user: FirebaseUser?) {
+        User.authenticate = user
+        val action = LoginDirections.actionLoginScreenToActivityViewController()
+        findNavController().navigate(action)
     }
 
     private fun signIn() {
@@ -111,5 +136,11 @@ class Login : Fragment() {
     companion object {
         private const val TAG = "GoogleActivity"
         private const val RC_SIGN_IN = 9001
+    }
+
+    override fun dialogString(str: String) {
+        User.name = str
+        Authentication.denyDatabase(activity)
+        updateUI(null)
     }
 }

@@ -1,0 +1,8 @@
+//ext {
+//    kotlin : "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+//    firebase_analytics : "com.google.firebase:firebase-analytics:$versions.firebase_analytics"
+//
+//    versions = [
+//            firebase_analytics : "17.2.3"
+//    ]
+//}

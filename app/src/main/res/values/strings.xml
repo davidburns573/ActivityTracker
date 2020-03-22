@@ -6,4 +6,7 @@
     <string name="login_key">login_key</string>
     <string name="deny_google_access">Deny Google access</string>
     <string name="unnamed">UNNAMED</string>
+    <string name="deny_database_key">false</string>
+    <string name="error">ERROR</string>
+    <string name="enter_username">Enter Username</string>
 </resources>
