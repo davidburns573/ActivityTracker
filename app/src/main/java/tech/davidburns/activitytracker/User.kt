@@ -49,7 +49,6 @@ object User {
         activities.clear()
 
         val cursor: ActivityCursorWrapper = queryActivities(null, null)
-
         try {
             cursor.moveToFirst()
             while (!(cursor.isAfterLast)) {
