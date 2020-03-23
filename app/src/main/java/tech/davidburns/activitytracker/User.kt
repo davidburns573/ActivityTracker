@@ -8,6 +8,18 @@ import com.google.firebase.auth.FirebaseUser
 import tech.davidburns.activitytracker.util.ActivityBaseHelper
 import tech.davidburns.activitytracker.util.ActivitySchema
 
+//class User(var name: String) {
+//    constructor(firebaseUser: FirebaseUser) : this(
+//        firebaseUser.displayName ?: "UNNAMED"
+//    )
+//
+//    var activities: MutableList<Activity> = mutableListOf()
+//
+//    fun addActivity(name: String) {
+//        activities.add(Activity(name))
+//    }
+//}
+
 object User {
     var authenticate: FirebaseUser? = null
     var name: String = "UNNAMED"
@@ -37,7 +49,8 @@ object User {
             whereArgs,
             null,
             null,
-            null)
+            null
+        )
         return ActivityCursorWrapper(cursor)
     }
 
