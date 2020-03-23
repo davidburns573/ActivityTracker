@@ -40,7 +40,9 @@ object User {
             whereArgs,
             null,
             null,
-            null)
+            null
+        )
+
         return ActivityCursorWrapper(cursor)
     }
 
