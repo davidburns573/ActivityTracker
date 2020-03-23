@@ -42,7 +42,6 @@ object User {
             null,
             null
         )
-
         return ActivityCursorWrapper(cursor)
     }
 
