@@ -30,14 +30,14 @@ object User {
     }
 
     fun queryActivities(whereClause: String?, whereArgs: Array<String>?): ActivityCursorWrapper {
-        val cursor: Cursor = database.query(
-            ActivitySchema.ActivityTable.NAME,
+        val cursor: Cursor = database.query(ActivitySchema.ActivityTable.NAME,
             null,
             whereClause,
             whereArgs,
             null,
             null,
             null)
+
         return ActivityCursorWrapper(cursor)
     }
 
