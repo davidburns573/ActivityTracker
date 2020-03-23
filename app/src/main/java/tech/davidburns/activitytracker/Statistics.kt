@@ -38,19 +38,11 @@ class Statistics(val sessions: MutableList<Session>) {
     }
 
     fun timeLastWeek(): Array<Duration> {
-        val lastSevenDays: Array<Duration> = Array(7) { Duration.ZERO }
         val now: LocalDate = LocalDate.now()
-        
+        val lastSevenDays: Array<Duration> = Array(7) { Duration.ZERO }
         sessions.forEach {
-            when(Duration.between(it.start, now).toDays().toInt()) {
-                0 -> lastSevenDays[6] = lastSevenDays[6].plus(it.length)
-                1 -> lastSevenDays[5] = lastSevenDays[5].plus(it.length)
-                2 -> lastSevenDays[4] = lastSevenDays[4].plus(it.length)
-                3 -> lastSevenDays[3] = lastSevenDays[3].plus(it.length)
-                4 -> lastSevenDays[2] = lastSevenDays[2].plus(it.length)
-                5 -> lastSevenDays[1] = lastSevenDays[1].plus(it.length)
-                6 -> lastSevenDays[0] = lastSevenDays[0].plus(it.length)
-            }
+            val duration = Duration.between(it.start, now).toDays().toInt()
+            lastSevenDays[6 - duration] += it.length
         }
 
         return lastSevenDays
