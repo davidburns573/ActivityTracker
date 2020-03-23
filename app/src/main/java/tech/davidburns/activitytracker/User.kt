@@ -1,6 +1,12 @@
 package tech.davidburns.activitytracker
 
+import android.content.ContentValues
+import android.content.Context
+import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
 import com.google.firebase.auth.FirebaseUser
+import tech.davidburns.activitytracker.util.ActivityBaseHelper
+import tech.davidburns.activitytracker.util.ActivitySchema
 
 //class User(var name: String) {
 //    constructor(firebaseUser: FirebaseUser) : this(
@@ -20,13 +26,43 @@ object User {
 
     var firebaseUser: FirebaseUser? = null
 
-    val activities: MutableList<Activity> = mutableListOf()
+    var activities: MutableList<Activity> = mutableListOf()
+
+    var database: SQLiteDatabase? = null
 
     fun newActivity(name: String) {
-        activities.add(Activity(name))
+        val activity = Activity(name)
+        activities.add(activity)
+        val values: ContentValues = Activity.getContentValues(activity)
+        database?.insert(ActivitySchema.ActivityTable.NAME, null, values)
     }
 
-    fun getActivities() {
+    fun initDatabase(context: Context) {
+        database = ActivityBaseHelper(context).writableDatabase;
+    }
 
+    fun queryActivities(whereClause: String?, whereArgs: Array<String>?): ActivityCursorWrapper? {
+        val cursor: Cursor? = database?.query(
+            ActivitySchema.ActivityTable.NAME,
+            null,
+            whereClause,
+            whereArgs,
+            null,
+            null,
+            null)
+        return cursor?.let { ActivityCursorWrapper(it) }
+    }
+
+    fun setActivitiesFromDB() {
+        activities = mutableListOf()
+
+        val cursor: ActivityCursorWrapper? = queryActivities(null, null)
+
+        cursor.use { cursor ->
+            cursor?.moveToFirst()
+            while (!cursor?.isAfterLast!!) {
+                cursor.getActivity().let { activities.add(it) }
+            }
+        }
     }
 }
