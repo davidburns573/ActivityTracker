@@ -22,9 +22,12 @@ class ActivityViewController : Fragment(), Dialogable {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+<<<<<<< HEAD
         viewManager = LinearLayoutManager(activity).apply { reverseLayout = true }
                                                    .apply { stackFromEnd = true }
         viewAdapter = ActivityAdapter(User.activities)
+=======
+>>>>>>> Finished ActivityDatabase
         context?.let { User.initDatabase(it) }
         return inflater.inflate(R.layout.activity_view, container, false)
     }
@@ -35,6 +38,11 @@ class ActivityViewController : Fragment(), Dialogable {
         activity_recycler.layoutManager = viewManager
 
         initializeData()
+
+        User.setActivitiesFromDB()
+        for (activity in User.activities) {
+            addActivityView(activity.name)
+        }
 
         btnAddActivity.setOnClickListener {
             val fragmentTransaction = activity?.supportFragmentManager?.beginTransaction()
@@ -59,6 +67,7 @@ class ActivityViewController : Fragment(), Dialogable {
             }
         }
         User.addActivity(str)
+<<<<<<< HEAD
         viewAdapter.notifyItemInserted(User.activities.size - 1)
         return true
     }
@@ -67,5 +76,20 @@ class ActivityViewController : Fragment(), Dialogable {
         val startingIndex = User.activities.size
         User.setActivitiesFromDB()
         viewAdapter.notifyItemRangeInserted(startingIndex, User.activities.size - startingIndex)
+=======
+        addActivityView(str)
+        return true
+    }
+
+    private fun addActivityView(name: String) {
+        val layoutInflater: LayoutInflater =
+            activity?.applicationContext?.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val view: View = layoutInflater.inflate(R.layout.activity, null)
+        view.name.text = name
+        val activity = Activity(name)
+        activity.initView(view)
+        val viewGroup = activityLayout
+        viewGroup.addView(view, 0)
+>>>>>>> Finished ActivityDatabase
     }
 }
