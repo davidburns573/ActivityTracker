@@ -29,7 +29,10 @@ object User {
         database = ActivityBaseHelper(context).writableDatabase
     }
 
-    fun queryActivities(whereClause: String?, whereArgs: Array<String>?): ActivityCursorWrapper {
+    fun queryActivities(
+        whereClause: String?,
+        whereArgs: Array<String>?
+    ): ActivityCursorWrapper {
         val cursor: Cursor = database.query(
             ActivitySchema.ActivityTable.NAME,
             null,
@@ -37,7 +40,8 @@ object User {
             whereArgs,
             null,
             null,
-            null)
+            null
+        )
         return ActivityCursorWrapper(cursor)
     }
 
