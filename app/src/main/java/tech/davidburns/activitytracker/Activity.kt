@@ -5,7 +5,7 @@ import android.database.Cursor
 import android.database.CursorWrapper
 import android.view.View
 import kotlinx.android.synthetic.main.activity.view.*
-import tech.davidburns.activitytracker.util.ActivitySchema
+import tech.davidburns.activitytracker.util.UserSchema
 import java.time.Duration
 import java.time.LocalDateTime
 
@@ -15,11 +15,17 @@ class Activity(var name: String) {
     var view: View? = null
 
     fun addSession(length: Duration) {
-        sessions.add(Session(length))
+        val session: Session = Session(length, name)
+        sessions.add(session)
+        val values: ContentValues = Session.getContentValues(session)
+        User.database.insert(UserSchema.SessionTable.NAME, null, values)
     }
 
     fun addSession(start: LocalDateTime, end: LocalDateTime) {
-        sessions.add(Session(start, end))
+        val session: Session = Session(start, end, name)
+        sessions.add(session)
+        val values: ContentValues = Session.getContentValues(session)
+        User.database.insert(UserSchema.SessionTable.NAME, null, values)
     }
 
     fun initView(view: View) {
@@ -35,7 +41,7 @@ class Activity(var name: String) {
     companion object {
         fun getContentValues(activity: Activity): ContentValues {
             val values = ContentValues()
-            values.put(ActivitySchema.ActivityTable.Cols.ACTIVITYNAME, activity.name)
+            values.put(UserSchema.ActivityTable.Cols.ACTIVITYNAME, activity.name)
             return values
         }
     }
@@ -43,7 +49,7 @@ class Activity(var name: String) {
 
 class  ActivityCursorWrapper(cursor: Cursor): CursorWrapper(cursor) {
     fun getActivity(): Activity {
-        val name: String = getString(getColumnIndex(ActivitySchema.ActivityTable.Cols.ACTIVITYNAME));
+        val name: String = getString(getColumnIndex(UserSchema.ActivityTable.Cols.ACTIVITYNAME));
         return Activity(name)
     }
 }
