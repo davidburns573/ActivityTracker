@@ -28,21 +28,21 @@ object User {
 
     var activities: MutableList<Activity> = mutableListOf()
 
-    var database: SQLiteDatabase? = null
+    lateinit var database: SQLiteDatabase
 
-    fun newActivity(name: String) {
+    fun addActivity(name: String) {
         val activity = Activity(name)
         activities.add(activity)
         val values: ContentValues = Activity.getContentValues(activity)
-        database?.insert(ActivitySchema.ActivityTable.NAME, null, values)
+        database.insert(ActivitySchema.ActivityTable.NAME, null, values)
     }
 
     fun initDatabase(context: Context) {
-        database = ActivityBaseHelper(context).writableDatabase;
+        database = ActivityBaseHelper(context).writableDatabase
     }
 
-    fun queryActivities(whereClause: String?, whereArgs: Array<String>?): ActivityCursorWrapper? {
-        val cursor: Cursor? = database?.query(
+    fun queryActivities(whereClause: String?, whereArgs: Array<String>?): ActivityCursorWrapper {
+        val cursor: Cursor = database.query(
             ActivitySchema.ActivityTable.NAME,
             null,
             whereClause,
@@ -50,19 +50,22 @@ object User {
             null,
             null,
             null)
-        return cursor?.let { ActivityCursorWrapper(it) }
+        return ActivityCursorWrapper(cursor)
     }
 
     fun setActivitiesFromDB() {
         activities = mutableListOf()
 
-        val cursor: ActivityCursorWrapper? = queryActivities(null, null)
+        var cursor: ActivityCursorWrapper = queryActivities(null, null)
 
-        cursor.use { cursor ->
-            cursor?.moveToFirst()
-            while (!cursor?.isAfterLast!!) {
-                cursor.getActivity().let { activities.add(it) }
+        try {
+            cursor.moveToFirst()
+            while (!(cursor.isAfterLast)) {
+                activities.add(cursor.getActivity())
+                cursor.moveToNext()
             }
+        } finally {
+            cursor?.close()
         }
     }
 }

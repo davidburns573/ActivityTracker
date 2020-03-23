@@ -38,10 +38,15 @@ class MyDialog(@StringRes private val hint: Int) : DialogFragment() {
         btnEnterName.setOnClickListener {
             val activityName: String = txtEnterName.text.toString()
             if (activityName == "") {
-                txtEnterName?.hint = "Cannot be empty!";
+                txtEnterName?.hint = "Cannot be empty!"
             } else {
-                dismiss()
-                fragment?.dialogString(activityName)
+                val valid: Boolean? = fragment?.dialogString(activityName)
+                if (valid!!) {
+                    dismiss()
+                } else {
+                    txtEnterName.setText("")
+                    txtEnterName?.hint = "Must be unique!"
+                }
             }
         }
     }

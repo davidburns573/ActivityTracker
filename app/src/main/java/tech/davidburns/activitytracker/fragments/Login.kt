@@ -138,9 +138,10 @@ class Login : Fragment(), Dialogable {
         private const val RC_SIGN_IN = 9001
     }
 
-    override fun dialogString(str: String) {
+    override fun dialogString(str: String): Boolean {
         User.name = str
         Authentication.denyDatabase(activity)
         updateUI(null)
+        return true
     }
 }
