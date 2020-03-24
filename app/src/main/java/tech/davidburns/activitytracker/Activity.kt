@@ -4,7 +4,6 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.database.CursorWrapper
 import android.view.View
-import kotlinx.android.synthetic.main.activity.view.*
 import tech.davidburns.activitytracker.util.ActivitySchema
 import java.time.Duration
 import java.time.LocalDateTime
@@ -20,16 +19,6 @@ class Activity(var name: String) {
 
     fun addSession(start: LocalDateTime, end: LocalDateTime) {
         sessions.add(Session(start, end))
-    }
-
-    fun initView(view: View) {
-        this.view = view
-        view.setOnClickListener {
-
-        }
-        view.btnStart.setOnClickListener {
-
-        }
     }
 
     companion object {
