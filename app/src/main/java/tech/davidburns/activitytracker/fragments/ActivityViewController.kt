@@ -24,7 +24,7 @@ class ActivityViewController : Fragment(), Dialogable {
     ): View? {
         viewManager = LinearLayoutManager(activity).apply { reverseLayout = true }
             .apply { stackFromEnd = true }
-            .apply { stackFromEnd = true }
+
         viewAdapter = ActivityAdapter(User.activities)
         context?.let { User.initDatabase(it) }
         return inflater.inflate(R.layout.activity_view, container, false)
