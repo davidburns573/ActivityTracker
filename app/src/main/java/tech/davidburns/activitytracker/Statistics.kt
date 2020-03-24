@@ -4,10 +4,15 @@ import java.time.Duration
 import java.time.LocalDate
 import kotlin.math.ceil
 
+/**
+ * @constructor Creates an object to calculate a variety of stats about a list of [Session]s
+ * @author David Burns
+ * @author Charles Jenkins
+ * @since 1.0
+ */
 class Statistics(val sessions: MutableList<Session>) {
-
     /**
-     * @return [Duration] of all sessions of an [Activity]
+     * @return [Duration] of all [Session]s of an [Activity]
      */
     fun totalTimeEver(): Duration {
         var total: Duration = Duration.ZERO
@@ -17,6 +22,9 @@ class Statistics(val sessions: MutableList<Session>) {
         return total
     }
 
+    /**
+     * @return Average [Duration] of all [Session]s of an [Activity] per day
+     */
     fun averageTimePerDayEver(): Duration {
         val startDate: LocalDate = sessions[0].day
         val endDate: LocalDate = LocalDate.now()
@@ -37,22 +45,17 @@ class Statistics(val sessions: MutableList<Session>) {
         return daysTotalTime
     }
 
+    /**
+     * Index 0 contains total time spent on Sunday... Index 6 contains total time spent on Saturday
+     * @return [Array] of [Duration]s.
+     */
     fun timeLastWeek(): Array<Duration> {
-        val lastSevenDays: Array<Duration> = Array(7) { Duration.ZERO }
         val now: LocalDate = LocalDate.now()
-        
+        val lastSevenDays: Array<Duration> = Array(7) { Duration.ZERO }
         sessions.forEach {
-            when(Duration.between(it.start, now).toDays().toInt()) {
-                0 -> lastSevenDays[6] = lastSevenDays[6].plus(it.length)
-                1 -> lastSevenDays[5] = lastSevenDays[5].plus(it.length)
-                2 -> lastSevenDays[4] = lastSevenDays[4].plus(it.length)
-                3 -> lastSevenDays[3] = lastSevenDays[3].plus(it.length)
-                4 -> lastSevenDays[2] = lastSevenDays[2].plus(it.length)
-                5 -> lastSevenDays[1] = lastSevenDays[1].plus(it.length)
-                6 -> lastSevenDays[0] = lastSevenDays[0].plus(it.length)
-            }
+            val duration = Duration.between(it.start, now).toDays().toInt()
+            lastSevenDays[6 - duration] += it.length
         }
-
         return lastSevenDays
     }
 }
