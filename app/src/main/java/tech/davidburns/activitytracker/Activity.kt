@@ -38,6 +38,31 @@ class Activity(var name: String) {
         }
     }
 
+    fun querySessions(): SessionCursorWrapper {
+        val query: String = "SELECT * FROM " + UserSchema.SessionTable.NAME +
+                " WHERE " + UserSchema.SessionTable.Cols.NAME + "=" + "?"
+
+        val strArray: Array<String> = arrayOf(name)
+        val cursor: Cursor = User.database.rawQuery(query, strArray)
+        return SessionCursorWrapper(cursor)
+    }
+
+    fun setSessionsFromDB() {
+        sessions = mutableListOf()
+
+        val cursor: SessionCursorWrapper = querySessions()
+
+        try {
+            cursor.moveToFirst()
+            while (!(cursor.isAfterLast)) {
+                sessions.add(cursor.getSession())
+                cursor.moveToNext()
+            }
+        } finally {
+            cursor.close()
+        }
+    }
+
     companion object {
         fun getContentValues(activity: Activity): ContentValues {
             val values = ContentValues()
@@ -53,3 +78,4 @@ class  ActivityCursorWrapper(cursor: Cursor): CursorWrapper(cursor) {
         return Activity(name)
     }
 }
+

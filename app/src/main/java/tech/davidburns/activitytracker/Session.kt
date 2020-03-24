@@ -54,12 +54,7 @@ class Session {
     }
 }
 
-class  UserCursorWrapper(cursor: Cursor): CursorWrapper(cursor) {
-    fun getActivity(): Activity {
-        val name: String = getString(getColumnIndex(UserSchema.ActivityTable.Cols.ACTIVITYNAME));
-        return Activity(name)
-    }
-
+class  SessionCursorWrapper(cursor: Cursor): CursorWrapper(cursor) {
     fun getSession(): Session {
         val name: String = getString(getColumnIndex(UserSchema.SessionTable.Cols.NAME))
         val length: Long = getLong(getColumnIndex(UserSchema.SessionTable.Cols.LENGTH))

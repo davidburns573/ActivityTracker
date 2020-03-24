@@ -56,7 +56,7 @@ object User {
     fun setActivitiesFromDB() {
         activities = mutableListOf()
 
-        var cursor: ActivityCursorWrapper = queryActivities(null, null)
+        val cursor: ActivityCursorWrapper = queryActivities(null, null)
 
         try {
             cursor.moveToFirst()
@@ -65,7 +65,7 @@ object User {
                 cursor.moveToNext()
             }
         } finally {
-            cursor?.close()
+            cursor.close()
         }
     }
 }
