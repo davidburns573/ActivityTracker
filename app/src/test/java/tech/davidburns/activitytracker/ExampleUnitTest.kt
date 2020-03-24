@@ -67,4 +67,15 @@ class ExampleUnitTest {
 
         return lastSevenDays
     }
+//    @Test
+//    fun sessionDatabase() {
+//        val activity = Activity("David")
+//        activity.addSession(Duration.ofMillis(30))
+//        activity.addSession(Duration.ofMillis(30))
+//        activity.sessions = mutableListOf()
+//        activity.setSessionsFromDB()
+//        for (session in activity.sessions) {
+//            println(session.length.toMillis())
+//        }
+//    }
 }
