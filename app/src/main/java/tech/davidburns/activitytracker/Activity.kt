@@ -64,15 +64,8 @@ class Activity(var name: String) {
 
 class ActivityCursorWrapper(cursor: Cursor) : CursorWrapper(cursor) {
     fun getActivity(): Activity {
-        val name: String = getString(getColumnIndex(ActivitySchema.ActivityTable.Cols.ACTIVITYNAME));
+        val name: String =
+            getString(getColumnIndex(ActivitySchema.ActivityTable.Cols.ACTIVITYNAME));
         return Activity(name)
-    }
-
-    companion object {
-        fun getContentValues(activity: Activity): ContentValues {
-            val values = ContentValues()
-            values.put(ActivitySchema.ActivityTable.Cols.ACTIVITYNAME, activity.name)
-            return values
-        }
     }
 }
