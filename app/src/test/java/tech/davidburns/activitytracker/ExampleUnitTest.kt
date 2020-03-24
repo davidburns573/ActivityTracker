@@ -25,19 +25,17 @@ class ExampleUnitTest {
         assertEquals(activity.sessions, activity.statistics.sessions)
     }
 
-    @Test
-    fun sameThing() {
-        val sessions = mutableListOf<Session>(Session(
-            LocalDateTime.of(2020, 5,8, 1, 30),
-            LocalDateTime.of(2020, 5,8, 0, 30)
-        ), Session(
-            LocalDateTime.of(2020, 4,8, 1, 30),
-            LocalDateTime.of(2020, 4,8, 0, 30)
-        ), Session(
-            LocalDateTime.of(2020, 4,7, 1, 30),
-            LocalDateTime.of(2020, 4,8, 0, 30)
-        ))
-    }
+//    @Test
+//    fun sessionDatabase() {
+//        val activity = Activity("David")
+//        activity.addSession(Duration.ofMillis(30))
+//        activity.addSession(Duration.ofMillis(30))
+//        activity.sessions = mutableListOf()
+//        activity.setSessionsFromDB()
+//        for (session in activity.sessions) {
+//            println(session.length.toMillis())
+//        }
+//    }
 
     fun timeLastWeek(sessions: MutableList<Session>): Array<Duration> {
         val lastSevenDays: Array<Duration> = Array(7) { Duration.ZERO }
