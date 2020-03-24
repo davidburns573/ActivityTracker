@@ -54,7 +54,7 @@ object User {
     }
 
     fun setActivitiesFromDB() {
-        activities = mutableListOf()
+        activities.clear()
 
         var cursor: ActivityCursorWrapper = queryActivities(null, null)
 
