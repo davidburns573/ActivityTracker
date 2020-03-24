@@ -9,4 +9,5 @@
     <string name="deny_database_key">false</string>
     <string name="error">ERROR</string>
     <string name="enter_username">Enter Username</string>
+    <string name="start">Start</string>
 </resources>

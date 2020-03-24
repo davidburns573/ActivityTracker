@@ -1,35 +1,41 @@
 package tech.davidburns.activitytracker.fragments
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import kotlinx.android.synthetic.main.activity.view.*
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_view.*
-import tech.davidburns.activitytracker.Activity
+import tech.davidburns.activitytracker.ActivityAdapter
 import tech.davidburns.activitytracker.R
 import tech.davidburns.activitytracker.User
 import tech.davidburns.activitytracker.interfaces.Dialogable
 
 class ActivityViewController : Fragment(), Dialogable {
+    private lateinit var viewManager: RecyclerView.LayoutManager
+    private lateinit var viewAdapter: RecyclerView.Adapter<*>
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        viewManager = LinearLayoutManager(activity).apply { reverseLayout = true }
+            .apply { stackFromEnd = true }
+            .apply { stackFromEnd = true }
+        viewAdapter = ActivityAdapter(User.activities)
         context?.let { User.initDatabase(it) }
         return inflater.inflate(R.layout.activity_view, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        activity_recycler.adapter = viewAdapter
+        activity_recycler.layoutManager = viewManager
 
-        User.setActivitiesFromDB()
-        for (activity in User.activities) {
-            addActivityView(activity.name)
-        }
+        initializeData()
 
         btnAddActivity.setOnClickListener {
             val fragmentTransaction = activity?.supportFragmentManager?.beginTransaction()
@@ -54,18 +60,13 @@ class ActivityViewController : Fragment(), Dialogable {
             }
         }
         User.addActivity(str)
-        addActivityView(str)
+        viewAdapter.notifyItemInserted(User.activities.size - 1)
         return true
     }
 
-    private fun addActivityView(name: String) {
-        val layoutInflater: LayoutInflater =
-            activity?.applicationContext?.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        val view: View = layoutInflater.inflate(R.layout.activity, null)
-        view.name.text = name
-        val activity = Activity(name)
-        activity.initView(view)
-        val viewGroup = activityLayout
-        viewGroup.addView(view, 0)
+    private fun initializeData() {
+        val startingIndex = User.activities.size
+        User.setActivitiesFromDB()
+        viewAdapter.notifyItemRangeInserted(startingIndex, User.activities.size - startingIndex)
     }
 }
