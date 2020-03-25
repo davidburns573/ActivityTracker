@@ -15,13 +15,9 @@
         android:longClickable="true"
 
         android:scaleType="center"
-        android:scaleX="1"
-        android:scaleY="1"
-        android:src="@android:drawable/ic_menu_add"
-        app:backgroundTint="#FFFFFF"
+        android:src="@drawable/ic_add_black_24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:maxImageSize="74dp"
         app:useCompatPadding="true" />
 
     <androidx.recyclerview.widget.RecyclerView
