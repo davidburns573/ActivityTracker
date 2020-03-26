@@ -7,14 +7,15 @@ import android.database.sqlite.SQLiteDatabase
 import com.google.firebase.auth.FirebaseUser
 import tech.davidburns.activitytracker.util.UserBaseHelper
 import tech.davidburns.activitytracker.util.UserSchema
+import tech.davidburns.activitytracker.interfaces.Database
 
 object User {
     var authenticate: FirebaseUser? = null
     var name: String = "UNNAMED"
 
-    var firebaseUser: FirebaseUser? = null
-
     var activities: MutableList<Activity> = mutableListOf()
+
+    var implementedDatabase: Database? = null
 
     lateinit var database: SQLiteDatabase
 
@@ -45,6 +46,9 @@ object User {
         return ActivityCursorWrapper(cursor)
     }
 
+    /**
+     * Clears current activities and then retrieves activities from the database
+     */
     fun setActivitiesFromDB() {
         activities.clear()
 

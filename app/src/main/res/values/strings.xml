@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ActivityTracker</string>
+    <string name="app_name">Activity Tracker</string>
     <string name="enter_activity_name">Enter Activity Name</string>
     <string name="login">Login</string>
     <string name="todo">TODO</string>
