@@ -18,12 +18,12 @@ class ExampleUnitTest {
         assertEquals(4, 2 + 2)
     }
 
-    @Test
-    fun aliasing() {
-        val activity = Activity("Study")
-        activity.addSession(Duration.ofMinutes(30))
-        assertEquals(activity.sessions, activity.statistics.sessions)
-    }
+//    @Test
+//    fun aliasing() {
+//        val activity = Activity("Study")
+//        activity.addSession(Duration.ofMinutes(30))
+//        assertEquals(activity.sessions, activity.statistics.sessions)
+//    }
 
 //    @Test
 //    fun sessionDatabase() {
