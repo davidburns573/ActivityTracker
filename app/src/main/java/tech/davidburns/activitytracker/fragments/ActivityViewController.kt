@@ -24,10 +24,10 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        context?.let { User.initDatabase(it) }
         viewManager = LinearLayoutManager(activity).apply { reverseLayout = true }
             .apply { stackFromEnd = true }
         viewAdapter = ActivityAdapter(User.activities, this)
-        context?.let { User.initDatabase(it) }
         return inflater.inflate(R.layout.activity_view, container, false)
     }
 

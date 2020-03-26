@@ -9,16 +9,16 @@ class UserSchema {
         const val NAME: String = "activities"
 
         object Cols {
-            val ACTIVITYNAME = "activityname"
+            const val ACTIVITYNAME = "activityname"
         }
     }
     object SessionTable {
         const val NAME: String = "sessions"
         object Cols {
-            val NAME = "name"
-            val LENGTH = "length"
-            val DAY = "day"
-            val START = "start"
+            const val NAME = "name"
+            const val LENGTH = "length"
+            const val DAY = "day"
+            const val START = "start"
         }
     }
 
@@ -36,9 +36,9 @@ class UserBaseHelper(private val context: Context):
                 + UserSchema.ActivityTable.Cols.ACTIVITYNAME + ")")
         db?.execSQL("create table " + UserSchema.SessionTable.NAME
                 + "(" + " _id integer primary key autoincrement, "
-                + UserSchema.SessionTable.Cols.NAME
-                + UserSchema.SessionTable.Cols.LENGTH
-                + UserSchema.SessionTable.Cols.DAY
+                + UserSchema.SessionTable.Cols.NAME + ", "
+                + UserSchema.SessionTable.Cols.LENGTH + ", "
+                + UserSchema.SessionTable.Cols.DAY + ", "
                 + UserSchema.SessionTable.Cols.START + ")")
     }
 

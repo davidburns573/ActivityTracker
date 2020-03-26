@@ -7,9 +7,11 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class ActivityAdapter(private val activities: MutableList<Activity>,
-                      private val onClickListener: OnClickListener) :
-                      RecyclerView.Adapter<ActivityAdapter.ViewHolder>() {
+class ActivityAdapter(
+    private val activities: MutableList<Activity>,
+    private val onClickListener: OnClickListener
+) :
+    RecyclerView.Adapter<ActivityAdapter.ViewHolder>() {
     lateinit var title: TextView
     lateinit var secondary: TextView
     lateinit var other: TextView
@@ -30,13 +32,16 @@ class ActivityAdapter(private val activities: MutableList<Activity>,
             // Get the data model based on position
             val thisActivity = activities[position]
             title.text = thisActivity.name
+            thisActivity.setSessionsFromDB()
+            secondary.text =
+                "${thisActivity.statistics.totalTimeEver().seconds} seconds"
         }
     }
 
     override fun getItemCount(): Int = activities.size
 
-    inner class ViewHolder(itemView: View, private val onClickListener: OnClickListener)
-        : RecyclerView.ViewHolder(itemView), View.OnClickListener {
+    inner class ViewHolder(itemView: View, private val onClickListener: OnClickListener) :
+        RecyclerView.ViewHolder(itemView), View.OnClickListener {
 
         init {
             title = itemView.findViewById(R.id.activity_title)

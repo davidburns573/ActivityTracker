@@ -5,16 +5,16 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import tech.davidburns.activitytracker.fragments.SessionLength
 import tech.davidburns.activitytracker.fragments.SessionLog
 
-class SliderAdapter(fa: FragmentActivity) : FragmentStateAdapter(fa) {
+class SliderAdapter(fa: FragmentActivity, val activity: Activity) : FragmentStateAdapter(fa) {
     override fun getItemCount(): Int {
         return 2
     }
 
     override fun createFragment(position: Int): Fragment {
         return if (position == 0) {
-            SessionLength()
+            SessionLength(activity)
         } else {
-            SessionLog()
+            SessionLog(activity)
         }
     }
 

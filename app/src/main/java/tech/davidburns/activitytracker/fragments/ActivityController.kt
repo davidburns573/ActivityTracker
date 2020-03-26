@@ -34,6 +34,6 @@ class ActivityController : Fragment() {
 
         activity_title.text = activity.name
 
-        slide_view_pager.adapter = getActivity()?.let { SliderAdapter(it) }
+        slide_view_pager.adapter = getActivity()?.let { SliderAdapter(it, activity) }
     }
 }
