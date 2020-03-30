@@ -35,16 +35,6 @@ class Activity(var name: String) {
         val strArray: Array<String> = arrayOf(name)
         val cursor: Cursor = User.database.rawQuery(query, strArray)
 
-//        val cursor: Cursor = User.database.query(
-//            UserSchema.SessionTable.NAME,
-//            null,
-//            whereClause,
-//            whereArgs,
-//            null,
-//            null,
-//            null
-//        )
-
         return SessionCursorWrapper(cursor)
     }
 
