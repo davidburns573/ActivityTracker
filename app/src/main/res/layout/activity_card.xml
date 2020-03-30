@@ -7,6 +7,7 @@
     android:clickable="true"
     android:foreground="?android:attr/selectableItemBackground"
     card_view:cardBackgroundColor="#E6E6E6"
+    card_view:cardElevation="8dp"
     card_view:cardCornerRadius="8dp"
     android:layout_margin="10dp">
 
@@ -21,7 +22,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
-            android:text="Title"
+            android:text="@string/title"
             android:textColor="@color/black"
             android:textSize="16sp"
             card_view:layout_constraintBottom_toTopOf="@id/secondary_text"
@@ -32,9 +33,9 @@
             android:id="@+id/secondary_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Secondary Text"
+            android:text="@string/secondary_text"
             android:textColor="?android:attr/textColorSecondary"
-            android:textSize="10sp"
+            android:textSize="12sp"
             card_view:layout_constraintBottom_toTopOf="@id/other_text"
             card_view:layout_constraintStart_toStartOf="@id/activity_title"
             card_view:layout_constraintTop_toBottomOf="@id/activity_title" />
@@ -45,9 +46,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
-            android:text="Other text"
+            android:text="@string/other_text"
             android:textColor="?android:attr/textColorSecondary"
-            android:textSize="10sp"
+            android:textSize="12sp"
             card_view:layout_constraintBottom_toBottomOf="parent"
             card_view:layout_constraintStart_toStartOf="@id/activity_title"
             card_view:layout_constraintTop_toBottomOf="@id/secondary_text" />
