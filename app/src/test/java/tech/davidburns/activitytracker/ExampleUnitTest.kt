@@ -25,6 +25,7 @@ class ExampleUnitTest {
 //        assertEquals(activity.sessions, activity.statistics.sessions)
 //    }
 
+
 //    @Test
 //    fun sessionDatabase() {
 //        val activity = Activity("David")

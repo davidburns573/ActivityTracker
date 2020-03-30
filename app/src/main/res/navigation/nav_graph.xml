@@ -28,5 +28,19 @@
         android:id="@+id/activityViewController"
         android:name="tech.davidburns.activitytracker.fragments.ActivityViewController"
         android:label="activity_view"
-        tools:layout="@layout/activity_view" />
+        tools:layout="@layout/activity_view" >
+        <action
+            android:id="@+id/action_activityViewController_to_activityController"
+            app:destination="@id/activityController"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@anim/fragment_fade_exit" />
+    </fragment>
+    <fragment
+        android:id="@+id/activityController"
+        android:name="tech.davidburns.activitytracker.fragments.ActivityController"
+        android:label="ActivityController" >
+        <argument
+            android:name="activityPosition"
+            app:argType="integer" />
+    </fragment>
 </navigation>
