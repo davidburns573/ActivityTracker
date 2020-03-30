@@ -15,7 +15,7 @@ object User {
 
     var activities: MutableList<Activity> = mutableListOf()
 
-    var implementedDatabase: Database? = null
+    lateinit var implementedDatabase: Database
 
     lateinit var database: SQLiteDatabase
 
