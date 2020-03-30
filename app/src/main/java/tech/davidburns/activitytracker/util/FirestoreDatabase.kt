@@ -15,6 +15,11 @@ const val activityPath = "activities"
 const val sessionPath = "sessions"
 const val TAG = "FIRESTORE_DATABASE"
 
+/**
+ * Interfaces with the Firestore Database.
+ * Firestore database only allows reads and writes to authenticated users.
+ * These authenticated users can only view files that contain their unique user id.
+ */
 class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
     private lateinit var db: FirebaseFirestore
 
