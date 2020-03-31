@@ -1,9 +1,5 @@
 package tech.davidburns.activitytracker
 
-import android.content.ContentValues
-import android.database.Cursor
-import android.database.CursorWrapper
-import tech.davidburns.activitytracker.util.UserSchema
 import java.time.*
 
 class Session {
@@ -47,35 +43,4 @@ class Session {
         LocalDateTime.ofEpochSecond(start, 0, ZoneOffset.ofTotalSeconds(0))
     )
 
-    //    fun createSessionData(): SessionData {
-//        val zoneId = ZoneId.systemDefault()
-//        val SessionData = SessionData(this.hashCode(), name, length.toMillis(), day.toEpochDay(),
-//            start?.atZone(zoneId)?.toEpochSecond())
-//        return SessionData;
-//    }
-
-    companion object {
-        fun getContentValues(session: Session): ContentValues {
-            val values = ContentValues()
-            values.put(UserSchema.SessionTable.Cols.NAME, session.name)
-            values.put(UserSchema.SessionTable.Cols.LENGTH, session.length.toMillis())
-            val zoneId = ZoneId.systemDefault()
-            values.put(UserSchema.SessionTable.Cols.DAY, session.day.toEpochDay())
-            values.put(
-                UserSchema.SessionTable.Cols.START,
-                session.start?.atZone(zoneId)?.toEpochSecond()
-            )
-            return values
-        }
-    }
-}
-
-class SessionCursorWrapper(cursor: Cursor) : CursorWrapper(cursor) {
-    fun getSession(): Session {
-        val name: String = getString(getColumnIndex(UserSchema.SessionTable.Cols.NAME))
-        val length: Long = getLong(getColumnIndex(UserSchema.SessionTable.Cols.LENGTH))
-        val day: Long = getLong(getColumnIndex(UserSchema.SessionTable.Cols.DAY))
-        val start: Long = getLong(getColumnIndex(UserSchema.SessionTable.Cols.START))
-        return Session(name, length, day, start)
-    }
 }

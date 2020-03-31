@@ -1,8 +1,5 @@
 package tech.davidburns.activitytracker.interfaces
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import tech.davidburns.activitytracker.Activity
 import tech.davidburns.activitytracker.Session
 
@@ -31,14 +28,14 @@ abstract class Database {
      * User will most likely not have very many activities, but take caution when retrieving all.
      * @return a list of all activities
      */
-    abstract fun getActivities(): List<Activity>
+    abstract fun getActivities(): MutableList<Activity>
 
     /**
      * User may have a lot of sessions, so take caution when retrieving all.
      * @param activityName that contains sessions
      * @return a list of all sessions belonging to an [Activity], will be empty if no sessions
      */
-    abstract fun getSessionsFromActivity(activityName: String): List<Session>
+    abstract fun getSessionsFromActivity(activityName: String): MutableList<Session>
 
     /**
      * Add an activity to the local activity cache and to the database
