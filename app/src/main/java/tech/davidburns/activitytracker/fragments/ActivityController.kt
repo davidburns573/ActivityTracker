@@ -15,7 +15,7 @@ import tech.davidburns.activitytracker.User
 
 class ActivityController : Fragment() {
 
-    private val args: ActivityControllerArgs by navArgs() //Lazily get arguments
+    private val args: ActivityControllerArgs by navArgs()
     private lateinit var activity: Activity
 
     override fun onCreateView(

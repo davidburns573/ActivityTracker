@@ -12,6 +12,8 @@ import tech.davidburns.activitytracker.R
 import tech.davidburns.activitytracker.User
 import tech.davidburns.activitytracker.enums.LoginState
 import tech.davidburns.activitytracker.util.Authentication
+import tech.davidburns.activitytracker.util.FirestoreDatabase
+import tech.davidburns.activitytracker.util.NativeDatabase
 
 const val DELAY = 3000L
 
@@ -37,9 +39,13 @@ class SplashScreen : Fragment() {
             val action = when (loginState()) {
                 LoginState.NEW_USER -> SplashScreenDirections.actionSplashScreenToLoginScreen()
                 LoginState.LOGGED_IN -> {
+                    User.database = FirestoreDatabase(auth.currentUser!!)
                     SplashScreenDirections.actionSplashScreenToActivityViewController()
                 }
-                LoginState.DENIED_DATABASE -> SplashScreenDirections.actionSplashScreenToActivityViewController()
+                LoginState.DENIED_DATABASE -> {
+                    User.database = NativeDatabase(requireContext())
+                    SplashScreenDirections.actionSplashScreenToActivityViewController()
+                }
             }
             findNavController().navigate(action)
         }, DELAY)

@@ -1,11 +1,8 @@
 package tech.davidburns.activitytracker
 
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import org.junit.Test
 
 import org.junit.Assert.*
-import tech.davidburns.activitytracker.util.FirestoreDatabase
 import java.time.Duration
 import java.time.LocalDate
 

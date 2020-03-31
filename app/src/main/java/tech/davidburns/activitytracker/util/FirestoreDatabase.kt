@@ -35,7 +35,7 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
             .set(userHashMap)
     }
 
-    override fun getActivities(): List<Activity> {
+    override fun getActivities(): MutableList<Activity> {
         val mutableList = mutableListOf<Activity>()
         db.collection("$userPath/${firebaseUser.uid}/$activityPath")
             .get()
@@ -56,16 +56,17 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
         return mutableList
     }
 
-    override fun getSessionsFromActivity(activityName: String): List<Session> {
+    override fun getSessionsFromActivity(activityName: String): MutableList<Session> {
         val list = mutableListOf<Session>()
-        db.collection("$userPath/${firebaseUser.uid}/$activityPath/${activityName}").get()
+        db.collection("$userPath/${firebaseUser.uid}/$activityPath/$activityName/$sessionPath")
+            .get()
             .addOnSuccessListener { result ->
                 for (document in result) {
                     try {
                         val name = document.data["name"] as String
                         val length = document.data["length"] as Long
                         val day = document.data["day"] as Long
-                        val start = document.data["start"] as Long
+                        val start = document.data["start"] as Long?
                         list.add(Session(name, length, day, start))
                     } catch (ex: Exception) {
                         ex.printStackTrace()

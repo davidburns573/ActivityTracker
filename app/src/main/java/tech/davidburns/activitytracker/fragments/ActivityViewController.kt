@@ -6,13 +6,18 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_view.*
 import tech.davidburns.activitytracker.ActivityAdapter
 import tech.davidburns.activitytracker.R
 import tech.davidburns.activitytracker.User
 import tech.davidburns.activitytracker.interfaces.Dialogable
+import tech.davidburns.activitytracker.util.FirestoreDatabase
+import tech.davidburns.activitytracker.util.NativeDatabase
 
 class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickListener {
     private lateinit var viewManager: RecyclerView.LayoutManager

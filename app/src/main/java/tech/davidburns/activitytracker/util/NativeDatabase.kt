@@ -10,8 +10,8 @@ import tech.davidburns.activitytracker.*
 import tech.davidburns.activitytracker.interfaces.Database
 import java.time.ZoneId
 
-class UserDatabase(private val context: Context) : Database() {
-    lateinit var database: SQLiteDatabase
+class NativeDatabase(private val context: Context) : Database() {
+    private lateinit var database: SQLiteDatabase
 
     override fun initializeDatabase() {
         database = UserBaseHelper(context).writableDatabase
