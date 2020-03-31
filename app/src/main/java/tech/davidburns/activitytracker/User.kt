@@ -52,15 +52,12 @@ object User {
     fun setActivitiesFromDB() {
         activities.clear()
 
-        val cursor: ActivityCursorWrapper = queryActivities(null, null)
-        try {
+        queryActivities(null, null).use {cursor ->
             cursor.moveToFirst()
             while (!(cursor.isAfterLast)) {
                 activities.add(cursor.getActivity())
                 cursor.moveToNext()
             }
-        } finally {
-            cursor.close()
         }
     }
 }

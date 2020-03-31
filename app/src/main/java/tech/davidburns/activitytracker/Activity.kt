@@ -41,16 +41,12 @@ class Activity(var name: String) {
     fun setSessionsFromDB() {
         sessions.clear()
 
-        val cursor: SessionCursorWrapper = querySessions()
-
-        try {
+        querySessions().use {cursor ->
             cursor.moveToFirst()
             while (!(cursor.isAfterLast)) {
                 sessions.add(cursor.getSession())
                 cursor.moveToNext()
             }
-        } finally {
-            cursor.close()
         }
     }
 
