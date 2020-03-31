@@ -32,7 +32,8 @@ class ActivityAdapter(
             // Get the data model based on position
             val thisActivity = activities[position]
             title.text = thisActivity.name
-            thisActivity.sessions = User.database.getSessionsFromActivity(thisActivity.name)
+            thisActivity.sessions.clear()
+            thisActivity.sessions.addAll(User.database.getSessionsFromActivity(thisActivity.name))
             secondary.text =
                 "${thisActivity.statistics.totalTimeEver().seconds} seconds"
         }

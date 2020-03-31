@@ -39,11 +39,11 @@ class SplashScreen : Fragment() {
             val action = when (loginState()) {
                 LoginState.NEW_USER -> SplashScreenDirections.actionSplashScreenToLoginScreen()
                 LoginState.LOGGED_IN -> {
-                    User.database = FirestoreDatabase(auth.currentUser!!)
+                    User.database = FirestoreDatabase(auth.currentUser!!, requireActivity().applicationContext)
                     SplashScreenDirections.actionSplashScreenToActivityViewController()
                 }
                 LoginState.DENIED_DATABASE -> {
-                    User.database = NativeDatabase(requireContext())
+                    User.database = NativeDatabase(requireActivity().applicationContext)
                     SplashScreenDirections.actionSplashScreenToActivityViewController()
                 }
             }

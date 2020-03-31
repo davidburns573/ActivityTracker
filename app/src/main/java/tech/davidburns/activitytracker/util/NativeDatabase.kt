@@ -10,12 +10,11 @@ import tech.davidburns.activitytracker.*
 import tech.davidburns.activitytracker.interfaces.Database
 import java.time.ZoneId
 
-class NativeDatabase(private val context: Context) : Database() {
+class NativeDatabase(context: Context) : Database(context) {
     private lateinit var database: SQLiteDatabase
 
-    override fun initializeDatabase() {
+    override fun initializeDatabase(context: Context) {
         database = UserBaseHelper(context).writableDatabase
-        User.activities = getActivities()
     }
 
     override fun setUserInfo() {

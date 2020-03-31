@@ -1,7 +1,9 @@
 package tech.davidburns.activitytracker.interfaces
 
+import android.content.Context
 import tech.davidburns.activitytracker.Activity
 import tech.davidburns.activitytracker.Session
+import tech.davidburns.activitytracker.User
 
 /**
  * Abstract class for database communication. Retrieving
@@ -11,16 +13,18 @@ import tech.davidburns.activitytracker.Session
  * @author Charles Jenkins
  * @author David Burns
  */
-abstract class Database {
+abstract class Database(context: Context) {
     init {
-        this.initializeDatabase()
+        this.initializeDatabase(context)
+        User.activities.clear()
+        User.activities.addAll(this.getActivities())
     }
 
     /**
      * Must be called before any other methods are called.
      * Ensures that the database is ready to be written to / read from
      */
-    protected abstract fun initializeDatabase()
+    protected abstract fun initializeDatabase(context: Context)
 
     abstract fun setUserInfo()
 

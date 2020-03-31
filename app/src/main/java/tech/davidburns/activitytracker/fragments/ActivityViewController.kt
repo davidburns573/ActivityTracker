@@ -39,7 +39,7 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
         activity_recycler.adapter = viewAdapter
         activity_recycler.layoutManager = viewManager
 
-        viewAdapter.notifyItemRangeInserted(0, User.activities.size)
+//        viewAdapter.notifyItemRangeInserted(0, User.activities.size)
 
         btnAddActivity.setOnClickListener {
             val fragmentTransaction = activity?.supportFragmentManager?.beginTransaction()

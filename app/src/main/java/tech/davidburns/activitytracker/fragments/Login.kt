@@ -24,6 +24,8 @@ import tech.davidburns.activitytracker.R
 import tech.davidburns.activitytracker.User
 import tech.davidburns.activitytracker.interfaces.Dialogable
 import tech.davidburns.activitytracker.util.Authentication
+import tech.davidburns.activitytracker.util.FirestoreDatabase
+import tech.davidburns.activitytracker.util.NativeDatabase
 
 class Login : Fragment(), Dialogable {
     private lateinit var auth: FirebaseAuth
@@ -110,7 +112,11 @@ class Login : Fragment(), Dialogable {
     }
 
     private fun updateUI(user: FirebaseUser?) {
-        User.authenticate = user
+        if (user != null) {
+            User.database = FirestoreDatabase(user, requireActivity().applicationContext)
+        } else {
+            User.database = NativeDatabase(requireActivity().applicationContext)
+        }
         val action = LoginDirections.actionLoginScreenToActivityViewController()
         findNavController().navigate(action)
     }
