@@ -16,9 +16,9 @@ import tech.davidburns.activitytracker.User
 abstract class Database(context: Context) {
     init {
         this.initializeDatabase(context)
-        User.activities.clear()
-        User.activities.addAll(this.getActivities())
     }
+
+    abstract val activities: MutableList<Activity>
 
     /**
      * Must be called before any other methods are called.
@@ -27,12 +27,6 @@ abstract class Database(context: Context) {
     protected abstract fun initializeDatabase(context: Context)
 
     abstract fun setUserInfo()
-
-    /**
-     * User will most likely not have very many activities, but take caution when retrieving all.
-     * @return a list of all activities
-     */
-    abstract fun getActivities(): MutableList<Activity>
 
     /**
      * User may have a lot of sessions, so take caution when retrieving all.

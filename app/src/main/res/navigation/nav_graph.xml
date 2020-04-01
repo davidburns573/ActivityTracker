@@ -38,9 +38,5 @@
     <fragment
         android:id="@+id/activityController"
         android:name="tech.davidburns.activitytracker.fragments.ActivityController"
-        android:label="ActivityController" >
-        <argument
-            android:name="activityPosition"
-            app:argType="integer" />
-    </fragment>
+        android:label="ActivityController" />
 </navigation>

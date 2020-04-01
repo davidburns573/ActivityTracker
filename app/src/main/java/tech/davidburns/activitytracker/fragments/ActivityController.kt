@@ -14,8 +14,6 @@ import tech.davidburns.activitytracker.SliderAdapter
 import tech.davidburns.activitytracker.User
 
 class ActivityController : Fragment() {
-
-    private val args: ActivityControllerArgs by navArgs()
     private lateinit var activity: Activity
 
     override fun onCreateView(
@@ -23,9 +21,7 @@ class ActivityController : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        activity = User.activities[args.activityPosition] //set current activity from index
-
-
+        activity = User.currentActivity //set current activity from index
         return inflater.inflate(R.layout.activity_detail, container, false)
     }
 

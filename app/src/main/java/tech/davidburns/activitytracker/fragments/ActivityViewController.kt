@@ -6,18 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_view.*
 import tech.davidburns.activitytracker.ActivityAdapter
 import tech.davidburns.activitytracker.R
 import tech.davidburns.activitytracker.User
 import tech.davidburns.activitytracker.interfaces.Dialogable
-import tech.davidburns.activitytracker.util.FirestoreDatabase
-import tech.davidburns.activitytracker.util.NativeDatabase
 
 class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickListener {
     private lateinit var viewManager: RecyclerView.LayoutManager
@@ -30,7 +25,7 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
     ): View? {
         viewManager = LinearLayoutManager(activity).apply { reverseLayout = true }
             .apply { stackFromEnd = true }
-        viewAdapter = ActivityAdapter(User.activities, this)
+        viewAdapter = ActivityAdapter(User.database.activities, this)
         return inflater.inflate(R.layout.activity_view, container, false)
     }
 
@@ -38,8 +33,6 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
         super.onViewCreated(view, savedInstanceState)
         activity_recycler.adapter = viewAdapter
         activity_recycler.layoutManager = viewManager
-
-//        viewAdapter.notifyItemRangeInserted(0, User.activities.size)
 
         btnAddActivity.setOnClickListener {
             val fragmentTransaction = activity?.supportFragmentManager?.beginTransaction()
@@ -58,19 +51,19 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
     }
 
     override fun dialogString(str: String): Boolean {
-        User.activities.forEach {
+        User.database.activities.forEach {
             if (it.name == str) {
                 return false
             }
         }
         User.addActivity(str)
-        viewAdapter.notifyItemInserted(User.activities.size - 1)
+        viewAdapter.notifyItemInserted(User.database.activities.size - 1)
         return true
     }
 
-    override fun onClick(position: Int) {
-        val action = ActivityViewControllerDirections.
-                     actionActivityViewControllerToActivityController(position)
+    override fun onClick() {
+        val action =
+            ActivityViewControllerDirections.actionActivityViewControllerToActivityController()
         findNavController().navigate(action)
     }
 }

@@ -53,11 +53,12 @@ class ActivityAdapter(
         }
 
         override fun onClick(v: View?) {
-            onClickListener.onClick(adapterPosition)
+            User.currentActivity = activities[adapterPosition]
+            onClickListener.onClick()
         }
     }
 
     interface OnClickListener {
-        fun onClick(position: Int)
+        fun onClick()
     }
 }

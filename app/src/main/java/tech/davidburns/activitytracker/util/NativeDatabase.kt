@@ -13,30 +13,31 @@ import java.time.ZoneId
 class NativeDatabase(context: Context) : Database(context) {
     private lateinit var database: SQLiteDatabase
 
+    override val activities: MutableList<Activity>
+        get() {
+            val cursor: Cursor = database.query(
+                UserSchema.ActivityTable.NAME,
+                null, null,
+                null, null,
+                null, null
+            )
+            val activities: MutableList<Activity> = mutableListOf()
+            ActivityCursorWrapper(cursor).use {
+                it.moveToFirst()
+                while (!(it.isAfterLast)) {
+                    activities.add(it.getActivity())
+                    it.moveToNext()
+                }
+            }
+            return activities
+        }
+
     override fun initializeDatabase(context: Context) {
         database = UserBaseHelper(context).writableDatabase
     }
 
     override fun setUserInfo() {
         TODO("Not yet implemented")
-    }
-
-    override fun getActivities(): MutableList<Activity> {
-        val cursor: Cursor = database.query(
-            UserSchema.ActivityTable.NAME,
-            null, null,
-            null, null,
-            null, null
-        )
-        val activities: MutableList<Activity> = mutableListOf()
-        ActivityCursorWrapper(cursor).use {
-            it.moveToFirst()
-            while (!(it.isAfterLast)) {
-                User.activities.add(it.getActivity())
-                it.moveToNext()
-            }
-        }
-        return activities
     }
 
     override fun getSessionsFromActivity(activityName: String): MutableList<Session> {
@@ -58,6 +59,7 @@ class NativeDatabase(context: Context) : Database(context) {
 
     override fun addActivity(activity: Activity) {
         val values: ContentValues = getActivityContentValues(activity)
+        activities.add(activity)
         database.insert(UserSchema.ActivityTable.NAME, null, values)
     }
 

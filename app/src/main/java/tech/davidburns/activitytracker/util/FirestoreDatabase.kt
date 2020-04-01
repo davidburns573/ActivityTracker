@@ -8,7 +8,6 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import tech.davidburns.activitytracker.Activity
 import tech.davidburns.activitytracker.Session
-import tech.davidburns.activitytracker.User
 import tech.davidburns.activitytracker.interfaces.Database
 import java.time.ZoneId
 
@@ -22,8 +21,32 @@ const val TAG = "FIRESTORE_DATABASE"
  * Firestore database only allows reads and writes to authenticated users.
  * These authenticated users can only view files that contain their unique user id.
  */
-class FirestoreDatabase(private val firebaseUser: FirebaseUser, context: Context) : Database(context) {
+class FirestoreDatabase(private val firebaseUser: FirebaseUser, context: Context) :
+    Database(context) {
     private lateinit var db: FirebaseFirestore
+
+    override val activities: MutableList<Activity>
+        get() {
+            val mutableList = mutableListOf<Activity>()
+            db.collection("$userPath/${firebaseUser.uid}/$activityPath")
+                .get()
+                .addOnSuccessListener { result ->
+                    for (document in result) {
+                        try {
+                            val name = document.id
+                            val activity = Activity(name)
+                            mutableList.add(activity)
+                            Log.d(TAG, "${document.id} => ${document.data}")
+                        } catch (ex: Exception) {
+                            ex.printStackTrace()
+                        }
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Log.d(TAG, "Error getting documents: ", exception)
+                }
+            return mutableList
+        }
 
     override fun initializeDatabase(context: Context) {
         db = Firebase.firestore
@@ -35,27 +58,6 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser, context: Context
         )
         db.document("$userPath/${firebaseUser.uid}")
             .set(userHashMap)
-    }
-
-    override fun getActivities(): MutableList<Activity> {
-        val mutableList = mutableListOf<Activity>()
-        db.collection("$userPath/${firebaseUser.uid}/$activityPath")
-            .get()
-            .addOnSuccessListener { result ->
-                for (document in result) {
-                    try {
-                        val name = document.id
-                        mutableList.add(Activity(name))
-                        Log.d(TAG, "${document.id} => ${document.data}")
-                    } catch (ex: Exception) {
-                        ex.printStackTrace()
-                    }
-                }
-            }
-            .addOnFailureListener { exception ->
-                Log.d(TAG, "Error getting documents: ", exception)
-            }
-        return mutableList
     }
 
     override fun getSessionsFromActivity(activityName: String): MutableList<Session> {
