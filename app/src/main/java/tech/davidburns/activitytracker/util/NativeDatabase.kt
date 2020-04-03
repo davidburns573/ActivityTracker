@@ -10,30 +10,33 @@ import tech.davidburns.activitytracker.*
 import tech.davidburns.activitytracker.interfaces.Database
 import java.time.ZoneId
 
-class NativeDatabase(context: Context) : Database(context) {
+class NativeDatabase : Database() {
     private lateinit var database: SQLiteDatabase
 
-    override val activities: MutableList<Activity>
-        get() {
-            val cursor: Cursor = database.query(
-                UserSchema.ActivityTable.NAME,
-                null, null,
-                null, null,
-                null, null
-            )
-            val activities: MutableList<Activity> = mutableListOf()
-            ActivityCursorWrapper(cursor).use {
-                it.moveToFirst()
-                while (!(it.isAfterLast)) {
-                    activities.add(it.getActivity())
-                    it.moveToNext()
-                }
+    override fun retrieveActivities(): MutableList<Activity> {
+        _activities.clear()
+        val cursor: Cursor = database.query(
+            UserSchema.ActivityTable.NAME,
+            null, null,
+            null, null,
+            null, null
+        )
+        ActivityCursorWrapper(cursor).use {
+            it.moveToFirst()
+            while (!(it.isAfterLast)) {
+                _activities.add(it.getActivity())
+                it.moveToNext()
             }
-            return activities
         }
+        return _activities
+    }
 
-    override fun initializeDatabase(context: Context) {
-        database = UserBaseHelper(context).writableDatabase
+    override fun cacheActivities() {
+        //Do nothing for now TODO
+    }
+
+    override fun initializeDatabase() {
+        database = UserBaseHelper(User.applicationContext).writableDatabase
     }
 
     override fun setUserInfo() {
@@ -59,7 +62,6 @@ class NativeDatabase(context: Context) : Database(context) {
 
     override fun addActivity(activity: Activity) {
         val values: ContentValues = getActivityContentValues(activity)
-        activities.add(activity)
         database.insert(UserSchema.ActivityTable.NAME, null, values)
     }
 

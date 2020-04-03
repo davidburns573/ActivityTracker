@@ -113,9 +113,9 @@ class Login : Fragment(), Dialogable {
 
     private fun updateUI(user: FirebaseUser?) {
         if (user != null) {
-            User.database = FirestoreDatabase(user, requireActivity().applicationContext)
+            User.database = FirestoreDatabase(user)
         } else {
-            User.database = NativeDatabase(requireActivity().applicationContext)
+            User.database = NativeDatabase()
         }
         val action = LoginDirections.actionLoginScreenToActivityViewController()
         findNavController().navigate(action)

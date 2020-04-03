@@ -56,7 +56,7 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
                 return false
             }
         }
-        User.addActivity(str)
+        User.database.addActivity(str)
         viewAdapter.notifyItemInserted(User.database.activities.size - 1)
         return true
     }

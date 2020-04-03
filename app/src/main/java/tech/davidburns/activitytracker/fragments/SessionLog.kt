@@ -35,20 +35,25 @@ class SessionLog(val activity: Activity) : Fragment() {
 
         enter_start_time.setOnClickListener {
             val timePickerDialog: TimePickerDialog = TimePickerDialog(context,
-                TimePickerDialog.OnTimeSetListener { timePicker: TimePicker, hour: Int, minute: Int ->
-                    var amPm: String
+                TimePickerDialog.OnTimeSetListener { _: TimePicker, hour: Int, minute: Int ->
+                    val amPm: String
                     var amPmHour = hour
                     startTime = LocalTime.of(hour, minute)
-                    if (hour > 12) {
-                        amPm = "PM"
-                        amPmHour -= 12
-                    } else if (hour == 12) {
-                        amPm = "PM"
-                    } else if (hour == 0) {
-                        amPm = "AM"
-                        amPmHour += 12
-                    } else {
-                        amPm = "AM"
+                    when {
+                        hour > 12 -> {
+                            amPm = "PM"
+                            amPmHour -= 12
+                        }
+                        hour == 12 -> {
+                            amPm = "PM"
+                        }
+                        hour == 0 -> {
+                            amPm = "AM"
+                            amPmHour += 12
+                        }
+                        else -> {
+                            amPm = "AM"
+                        }
                     }
                     enter_start_time.text = String.format("%02d:%02d", amPmHour, minute) + amPm;
                 }, 0,0, false);
@@ -58,20 +63,25 @@ class SessionLog(val activity: Activity) : Fragment() {
 
         enter_end_time.setOnClickListener {
             val timePickerDialog: TimePickerDialog = TimePickerDialog(context,
-                TimePickerDialog.OnTimeSetListener { timePicker: TimePicker, hour: Int, minute: Int ->
-                    var amPm: String
+                TimePickerDialog.OnTimeSetListener { _: TimePicker, hour: Int, minute: Int ->
+                    val amPm: String
                     var amPmHour = hour
                     endTime = LocalTime.of(hour, minute)
-                    if (hour > 12) {
-                        amPm = "PM"
-                        amPmHour -= 12
-                    } else if (hour == 12) {
-                        amPm = "PM"
-                    } else if (hour == 0) {
-                        amPm = "AM"
-                        amPmHour += 12
-                    } else {
-                        amPm = "AM"
+                    when {
+                        hour > 12 -> {
+                            amPm = "PM"
+                            amPmHour -= 12
+                        }
+                        hour == 12 -> {
+                            amPm = "PM"
+                        }
+                        hour == 0 -> {
+                            amPm = "AM"
+                            amPmHour += 12
+                        }
+                        else -> {
+                            amPm = "AM"
+                        }
                     }
                     enter_end_time.text = String.format("%02d:%02d", amPmHour, minute) + amPm;
                 }, 0,0, false);
@@ -94,8 +104,8 @@ class SessionLog(val activity: Activity) : Fragment() {
     }
 
     fun resetText() {
-        enter_start_time.text = "Start Time"
-        enter_end_time.text = "End Time"
+        enter_start_time.text = getString(R.string.start_time)
+        enter_end_time.text = getString(R.string.end_time)
     }
 
     /**

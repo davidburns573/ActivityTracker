@@ -1,9 +1,7 @@
 package tech.davidburns.activitytracker.interfaces
 
-import android.content.Context
 import tech.davidburns.activitytracker.Activity
 import tech.davidburns.activitytracker.Session
-import tech.davidburns.activitytracker.User
 
 /**
  * Abstract class for database communication. Retrieving
@@ -13,20 +11,29 @@ import tech.davidburns.activitytracker.User
  * @author Charles Jenkins
  * @author David Burns
  */
-abstract class Database(context: Context) {
+abstract class Database {
     init {
-        this.initializeDatabase(context)
+        this.initializeDatabase()
     }
 
-    abstract val activities: MutableList<Activity>
+    protected val _activities: MutableList<Activity> = mutableListOf()
+    val activities: MutableList<Activity>
+        get() = _activities
+
+    abstract fun cacheActivities()
 
     /**
      * Must be called before any other methods are called.
      * Ensures that the database is ready to be written to / read from
      */
-    protected abstract fun initializeDatabase(context: Context)
+    protected abstract fun initializeDatabase()
 
     abstract fun setUserInfo()
+
+    /**
+     * @return all activities from the database.
+     */
+    abstract fun retrieveActivities() : MutableList<Activity>
 
     /**
      * User may have a lot of sessions, so take caution when retrieving all.
@@ -40,6 +47,11 @@ abstract class Database(context: Context) {
      * @param activity is the activity to add to the database
      */
     abstract fun addActivity(activity: Activity)
+
+    /**
+     * @param name is the name of the Activity to be created
+     */
+    fun addActivity(name: String) = addActivity(Activity(name))
 
     /**
      * Add a session pertaining to an activity to the database

@@ -14,4 +14,6 @@
     <string name="title">Title</string>
     <string name="secondary_text">Secondary Text</string>
     <string name="other_text">Other text</string>
+    <string name="start_time">Start Time</string>
+    <string name="end_time">End Time</string>
 </resources>

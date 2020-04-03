@@ -1,14 +1,13 @@
 package tech.davidburns.activitytracker.util
 
-import android.content.Context
 import android.util.Log
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import tech.davidburns.activitytracker.Activity
 import tech.davidburns.activitytracker.Session
 import tech.davidburns.activitytracker.interfaces.Database
+import java.time.Instant
 import java.time.ZoneId
 
 const val userPath = "users"
@@ -21,35 +20,52 @@ const val TAG = "FIRESTORE_DATABASE"
  * Firestore database only allows reads and writes to authenticated users.
  * These authenticated users can only view files that contain their unique user id.
  */
-class FirestoreDatabase(private val firebaseUser: FirebaseUser, context: Context) :
-    Database(context) {
+class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
     private lateinit var db: FirebaseFirestore
 
-    override val activities: MutableList<Activity>
-        get() {
-            val mutableList = mutableListOf<Activity>()
-            db.collection("$userPath/${firebaseUser.uid}/$activityPath")
-                .get()
-                .addOnSuccessListener { result ->
-                    for (document in result) {
-                        try {
-                            val name = document.id
-                            val activity = Activity(name)
-                            mutableList.add(activity)
-                            Log.d(TAG, "${document.id} => ${document.data}")
-                        } catch (ex: Exception) {
-                            ex.printStackTrace()
-                        }
+    override fun retrieveActivities(): MutableList<Activity> {
+        db.collection("$userPath/${firebaseUser.uid}/$activityPath")
+            .addSnapshotListener { value, e ->
+                if (e != null) {
+                    Log.w(TAG, "Listen failed.", e)
+                    return@addSnapshotListener
+                }
+
+                for (dc in value!!.documentChanges) {
+                    when (dc.type) {
+                        DocumentChange.Type.ADDED -> Log.d(TAG, "New Activity: ${dc.document.data}")
+                        DocumentChange.Type.MODIFIED -> Log.d(TAG, "Modified Activity: ${dc.document.data}")
+                        DocumentChange.Type.REMOVED -> Log.d(TAG, "Removed Activity: ${dc.document.data}")
                     }
                 }
-                .addOnFailureListener { exception ->
-                    Log.d(TAG, "Error getting documents: ", exception)
-                }
-            return mutableList
-        }
+            }
+//            .addOnSuccessListener { result ->
+//                for (document in result) {
+//                    try {
+//                        val name = document.id
+//                        val activity = Activity(name)
+//                        _activities.add(activity)
+//                        Log.d(TAG, "${document.id} => ${document.data}")
+//                    } catch (ex: Exception) {
+//                        ex.printStackTrace()
+//                    }
+//                }
+//            }
+//            .addOnFailureListener { exception ->
+//                Log.d(TAG, "Error getting documents: ", exception)
+//            }
+        return _activities
+    }
 
-    override fun initializeDatabase(context: Context) {
-        db = Firebase.firestore
+    override fun cacheActivities() {
+        _activities.apply {
+            clear()
+            retrieveActivities()
+        }
+    }
+
+    override fun initializeDatabase() {
+        db = FirebaseFirestore.getInstance()
     }
 
     override fun setUserInfo() {
@@ -81,8 +97,12 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser, context: Context
     }
 
     override fun addActivity(activity: Activity) {
+        val activityHashMap = hashMapOf(
+            "name" to activity.name,
+            "created" to Instant.now().epochSecond
+        )
         db.document("$userPath/${firebaseUser.uid}/$activityPath/${activity.name}")
-            .set(hashMapOf("name" to activity.name))
+            .set(activityHashMap)
             .addOnSuccessListener { Log.d(TAG, "SUCCESS") }
             .addOnFailureListener { e -> Log.w(TAG, "Error writing document", e) }
     }
