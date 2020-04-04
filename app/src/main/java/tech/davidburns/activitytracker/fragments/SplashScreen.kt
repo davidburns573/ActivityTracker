@@ -8,9 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import tech.davidburns.activitytracker.R
 import tech.davidburns.activitytracker.User
 import tech.davidburns.activitytracker.enums.LoginState
@@ -36,11 +34,13 @@ class SplashScreen : Fragment() {
     override fun onStart() {
         auth = FirebaseAuth.getInstance()
         user = auth.currentUser
-        transitionScreenWithDelay()
+        GlobalScope.launch {
+            transitionScreenWithDelay()
+        }
         super.onStart()
     }
 
-    private fun transitionScreenWithDelay() = runBlocking {
+    private suspend fun transitionScreenWithDelay() = coroutineScope {
         launch {
             User.applicationContext = requireActivity().applicationContext
             val before = Instant.now().epochSecond
