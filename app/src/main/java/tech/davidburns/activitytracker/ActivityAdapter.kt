@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import tech.davidburns.activitytracker.interfaces.DatabaseListener
 import kotlin.collections.ArrayList
 
+
 class ActivityAdapter(
     private val activities: MutableList<Activity>,
     private val onClickListener: OnClickListener
@@ -82,7 +83,6 @@ class ActivityAdapter(
                 timers[adapterPosition].stopTimer()
             }
         }
-
     }
 
     interface OnClickListener {
