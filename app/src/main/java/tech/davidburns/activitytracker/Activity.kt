@@ -10,12 +10,12 @@ class Activity(var name: String) {
     fun addSession(length: Duration) {
         val session = Session(length, name)
         sessions.add(session)
-        User.database.addSession(session, name)
+        User.addSession(session, name)
     }
 
     fun addSession(start: LocalDateTime, end: LocalDateTime) {
         val session = Session(start, end, name)
         sessions.add(session)
-        User.database.addSession(session, name)
+        User.addSession(session, name)
     }
 }

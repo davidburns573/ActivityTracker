@@ -13,7 +13,7 @@ import tech.davidburns.activitytracker.Session
  * @author David Burns
  */
 abstract class Database {
-    private val listeners : MutableList<DatabaseListener> = mutableListOf()
+    private val listeners: MutableList<DatabaseListener> = mutableListOf()
     protected val _activities: MutableList<Activity> = mutableListOf()
     val activities: MutableList<Activity>
         get() = _activities
@@ -35,11 +35,7 @@ abstract class Database {
         listeners.forEach { it.itemAdded(activities.size) }
     }
 
-    /**
-     * Allows activity to added directly by a name.
-     * @param name is the name of the Activity to be created
-     */
-    fun addActivity(name: String) = addActivity(Activity(name))
+    fun addActivity(activityName: String) = addActivity(Activity(activityName))
 
     /**
      * Add a session pertaining to an activity to the database.
@@ -50,6 +46,10 @@ abstract class Database {
 
     fun addListener(listener: DatabaseListener) {
         listeners.add(listener)
+    }
+
+    fun removeListener(listener: DatabaseListener) {
+        listeners.remove(listener)
     }
 }
 

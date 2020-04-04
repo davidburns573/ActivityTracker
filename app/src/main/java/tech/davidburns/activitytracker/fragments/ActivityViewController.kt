@@ -25,8 +25,8 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
     ): View? {
         viewManager = LinearLayoutManager(activity).apply { reverseLayout = true }
             .apply { stackFromEnd = true }
-        viewAdapter = ActivityAdapter(User.database.activities, this)
-        User.database.addListener(viewAdapter)
+        viewAdapter = ActivityAdapter(User.activities, this)
+        User.addActivityListener(viewAdapter)
         return inflater.inflate(R.layout.activity_view, container, false)
     }
 
@@ -52,13 +52,12 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
     }
 
     override fun dialogString(str: String): Boolean {
-        User.database.activities.forEach {
+        User.activities.forEach {
             if (it.name == str) {
                 return false
             }
         }
-        User.database.addActivity(str)
-        viewAdapter.notifyItemInserted(User.database.activities.size - 1)
+        User.addActivity(str)
         return true
     }
 
@@ -66,5 +65,10 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
         val action =
             ActivityViewControllerDirections.actionActivityViewControllerToActivityController()
         findNavController().navigate(action)
+    }
+
+    override fun onDestroyView() {
+        User.removeActivityListener(viewAdapter)
+        super.onDestroyView()
     }
 }
