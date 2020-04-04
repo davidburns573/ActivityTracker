@@ -7,14 +7,14 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import tech.davidburns.activitytracker.interfaces.DatabaseListener
 import kotlin.collections.ArrayList
-
 
 class ActivityAdapter(
     private val activities: MutableList<Activity>,
     private val onClickListener: OnClickListener
 ) :
-    RecyclerView.Adapter<ActivityAdapter.ViewHolder>() {
+    RecyclerView.Adapter<ActivityAdapter.ViewHolder>(), DatabaseListener {
     lateinit var title: TextView
     lateinit var secondary: TextView
     lateinit var other: TextView
@@ -40,7 +40,8 @@ class ActivityAdapter(
             // Get the data model based on position
             val thisActivity = activities[position]
             title.text = thisActivity.name
-            thisActivity.setSessionsFromDB()
+            thisActivity.sessions.clear()
+            thisActivity.sessions.addAll(User.getSessionsFromActivity(thisActivity.name))
             secondary.text =
                 "${thisActivity.statistics.totalTimeEver().seconds} seconds"
             timerLabels.add(0, timer)
@@ -67,7 +68,8 @@ class ActivityAdapter(
         }
 
         override fun onClick(v: View?) {
-            onClickListener.onClick(adapterPosition)
+            User.currentActivity = activities[adapterPosition]
+            onClickListener.onClick()
         }
 
         private fun btnStartOnClick() {
@@ -84,6 +86,22 @@ class ActivityAdapter(
     }
 
     interface OnClickListener {
-        fun onClick(position: Int)
+        fun onClick()
+    }
+
+    override fun itemChanged(index: Int) {
+        notifyItemChanged(index)
+    }
+
+    override fun itemRemoved(index: Int) {
+        notifyItemRemoved(index)
+    }
+
+    override fun itemAdded(index: Int) {
+        notifyItemInserted(index)
+    }
+
+    override fun itemRangeAdded(start: Int, itemCount: Int) {
+        notifyItemRangeInserted(start, itemCount)
     }
 }

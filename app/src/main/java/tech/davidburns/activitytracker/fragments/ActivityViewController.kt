@@ -8,30 +8,25 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_view.*
-import tech.davidburns.activitytracker.Activity
 import tech.davidburns.activitytracker.ActivityAdapter
 import tech.davidburns.activitytracker.R
 import tech.davidburns.activitytracker.User
-import tech.davidburns.activitytracker.*
 import tech.davidburns.activitytracker.interfaces.Dialogable
-import tech.davidburns.activitytracker.util.FirestoreDatabase
-import java.time.Duration
 
 class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickListener {
     private lateinit var viewManager: RecyclerView.LayoutManager
-    private lateinit var viewAdapter: RecyclerView.Adapter<*>
+    private lateinit var viewAdapter: ActivityAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        context?.let { User.initDatabase(it) }
         viewManager = LinearLayoutManager(activity).apply { reverseLayout = true }
             .apply { stackFromEnd = true }
         viewAdapter = ActivityAdapter(User.activities, this)
+        User.addActivityListener(viewAdapter)
         return inflater.inflate(R.layout.activity_view, container, false)
     }
 
@@ -39,8 +34,6 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
         super.onViewCreated(view, savedInstanceState)
         activity_recycler.adapter = viewAdapter
         activity_recycler.layoutManager = viewManager
-
-        initializeData()
 
         btnAddActivity.setOnClickListener {
             val fragmentTransaction = activity?.supportFragmentManager?.beginTransaction()
@@ -65,19 +58,17 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
             }
         }
         User.addActivity(str)
-        viewAdapter.notifyItemInserted(User.activities.size - 1)
         return true
     }
 
-    private fun initializeData() {
-        val startingIndex = User.activities.size
-        User.setActivitiesFromDB()
-        viewAdapter.notifyItemRangeInserted(startingIndex, User.activities.size - startingIndex)
+    override fun onClick() {
+        val action =
+            ActivityViewControllerDirections.actionActivityViewControllerToActivityController()
+        findNavController().navigate(action)
     }
 
-    override fun onClick(position: Int) {
-        val action = ActivityViewControllerDirections.
-                     actionActivityViewControllerToActivityController(position)
-        findNavController().navigate(action)
+    override fun onDestroyView() {
+        User.removeActivityListener(viewAdapter)
+        super.onDestroyView()
     }
 }

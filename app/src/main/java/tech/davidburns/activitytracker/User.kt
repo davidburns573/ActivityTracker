@@ -1,66 +1,55 @@
 package tech.davidburns.activitytracker
 
-import android.content.ContentValues
 import android.content.Context
-import android.database.Cursor
-import android.database.sqlite.SQLiteDatabase
-import com.google.firebase.auth.FirebaseUser
-import tech.davidburns.activitytracker.util.UserBaseHelper
-import tech.davidburns.activitytracker.util.UserSchema
 import tech.davidburns.activitytracker.interfaces.Database
+import tech.davidburns.activitytracker.interfaces.DatabaseListener
 
 object User {
-    var authenticate: FirebaseUser? = null
     var name: String = "UNNAMED"
+    lateinit var currentActivity: Activity
+    lateinit var applicationContext: Context
 
-    var activities: MutableList<Activity> = mutableListOf()
+    private lateinit var database: Database
 
-    lateinit var implementedDatabase: Database
-
-    lateinit var database: SQLiteDatabase
-
-    fun addActivity(name: String) {
-        val activity = Activity(name)
-        activities.add(activity)
-        val values: ContentValues = Activity.getContentValues(activity)
-        database.insert(UserSchema.ActivityTable.NAME, null, values)
+    fun setDatabase(database: Database) {
+        this.database = database
     }
 
-    fun initDatabase(context: Context) {
-        database = UserBaseHelper(context).writableDatabase
-    }
-
-    fun queryActivities(
-        whereClause: String?,
-        whereArgs: Array<String>?
-    ): ActivityCursorWrapper {
-        val cursor: Cursor = database.query(
-            UserSchema.ActivityTable.NAME,
-            null,
-            whereClause,
-            whereArgs,
-            null,
-            null,
-            null
-        )
-        return ActivityCursorWrapper(cursor)
-    }
+    val activities: MutableList<Activity>
+        get() = database.activities
 
     /**
-     * Clears current activities and then retrieves activities from the database
+     * Add specific activity object to database.
+     * @param activity to store in the database
      */
-    fun setActivitiesFromDB() {
-        activities.clear()
+    fun addActivity(activity: Activity) = database.addActivity(activity)
 
-        val cursor: ActivityCursorWrapper = queryActivities(null, null)
-        try {
-            cursor.moveToFirst()
-            while (!(cursor.isAfterLast)) {
-                activities.add(cursor.getActivity())
-                cursor.moveToNext()
-            }
-        } finally {
-            cursor.close()
-        }
+    /**
+     * Create activity with given name and add to the database.
+     * @param name of the [Activity] to create
+     */
+    fun addActivity(name: String) = addActivity(Activity(name))
+
+    /**
+     * Add given session to the database attached to the given activity.
+     * @param session to add to database
+     * @param activityName to attach the session to
+     */
+    fun addSession(session: Session, activityName: String) =
+        database.addSession(session, activityName)
+
+    /**
+     * Retrieve all [Session] belonging to a specific activity.
+     * @return list of [Session] belonging to the activity given
+     */
+    fun getSessionsFromActivity(activityName: String): MutableList<Session> =
+        database.getSessionsFromActivity(activityName)
+
+    fun addActivityListener(listener: DatabaseListener) {
+        database.addListener(listener)
+    }
+
+    fun removeActivityListener(listener: DatabaseListener) {
+        database.removeListener(listener)
     }
 }

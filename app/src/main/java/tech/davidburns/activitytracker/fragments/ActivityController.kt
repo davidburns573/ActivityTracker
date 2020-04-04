@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.navArgs
 import kotlinx.android.synthetic.main.activity_card.activity_title
 import kotlinx.android.synthetic.main.activity_detail.*
 import tech.davidburns.activitytracker.Activity
@@ -14,8 +13,6 @@ import tech.davidburns.activitytracker.SliderAdapter
 import tech.davidburns.activitytracker.User
 
 class ActivityController : Fragment() {
-
-    private val args: ActivityControllerArgs by navArgs() //Lazily get arguments
     private lateinit var activity: Activity
 
     override fun onCreateView(
@@ -23,9 +20,7 @@ class ActivityController : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        activity = User.activities[args.activityPosition] //set current activity from index
-
-
+        activity = User.currentActivity
         return inflater.inflate(R.layout.activity_detail, container, false)
     }
 
@@ -34,6 +29,6 @@ class ActivityController : Fragment() {
 
         activity_title.text = activity.name
 
-        slide_view_pager.adapter = getActivity()?.let { SliderAdapter(it, activity) }
+        slide_view_pager.adapter = SliderAdapter(requireActivity(), activity)
     }
 }

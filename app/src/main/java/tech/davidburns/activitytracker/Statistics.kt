@@ -10,7 +10,7 @@ import kotlin.math.ceil
  * @author Charles Jenkins
  * @since 1.0
  */
-class Statistics(val sessions: MutableList<Session>) {
+class Statistics(private val sessions: MutableList<Session>) {
     /**
      * @return [Duration] of all [Session]s of an [Activity]
      */
