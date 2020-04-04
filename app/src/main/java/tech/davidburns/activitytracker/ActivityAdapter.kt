@@ -4,8 +4,11 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import kotlin.collections.ArrayList
+
 
 class ActivityAdapter(
     private val activities: MutableList<Activity>,
@@ -15,6 +18,11 @@ class ActivityAdapter(
     lateinit var title: TextView
     lateinit var secondary: TextView
     lateinit var other: TextView
+    lateinit var btnStart: Button
+    lateinit var timer: TextView
+    val timerLabels: ArrayList<TextView> = ArrayList()
+    val startButtons: ArrayList<Button> = ArrayList()
+    val timers: ArrayList<Timer> = ArrayList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val context: Context = parent.context
@@ -35,6 +43,9 @@ class ActivityAdapter(
             thisActivity.setSessionsFromDB()
             secondary.text =
                 "${thisActivity.statistics.totalTimeEver().seconds} seconds"
+            timerLabels.add(0, timer)
+            startButtons.add(0, btnStart)
+            timers.add(0, Timer(timer))
         }
     }
 
@@ -47,6 +58,10 @@ class ActivityAdapter(
             title = itemView.findViewById(R.id.activity_title)
             secondary = itemView.findViewById(R.id.secondary_text)
             other = itemView.findViewById(R.id.other_text)
+            btnStart = itemView.findViewById(R.id.btn_start)
+            timer = itemView.findViewById(R.id.timer)
+
+            btnStart.setOnClickListener { btnStartOnClick(); }
 
             itemView.setOnClickListener(this)
         }
@@ -54,6 +69,18 @@ class ActivityAdapter(
         override fun onClick(v: View?) {
             onClickListener.onClick(adapterPosition)
         }
+
+        private fun btnStartOnClick() {
+            if (startButtons[adapterPosition].text == "Start") {
+                startButtons[adapterPosition].text = "Stop"
+                timers[adapterPosition].runTimer()
+            } else {
+                timerLabels[adapterPosition].text = ""
+                startButtons[adapterPosition].text = "Start"
+                timers[adapterPosition].stopTimer()
+            }
+        }
+
     }
 
     interface OnClickListener {

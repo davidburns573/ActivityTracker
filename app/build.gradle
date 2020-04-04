@@ -78,6 +78,9 @@ android {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 }
+repositories {
+    maven { url 'https://jitpack.io' }
+}
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -98,4 +101,5 @@ dependencies {
     implementation "androidx.cardview:cardview:1.0.0"
     implementation "androidx.viewpager2:viewpager2:1.0.0"
     implementation 'com.google.firebase:firebase-firestore-ktx:21.4.1'
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 }
