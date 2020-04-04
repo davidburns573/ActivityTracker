@@ -6,14 +6,20 @@ import android.database.Cursor
 import android.database.CursorWrapper
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import tech.davidburns.activitytracker.*
+import tech.davidburns.activitytracker.Activity
+import tech.davidburns.activitytracker.Session
+import tech.davidburns.activitytracker.User
 import tech.davidburns.activitytracker.interfaces.Database
 import java.time.ZoneId
 
 class NativeDatabase : Database() {
-    private lateinit var database: SQLiteDatabase
+    private val database: SQLiteDatabase by lazy { UserBaseHelper(User.applicationContext).writableDatabase }
 
-    override fun retrieveActivities(): MutableList<Activity> {
+    init {
+        retrieveActivities()
+    }
+
+    private fun retrieveActivities() {
         _activities.clear()
         val cursor: Cursor = database.query(
             UserSchema.ActivityTable.NAME,
@@ -24,23 +30,10 @@ class NativeDatabase : Database() {
         ActivityCursorWrapper(cursor).use {
             it.moveToFirst()
             while (!(it.isAfterLast)) {
-                _activities.add(it.getActivity())
+                super.addActivity(it.getActivity())
                 it.moveToNext()
             }
         }
-        return _activities
-    }
-
-    override fun cacheActivities() {
-        //Do nothing for now TODO
-    }
-
-    override fun initializeDatabase() {
-        database = UserBaseHelper(User.applicationContext).writableDatabase
-    }
-
-    override fun setUserInfo() {
-        TODO("Not yet implemented")
     }
 
     override fun getSessionsFromActivity(activityName: String): MutableList<Session> {
@@ -61,6 +54,7 @@ class NativeDatabase : Database() {
     }
 
     override fun addActivity(activity: Activity) {
+        super.addActivity(activity)
         val values: ContentValues = getActivityContentValues(activity)
         database.insert(UserSchema.ActivityTable.NAME, null, values)
     }
@@ -94,7 +88,7 @@ class NativeDatabase : Database() {
 class ActivityCursorWrapper(cursor: Cursor) : CursorWrapper(cursor) {
     fun getActivity(): Activity {
         val name: String =
-            getString(getColumnIndex(UserSchema.ActivityTable.Cols.ACTIVITYNAME));
+            getString(getColumnIndex(UserSchema.ActivityTable.Cols.ACTIVITYNAME))
         return Activity(name)
     }
 }

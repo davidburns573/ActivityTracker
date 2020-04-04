@@ -21,9 +21,13 @@ const val TAG = "FIRESTORE_DATABASE"
  * These authenticated users can only view files that contain their unique user id.
  */
 class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
-    private lateinit var db: FirebaseFirestore
+    private val db: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
 
-    override fun retrieveActivities(): MutableList<Activity> {
+    init {
+        retrieveActivities()
+    }
+
+    private fun retrieveActivities() {
         db.collection("$userPath/${firebaseUser.uid}/$activityPath")
             .addSnapshotListener { value, e ->
                 if (e != null) {
@@ -33,47 +37,21 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
 
                 for (dc in value!!.documentChanges) {
                     when (dc.type) {
-                        DocumentChange.Type.ADDED -> Log.d(TAG, "New Activity: ${dc.document.data}")
-                        DocumentChange.Type.MODIFIED -> Log.d(TAG, "Modified Activity: ${dc.document.data}")
-                        DocumentChange.Type.REMOVED -> Log.d(TAG, "Removed Activity: ${dc.document.data}")
+                        DocumentChange.Type.ADDED -> {
+                            super.addActivity(dc.document.data["name"] as String)
+                            Log.d(TAG, "New Activity: ${dc.document.data}")
+                        }
+                        DocumentChange.Type.MODIFIED -> Log.d(
+                            TAG,
+                            "Modified Activity: ${dc.document.data}"
+                        )
+                        DocumentChange.Type.REMOVED -> Log.d(
+                            TAG,
+                            "Removed Activity: ${dc.document.data}"
+                        )
                     }
                 }
             }
-//            .addOnSuccessListener { result ->
-//                for (document in result) {
-//                    try {
-//                        val name = document.id
-//                        val activity = Activity(name)
-//                        _activities.add(activity)
-//                        Log.d(TAG, "${document.id} => ${document.data}")
-//                    } catch (ex: Exception) {
-//                        ex.printStackTrace()
-//                    }
-//                }
-//            }
-//            .addOnFailureListener { exception ->
-//                Log.d(TAG, "Error getting documents: ", exception)
-//            }
-        return _activities
-    }
-
-    override fun cacheActivities() {
-        _activities.apply {
-            clear()
-            retrieveActivities()
-        }
-    }
-
-    override fun initializeDatabase() {
-        db = FirebaseFirestore.getInstance()
-    }
-
-    override fun setUserInfo() {
-        val userHashMap = hashMapOf(
-            "name" to firebaseUser.displayName
-        )
-        db.document("$userPath/${firebaseUser.uid}")
-            .set(userHashMap)
     }
 
     override fun getSessionsFromActivity(activityName: String): MutableList<Session> {
@@ -97,6 +75,7 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
     }
 
     override fun addActivity(activity: Activity) {
+        super.addActivity(activity)
         val activityHashMap = hashMapOf(
             "name" to activity.name,
             "created" to Instant.now().epochSecond
@@ -119,4 +98,12 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
             .addOnSuccessListener { Log.d(TAG, "SUCCESS") }
             .addOnFailureListener { e -> Log.w(TAG, "Error writing document", e) }
     }
+//
+//    override fun setUserInfo() {
+//        val userHashMap = hashMapOf(
+//            "name" to firebaseUser.displayName
+//        )
+//        db.document("$userPath/${firebaseUser.uid}")
+//            .set(userHashMap)
+//    }
 }

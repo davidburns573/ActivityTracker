@@ -6,12 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import tech.davidburns.activitytracker.interfaces.DatabaseListener
 
 class ActivityAdapter(
     private val activities: MutableList<Activity>,
     private val onClickListener: OnClickListener
 ) :
-    RecyclerView.Adapter<ActivityAdapter.ViewHolder>() {
+    RecyclerView.Adapter<ActivityAdapter.ViewHolder>(), DatabaseListener {
     lateinit var title: TextView
     lateinit var secondary: TextView
     lateinit var other: TextView
@@ -60,5 +61,21 @@ class ActivityAdapter(
 
     interface OnClickListener {
         fun onClick()
+    }
+
+    override fun itemChanged(index: Int) {
+        notifyItemChanged(index)
+    }
+
+    override fun itemRemoved(index: Int) {
+        notifyItemRemoved(index)
+    }
+
+    override fun itemAdded(index: Int) {
+        notifyItemInserted(index)
+    }
+
+    override fun itemRangeAdded(start: Int, itemCount: Int) {
+        notifyItemRangeInserted(start, itemCount)
     }
 }

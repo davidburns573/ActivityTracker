@@ -23,7 +23,7 @@ const val DELAY = 3000L
 
 class SplashScreen : Fragment() {
     private lateinit var auth: FirebaseAuth
-    private lateinit var user: FirebaseUser
+    private var user: FirebaseUser? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,6 +35,7 @@ class SplashScreen : Fragment() {
 
     override fun onStart() {
         auth = FirebaseAuth.getInstance()
+        user = auth.currentUser
         transitionScreenWithDelay()
         super.onStart()
     }
@@ -49,8 +50,7 @@ class SplashScreen : Fragment() {
             val action = when (loginState()) {
                 LoginState.NEW_USER -> SplashScreenDirections.actionSplashScreenToLoginScreen()
                 LoginState.LOGGED_IN -> {
-                    User.database = FirestoreDatabase(user)
-                    User.database.cacheActivities()
+                    User.database = FirestoreDatabase(user!!)
                     SplashScreenDirections.actionSplashScreenToActivityViewController()
                 }
                 LoginState.DENIED_DATABASE -> {
@@ -67,9 +67,7 @@ class SplashScreen : Fragment() {
     // Check if authenticated with Google
     // Otherwise, check if they have denied access to the use of an external database
     private fun loginState(): LoginState {
-        val user = auth.currentUser
         return if (user != null) {
-            this.user = user
             LoginState.LOGGED_IN
         } else {
             when (Authentication.isDatabaseEnabled(activity)) {

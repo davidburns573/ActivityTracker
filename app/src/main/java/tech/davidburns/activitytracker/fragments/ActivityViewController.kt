@@ -16,7 +16,7 @@ import tech.davidburns.activitytracker.interfaces.Dialogable
 
 class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickListener {
     private lateinit var viewManager: RecyclerView.LayoutManager
-    private lateinit var viewAdapter: RecyclerView.Adapter<*>
+    private lateinit var viewAdapter: ActivityAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -26,6 +26,7 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
         viewManager = LinearLayoutManager(activity).apply { reverseLayout = true }
             .apply { stackFromEnd = true }
         viewAdapter = ActivityAdapter(User.database.activities, this)
+        User.database.addListener(viewAdapter)
         return inflater.inflate(R.layout.activity_view, container, false)
     }
 
