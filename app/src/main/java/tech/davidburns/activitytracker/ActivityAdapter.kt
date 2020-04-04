@@ -4,9 +4,11 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import tech.davidburns.activitytracker.interfaces.DatabaseListener
+import kotlin.collections.ArrayList
 
 class ActivityAdapter(
     private val activities: MutableList<Activity>,
