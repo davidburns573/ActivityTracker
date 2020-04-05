@@ -25,8 +25,8 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
     ): View? {
         viewManager = LinearLayoutManager(activity).apply { reverseLayout = true }
             .apply { stackFromEnd = true }
-        User.addActivityListener(viewAdapter)
         viewAdapter = ActivityAdapter(User.activities, this, this)
+        User.addActivityListener(viewAdapter)
         return inflater.inflate(R.layout.activity_view, container, false)
     }
 
