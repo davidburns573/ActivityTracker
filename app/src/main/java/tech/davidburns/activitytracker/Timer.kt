@@ -5,7 +5,7 @@ import android.widget.TextView
 import java.util.*
 
 class Timer(private var textView: TextView) {
-    private var seconds: Int = 0
+    var seconds: Int = 0
     private val handler: Handler = Handler()
     private lateinit var runnable: Runnable
 
@@ -29,12 +29,18 @@ class Timer(private var textView: TextView) {
         handler.post(runnable)
     }
 
-    fun stopTimer() {
+    fun endTimer() {
         handler.removeCallbacks(runnable)
         seconds = 0;
+        textView.text = ""
     }
 
     fun pauseTimer() {
         handler.removeCallbacks(runnable)
+    }
+
+    fun reset() {
+        seconds = 0;
+        textView.text = ""
     }
 }
