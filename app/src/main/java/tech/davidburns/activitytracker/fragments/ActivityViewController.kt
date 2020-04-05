@@ -25,8 +25,8 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
     ): View? {
         viewManager = LinearLayoutManager(activity).apply { reverseLayout = true }
             .apply { stackFromEnd = true }
-        viewAdapter = ActivityAdapter(User.activities, this)
         User.addActivityListener(viewAdapter)
+        viewAdapter = ActivityAdapter(User.activities, this, this)
         return inflater.inflate(R.layout.activity_view, container, false)
     }
 
@@ -70,5 +70,9 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
     override fun onDestroyView() {
         User.removeActivityListener(viewAdapter)
         super.onDestroyView()
+    }
+
+    fun addTimerSessionDialog(addTimerSessionDialog: AddTimerSessionDialog) {
+        addTimerSessionDialog.show(activity?.supportFragmentManager?.beginTransaction()!!, "dialog")
     }
 }

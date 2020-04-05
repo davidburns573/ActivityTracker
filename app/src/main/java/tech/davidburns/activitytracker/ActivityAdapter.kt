@@ -8,11 +8,15 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import tech.davidburns.activitytracker.interfaces.DatabaseListener
+import tech.davidburns.activitytracker.fragments.ActivityViewController
+import tech.davidburns.activitytracker.fragments.AddTimerSessionDialog
 import kotlin.collections.ArrayList
+
 
 class ActivityAdapter(
     private val activities: MutableList<Activity>,
-    private val onClickListener: OnClickListener
+    private val onClickListener: OnClickListener,
+    private val activityViewController: ActivityViewController
 ) :
     RecyclerView.Adapter<ActivityAdapter.ViewHolder>(), DatabaseListener {
     lateinit var title: TextView
@@ -77,12 +81,13 @@ class ActivityAdapter(
                 startButtons[adapterPosition].text = "Stop"
                 timers[adapterPosition].runTimer()
             } else {
-                timerLabels[adapterPosition].text = ""
+                val dialog = AddTimerSessionDialog(activities[adapterPosition],
+                    timers[adapterPosition])
+                activityViewController.addTimerSessionDialog(dialog)
                 startButtons[adapterPosition].text = "Start"
-                timers[adapterPosition].stopTimer()
+                timers[adapterPosition].pauseTimer()
             }
         }
-
     }
 
     interface OnClickListener {
