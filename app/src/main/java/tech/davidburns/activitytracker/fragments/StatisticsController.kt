@@ -39,16 +39,7 @@ class StatisticsController : Fragment() {
         total_time.text = stringFromDuration(totalTimeEver)
 
         val timeLastWeek: Array<Duration> = statistics.timeLastWeek()
-
-        val barEntries: ArrayList<BarEntry> = ArrayList()
-        barEntries.add(BarEntry(0f, timeLastWeek[0].toMinutes().toFloat()))
-        barEntries.add(BarEntry(1f, timeLastWeek[1].toMinutes().toFloat()))
-        barEntries.add(BarEntry(2f, timeLastWeek[2].toMinutes().toFloat()))
-        barEntries.add(BarEntry(3f, timeLastWeek[3].toMinutes().toFloat()))
-        barEntries.add(BarEntry(4f, timeLastWeek[4].toMinutes().toFloat()))
-        barEntries.add(BarEntry(5f, timeLastWeek[5].toMinutes().toFloat()))
-        barEntries.add(BarEntry(6f, timeLastWeek[6].toMinutes().toFloat()))
-        val barDataSet = BarDataSet(barEntries, "Time")
+        val barDataSet: BarDataSet = createBarDataSet(timeLastWeek)
 
         var barLabels: ArrayList<String> = formatDateLabels()
 
@@ -145,5 +136,54 @@ class StatisticsController : Fragment() {
         }
 
         return newArr
+    }
+
+    /**
+     * format weekly data to be placed in bar graph
+     */
+    private fun createBarDataSet(arr: Array<Duration>) : BarDataSet {
+
+        val newArr: ArrayList<Float> = ArrayList()
+        val max: Long = arr.max()!!.seconds
+        var type: String
+
+        when {
+            max < 60 -> {
+                arr.forEach {
+                    newArr.add(it.seconds.toFloat())
+                }
+                type = "Seconds"
+            }
+            max < 3600 -> {
+                arr.forEach {
+                    val num: Float = (it.seconds / 60.0).toFloat()
+                    newArr.add(num)
+                }
+                type = "Minutes"
+            }
+            max < 86400 -> {
+                arr.forEach {
+                    val num: Float = (it.seconds / 3600.0).toFloat()
+                    newArr.add(num)
+                }
+                type = "Hours"
+            }
+            else -> {
+                arr.forEach {
+                    val num: Float = (it.seconds / 86400.0).toFloat()
+                    newArr.add(num)
+                }
+                type = "Days"
+            }
+        }
+
+        val barEntries: ArrayList<BarEntry> = ArrayList()
+        var counter = 0f;
+        newArr.forEach {
+            barEntries.add(BarEntry(counter, it))
+            counter++
+        }
+
+        return BarDataSet(barEntries, type)
     }
 }
