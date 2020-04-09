@@ -2,6 +2,7 @@ package tech.davidburns.activitytracker
 
 import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalDateTime
 import kotlin.math.ceil
 
 /**
@@ -10,7 +11,7 @@ import kotlin.math.ceil
  * @author Charles Jenkins
  * @since 1.0
  */
-class Statistics(private val sessions: MutableList<Session>) {
+class Statistics(private val sessions: List<Session>) {
     /**
      * @return [Duration] of all [Session]s of an [Activity]
      */
@@ -26,7 +27,7 @@ class Statistics(private val sessions: MutableList<Session>) {
      * @return Average [Duration] of all [Session]s of an [Activity] per day
      */
     fun averageTimePerDayEver(): Duration {
-        val startDate: LocalDate = sessions[0].day
+        val startDate: LocalDate = sessions[0].start.toLocalDate()
         val endDate: LocalDate = LocalDate.now()
         val numDays = ceil(Duration.between(startDate, endDate).toHours() / 24.0)
         val totalTime: Duration = totalTimeEver()
@@ -36,10 +37,10 @@ class Statistics(private val sessions: MutableList<Session>) {
     private fun getHashMapOfDaysAndTime(): HashMap<LocalDate, Duration> {
         val daysTotalTime: HashMap<LocalDate, Duration> = HashMap()
         sessions.forEach {
-            if (daysTotalTime.containsKey(it.day)) {
-                daysTotalTime[it.day] = daysTotalTime[it.day]!!.plus(it.length)
+            if (daysTotalTime.containsKey(it.start.toLocalDate())) {
+                daysTotalTime[it.start.toLocalDate()] = daysTotalTime[it.start.toLocalDate()]!!.plus(it.length)
             } else {
-                daysTotalTime[it.day] = it.length
+                daysTotalTime[it.start.toLocalDate()] = it.length
             }
         }
         return daysTotalTime
@@ -50,11 +51,13 @@ class Statistics(private val sessions: MutableList<Session>) {
      * @return [Array] of [Duration]s.
      */
     fun timeLastWeek(): Array<Duration> {
-        val now: LocalDate = LocalDate.now()
+        val now: LocalDateTime = LocalDateTime.now()
         val lastSevenDays: Array<Duration> = Array(7) { Duration.ZERO }
         sessions.forEach {
             val duration = Duration.between(it.start, now).toDays().toInt()
-            lastSevenDays[6 - duration] += it.length
+            if (duration <= 6) {
+                lastSevenDays[6 - duration] = lastSevenDays[6 - duration].plus(it.length)
+            }
         }
         return lastSevenDays
     }

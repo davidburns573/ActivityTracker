@@ -38,7 +38,7 @@ class SessionLength(val activity: Activity): Fragment() {
                 successfulSessionAnimation()
             } else if (enter_minutes.text.toString() == "") {
                 val hours = (enter_hours.text).toString().toLong()
-                val duration: Duration = Duration.ofMinutes(hours)
+                val duration: Duration = Duration.ofHours(hours)
                 activity.addSession(duration)
                 successfulSessionAnimation()
             } else {

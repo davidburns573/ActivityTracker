@@ -45,6 +45,13 @@ object User {
     fun getSessionsFromActivity(activityName: String): MutableList<Session> =
         database.getSessionsFromActivity(activityName)
 
+    /**
+     * Retrieve all [Session] belonging to a specific activity.
+     * @return list of [Session] belonging to the activity given
+     */
+    fun getSessionsFromCurrentActivity(): MutableList<Session> =
+        database.getSessionsFromActivity(currentActivity.name)
+
     fun addActivityListener(listener: DatabaseListener) {
         database.addListener(listener)
     }
