@@ -11,28 +11,41 @@ import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import kotlinx.android.synthetic.main.statistics_view.*
 import tech.davidburns.activitytracker.R
+import tech.davidburns.activitytracker.Session
+import tech.davidburns.activitytracker.Statistics
+import tech.davidburns.activitytracker.User
+import java.time.Duration
 
 class StatisticsController : Fragment() {
+    private lateinit var sessions: List<Session>
+    private lateinit var statistics: Statistics
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
+        sessions = User.getSessionsFromCurrentActivity()
+        statistics = Statistics(sessions)
         return inflater.inflate(R.layout.statistics_view, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val totalTimeEver: Duration = statistics.totalTimeEver()
+        total_time.text = totalTimeEver.toMinutes().toString() + " minutes"
+
+        val timeLastWeek: Array<Duration> = statistics.timeLastWeek()
+
         val barEntries: ArrayList<BarEntry> = ArrayList()
-        barEntries.add(BarEntry(0f, 1f))
-        barEntries.add(BarEntry(1f, 2f))
-        barEntries.add(BarEntry(2f, 3f))
-        barEntries.add(BarEntry(3f, 4f))
-        barEntries.add(BarEntry(4f, 2f))
-        barEntries.add(BarEntry(5f, 7f))
-        barEntries.add(BarEntry(6f, 4f))
+        barEntries.add(BarEntry(0f, timeLastWeek[0].toMinutes().toFloat()))
+        barEntries.add(BarEntry(1f, timeLastWeek[1].toMinutes().toFloat()))
+        barEntries.add(BarEntry(2f, timeLastWeek[2].toMinutes().toFloat()))
+        barEntries.add(BarEntry(3f, timeLastWeek[3].toMinutes().toFloat()))
+        barEntries.add(BarEntry(4f, timeLastWeek[4].toMinutes().toFloat()))
+        barEntries.add(BarEntry(5f, timeLastWeek[5].toMinutes().toFloat()))
+        barEntries.add(BarEntry(6f, timeLastWeek[6].toMinutes().toFloat()))
         val barDataSet = BarDataSet(barEntries, "Time")
 
         val barLabels: ArrayList<String> = ArrayList()

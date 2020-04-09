@@ -63,9 +63,8 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
                     try {
                         val name = document.data["name"] as String
                         val length = document.data["length"] as Long
-                        val day = document.data["day"] as Long
-                        val start = document.data["start"] as Long?
-                        list.add(Session(name, length, day, start))
+                        val start = document.data["start"] as Long
+                        list.add(Session(name, length, start))
                     } catch (ex: Exception) {
                         ex.printStackTrace()
                     }
@@ -90,8 +89,7 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
         val sessionHashMap = hashMapOf(
             "name" to session.name,
             "length" to session.length.toMillis(),
-            "day" to session.day.toEpochDay(),
-            "start" to session.start?.atZone(ZoneId.systemDefault())?.toEpochSecond()
+            "start" to session.start.atZone(ZoneId.systemDefault())?.toEpochSecond()
         )
         db.collection("$userPath/${firebaseUser.uid}/$activityPath/$activityName/$sessionPath")
             .add(sessionHashMap)

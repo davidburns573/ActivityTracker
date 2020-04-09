@@ -76,9 +76,8 @@ class NativeDatabase : Database() {
             values.put(UserSchema.SessionTable.Cols.NAME, session.name)
             values.put(UserSchema.SessionTable.Cols.LENGTH, session.length.toMillis())
             val zoneId = ZoneId.systemDefault()
-            values.put(UserSchema.SessionTable.Cols.DAY, session.day.toEpochDay())
             values.put(
-                UserSchema.SessionTable.Cols.START, session.start?.atZone(zoneId)?.toEpochSecond()
+                UserSchema.SessionTable.Cols.START, session.start.atZone(zoneId)?.toEpochSecond()
             )
             return values
         }
@@ -97,9 +96,8 @@ class SessionCursorWrapper(cursor: Cursor) : CursorWrapper(cursor) {
     fun getSession(): Session {
         val name: String = getString(getColumnIndex(UserSchema.SessionTable.Cols.NAME))
         val length: Long = getLong(getColumnIndex(UserSchema.SessionTable.Cols.LENGTH))
-        val day: Long = getLong(getColumnIndex(UserSchema.SessionTable.Cols.DAY))
         val start: Long = getLong(getColumnIndex(UserSchema.SessionTable.Cols.START))
-        return Session(name, length, day, start)
+        return Session(name, length, start)
     }
 }
 
@@ -119,7 +117,6 @@ class UserSchema {
         object Cols {
             const val NAME = "name"
             const val LENGTH = "length"
-            const val DAY = "day"
             const val START = "start"
         }
     }
@@ -129,7 +126,7 @@ class UserSchema {
 private const val VERSION: Int = 1
 private const val DATABASE_NAME = "UserBase.db"
 
-class UserBaseHelper(private val context: Context) :
+class UserBaseHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, VERSION) {
 
     override fun onCreate(db: SQLiteDatabase?) {
@@ -143,7 +140,6 @@ class UserBaseHelper(private val context: Context) :
                     + "(" + " _id integer primary key autoincrement, "
                     + UserSchema.SessionTable.Cols.NAME + ", "
                     + UserSchema.SessionTable.Cols.LENGTH + ", "
-                    + UserSchema.SessionTable.Cols.DAY + ", "
                     + UserSchema.SessionTable.Cols.START + ")"
         )
     }
