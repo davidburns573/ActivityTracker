@@ -15,6 +15,8 @@ import tech.davidburns.activitytracker.Session
 import tech.davidburns.activitytracker.Statistics
 import tech.davidburns.activitytracker.User
 import java.time.Duration
+import java.time.LocalDateTime
+import kotlin.collections.ArrayList
 
 class StatisticsController : Fragment() {
     private lateinit var sessions: List<Session>
@@ -34,7 +36,7 @@ class StatisticsController : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val totalTimeEver: Duration = statistics.totalTimeEver()
-        total_time.text = totalTimeEver.toMinutes().toString() + " minutes"
+        total_time.text = stringFromDuration(totalTimeEver)
 
         val timeLastWeek: Array<Duration> = statistics.timeLastWeek()
 
@@ -48,14 +50,8 @@ class StatisticsController : Fragment() {
         barEntries.add(BarEntry(6f, timeLastWeek[6].toMinutes().toFloat()))
         val barDataSet = BarDataSet(barEntries, "Time")
 
-        val barLabels: ArrayList<String> = ArrayList()
-        barLabels.add("Mon")
-        barLabels.add("Tue")
-        barLabels.add("Wed")
-        barLabels.add("Thu")
-        barLabels.add("Fri")
-        barLabels.add("Sat")
-        barLabels.add("Sun")
+        var barLabels: ArrayList<String> = formatDateLabels()
+
 
         val barData = BarData(barDataSet)
         bar_chart.data = barData
@@ -68,5 +64,86 @@ class StatisticsController : Fragment() {
         bar_chart.axisLeft.setDrawGridLines(false)
         bar_chart.axisRight.setDrawGridLines(false)
         bar_chart.description.isEnabled = false
+    }
+
+    /**
+     * Format a string from a Duration object
+     * @param duration
+     * @return formatted string
+     */
+    private fun stringFromDuration(duration: Duration) : String {
+        var str = ""
+        if (duration.seconds < 60) {
+            str += duration.seconds.toString() + " sec"
+        } else if (duration.toMinutes() < 60) {
+            str += duration.toMinutes().toString() + " min"
+            val sec: Long = duration.seconds % 60
+            if (sec != 0L) {
+                str += " $sec sec"
+            }
+        } else if (duration.toHours() < 24) {
+            str += duration.toHours().toString() + " hrs"
+            val min: Long = duration.toMinutes() % 60
+            if (min != 0L) {
+                str += " $min min"
+            }
+            val sec: Long = duration.seconds % 60
+            if (sec != 0L) {
+                str += " $sec sec"
+            }
+        } else {
+            str += duration.toDays().toString() + " days"
+            val hrs: Long = duration.toHours() % 24
+            if (hrs != 0L) {
+                str += " $hrs hrs"
+            }
+            val min: Long = duration.toMinutes() % 60
+            if (min != 0L) {
+                str += " $min min"
+            }
+            val sec: Long = duration.seconds % 60
+            if (sec != 0L) {
+                str += " $sec sec"
+            }
+        }
+        return str
+    }
+
+    /**
+     * Format date labels to match current day
+     * @return ArrayList of formatted label strings
+     */
+    private fun formatDateLabels() : ArrayList<String> {
+        val barLabels: ArrayList<String> = ArrayList()
+
+        var i = 6
+        var currentDay: LocalDateTime
+        while(i >= 0) {
+            currentDay = LocalDateTime.now().minusDays(i.toLong())
+            barLabels.add((currentDay.dayOfMonth).toString())
+            i--
+        }
+
+        return addSuffix(barLabels)
+    }
+
+    /**
+     * Add suffixes to array of strings containing numbers
+     */
+    private fun addSuffix(arrayList: ArrayList<String>) : ArrayList<String> {
+
+        val newArr: ArrayList<String> = ArrayList()
+
+        arrayList.forEach {
+            val str: String = when(it) {
+                "1", "21", "31" -> "st"
+                "2", "22" -> "nd"
+                "3", "23" -> "rd"
+                else -> "th"
+            }
+            newArr.add(it + str)
+        }
+
+        return newArr
     }
 }
