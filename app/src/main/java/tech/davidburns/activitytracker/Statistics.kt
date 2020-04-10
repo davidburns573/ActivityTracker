@@ -51,10 +51,10 @@ class Statistics(private val sessions: List<Session>) {
      * @return [Array] of [Duration]s.
      */
     fun timeLastWeek(): Array<Duration> {
-        val now: LocalDateTime = LocalDateTime.now()
+        val endOfDay: LocalDateTime = LocalDate.now().atStartOfDay().plusSeconds(86399)
         val lastSevenDays: Array<Duration> = Array(7) { Duration.ZERO }
         sessions.forEach {
-            val duration = Duration.between(it.start, now).toDays().toInt()
+            val duration = Duration.between(it.start, endOfDay).toDays().toInt()
             if (duration <= 6) {
                 lastSevenDays[6 - duration] = lastSevenDays[6 - duration].plus(it.length)
             }
