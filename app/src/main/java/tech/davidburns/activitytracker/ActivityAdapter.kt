@@ -6,7 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.ItemTouchHelper.UP
+import androidx.recyclerview.widget.ItemTouchHelper.DOWN
+import androidx.recyclerview.widget.ItemTouchHelper.START
+import androidx.recyclerview.widget.ItemTouchHelper.END
 import androidx.recyclerview.widget.RecyclerView
+import com.google.common.io.Resources
 import tech.davidburns.activitytracker.interfaces.DatabaseListener
 import tech.davidburns.activitytracker.fragments.ActivityViewController
 import tech.davidburns.activitytracker.fragments.AddTimerSessionDialog
@@ -108,5 +114,15 @@ class ActivityAdapter(
 
     override fun itemRangeAdded(start: Int, itemCount: Int) {
         notifyItemRangeInserted(start, itemCount)
+    }
+
+    fun moveItem(from: Int, to: Int) {
+        val fromActivity = activities[from]
+        activities.removeAt(from)
+        if (to < from) {
+            activities.add(to, fromActivity)
+        } else { // Account for items shifting
+            activities.add(to - 1, fromActivity)
+        }
     }
 }

@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_DRAG
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_view.*
@@ -15,7 +17,6 @@ import tech.davidburns.activitytracker.User
 import tech.davidburns.activitytracker.interfaces.Dialogable
 
 class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickListener {
-    private lateinit var viewManager: RecyclerView.LayoutManager
     private lateinit var viewAdapter: ActivityAdapter
 
     override fun onCreateView(
@@ -23,8 +24,6 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        viewManager = LinearLayoutManager(activity).apply { reverseLayout = true }
-            .apply { stackFromEnd = true }
         viewAdapter = ActivityAdapter(User.activities, this, this)
         User.addActivityListener(viewAdapter)
         return inflater.inflate(R.layout.activity_view, container, false)
@@ -32,8 +31,12 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        itemTouchHelper.attachToRecyclerView(activity_recycler)
         activity_recycler.adapter = viewAdapter
-        activity_recycler.layoutManager = viewManager
+        activity_recycler.layoutManager =
+            LinearLayoutManager(activity).apply { reverseLayout = true }
+                .apply { stackFromEnd = true }
 
         btnAddActivity.setOnClickListener {
             val fragmentTransaction = activity?.supportFragmentManager?.beginTransaction()
@@ -74,5 +77,68 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
 
     fun addTimerSessionDialog(addTimerSessionDialog: AddTimerSessionDialog) {
         addTimerSessionDialog.show(activity?.supportFragmentManager?.beginTransaction()!!, "dialog")
+    }
+
+    private val itemTouchHelper by lazy {
+        // 1. Note that I am specifying all 4 directions.
+        //    Specifying START and END also allows
+        //    more organic dragging than just specifying UP and DOWN.
+        val simpleItemTouchCallback =
+            object : ItemTouchHelper.SimpleCallback(
+                ItemTouchHelper.UP or
+                        ItemTouchHelper.DOWN or
+                        ItemTouchHelper.START or
+                        ItemTouchHelper.END, 0
+            ) {
+                // 1. This callback is called when a ViewHolder is selected.
+                //    We highlight the ViewHolder here.
+                override fun onSelectedChanged(
+                    viewHolder: RecyclerView.ViewHolder?,
+                    actionState: Int
+                ) {
+                    super.onSelectedChanged(viewHolder, actionState)
+
+                    if (actionState == ACTION_STATE_DRAG) {
+                        viewHolder?.itemView?.alpha = 0.5f
+                    }
+                }
+
+                // 2. This callback is called when the ViewHolder is
+                //    unselected (dropped). We unhighlight the ViewHolder here.
+                override fun clearView(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder
+                ) {
+                    super.clearView(recyclerView, viewHolder)
+                    viewHolder.itemView.alpha = 1.0f
+                }
+
+                override fun onMove(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder,
+                    target: RecyclerView.ViewHolder
+                ): Boolean {
+                    val from = viewHolder.adapterPosition
+                    val to = target.adapterPosition
+                    // 2. Update the backing model. Custom implementation in
+                    //    MainRecyclerViewAdapter. You need to implement
+                    //    reordering of the backing model inside the method.
+                    viewAdapter.moveItem(from, to)
+                    // 3. Tell adapter to render the model update.
+                    viewAdapter.notifyItemMoved(from, to)
+
+                    return true
+                }
+
+                override fun onSwiped(
+                    viewHolder: RecyclerView.ViewHolder,
+                    direction: Int
+                ) {
+                    // 4. Code block for horizontal swipe.
+                    //    ItemTouchHelper handles horizontal swipe as well, but
+                    //    it is not relevant with reordering. Ignoring here.
+                }
+            }
+        ItemTouchHelper(simpleItemTouchCallback)
     }
 }
