@@ -1,10 +1,12 @@
 package tech.davidburns.activitytracker.fragments
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
@@ -45,12 +47,23 @@ class StatisticsController : Fragment() {
 
 
         val barData = BarData(barDataSet)
+        barData.setValueTextSize(11f)
+        barData.setValueTextColor(Color.DKGRAY)
         bar_chart.data = barData
         bar_chart.xAxis.valueFormatter = IndexAxisValueFormatter(barLabels)
+        bar_chart.xAxis.textColor = Color.DKGRAY
+        bar_chart.xAxis.textSize = 11f
+        bar_chart.xAxis.position = XAxis.XAxisPosition.TOP_INSIDE
+        bar_chart.xAxis.setDrawAxisLine(false)
+
+        bar_chart.axisLeft.isEnabled = false
+        bar_chart.axisRight.isEnabled = false
+
+        bar_chart.setDrawGridBackground(false)
+        bar_chart.setDrawValueAboveBar(false)
+        bar_chart.setDrawBorders(false)
         barData.barWidth = .8f
         bar_chart.setFitBars(true)
-        bar_chart.setTouchEnabled(true)
-        bar_chart.setScaleEnabled(true)
         bar_chart.xAxis.setDrawGridLines(false)
         bar_chart.axisLeft.setDrawGridLines(false)
         bar_chart.axisRight.setDrawGridLines(false)
