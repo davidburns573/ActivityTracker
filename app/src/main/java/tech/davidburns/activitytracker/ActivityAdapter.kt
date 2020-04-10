@@ -127,4 +127,4 @@ class ActivityAdapter(
     }
 }
 
-class ActivityObj(val button: Button, val timer: Timer)
+data class ActivityObj(val button: Button, val timer: Timer)
