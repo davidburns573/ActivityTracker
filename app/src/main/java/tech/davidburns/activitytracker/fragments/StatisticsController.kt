@@ -41,7 +41,7 @@ class StatisticsController : Fragment() {
         val timeLastWeek: Array<Duration> = statistics.timeLastWeek()
         val barDataSet: BarDataSet = createBarDataSet(timeLastWeek)
 
-        var barLabels: ArrayList<String> = formatDateLabels()
+        val barLabels: ArrayList<String> = formatDateLabels()
 
 
         val barData = BarData(barDataSet)
@@ -145,7 +145,7 @@ class StatisticsController : Fragment() {
 
         val newArr: ArrayList<Float> = ArrayList()
         val max: Long = arr.max()!!.seconds
-        var type: String
+        val type: String
 
         when {
             max < 60 -> {
