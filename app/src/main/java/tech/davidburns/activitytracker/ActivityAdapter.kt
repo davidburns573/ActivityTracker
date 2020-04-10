@@ -30,9 +30,7 @@ class ActivityAdapter(
     lateinit var other: TextView
     lateinit var btnStart: Button
     lateinit var timer: TextView
-    val timerLabels: ArrayList<TextView> = ArrayList()
-    val startButtons: ArrayList<Button> = ArrayList()
-    val timers: ArrayList<Timer> = ArrayList()
+    val activityObjects: ArrayList<ActivityObj> = ArrayList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val context: Context = parent.context
@@ -54,9 +52,7 @@ class ActivityAdapter(
             thisActivity.sessions.addAll(User.getSessionsFromActivity(thisActivity.name))
             secondary.text =
                 "${thisActivity.statistics.totalTimeEver().seconds} seconds"
-            timerLabels.add(0, timer)
-            startButtons.add(0, btnStart)
-            timers.add(0, Timer(timer))
+            activityObjects.add(0, ActivityObj(btnStart, Timer(timer)))
         }
     }
 
@@ -83,15 +79,15 @@ class ActivityAdapter(
         }
 
         private fun btnStartOnClick() {
-            if (startButtons[adapterPosition].text == "Start") {
-                startButtons[adapterPosition].text = "Stop"
-                timers[adapterPosition].runTimer()
+            if (activityObjects[adapterPosition].button.text == "Start") {
+                activityObjects[adapterPosition].button.text = "Stop"
+                activityObjects[adapterPosition].timer.runTimer()
             } else {
                 val dialog = AddTimerSessionDialog(activities[adapterPosition],
-                    timers[adapterPosition])
+                    activityObjects[adapterPosition].timer)
                 activityViewController.addTimerSessionDialog(dialog)
-                startButtons[adapterPosition].text = "Start"
-                timers[adapterPosition].pauseTimer()
+                activityObjects[adapterPosition].button.text = "Start"
+                activityObjects[adapterPosition].timer.pauseTimer()
             }
         }
     }
@@ -118,11 +114,17 @@ class ActivityAdapter(
 
     fun moveItem(from: Int, to: Int) {
         val fromActivity = activities[from]
+        val fromActivityObj = activityObjects[from]
         activities.removeAt(from)
+        activityObjects.removeAt(from)
         if (to < from) {
             activities.add(to, fromActivity)
+            activityObjects.add(to, fromActivityObj)
         } else { // Account for items shifting
             activities.add(to - 1, fromActivity)
+            activityObjects.add(to - 1,fromActivityObj)
         }
     }
 }
+
+class ActivityObj(val button: Button, val timer: Timer)
