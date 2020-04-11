@@ -6,10 +6,11 @@ import java.util.*
 
 class Timer(private var textView: TextView) {
     var seconds: Int = 0
+    var isRunning: Boolean = false
     private val handler: Handler = Handler()
     private lateinit var runnable: Runnable
-
     fun runTimer() {
+        isRunning = true
         runnable = Runnable {
             val hours: Int = seconds / 3600
             val minutes: Int = seconds % 3600 / 60
@@ -31,16 +32,17 @@ class Timer(private var textView: TextView) {
 
     fun endTimer() {
         handler.removeCallbacks(runnable)
-        seconds = 0;
-        textView.text = ""
+        reset()
     }
 
     fun pauseTimer() {
         handler.removeCallbacks(runnable)
+        isRunning = false
     }
 
     fun reset() {
         seconds = 0;
         textView.text = ""
+        isRunning = false
     }
 }

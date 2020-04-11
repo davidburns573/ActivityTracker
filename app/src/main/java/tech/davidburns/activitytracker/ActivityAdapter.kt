@@ -6,25 +6,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.ItemTouchHelper.UP
-import androidx.recyclerview.widget.ItemTouchHelper.DOWN
-import androidx.recyclerview.widget.ItemTouchHelper.START
-import androidx.recyclerview.widget.ItemTouchHelper.END
 import androidx.recyclerview.widget.RecyclerView
-import com.google.common.io.Resources
-import tech.davidburns.activitytracker.interfaces.DatabaseListener
 import tech.davidburns.activitytracker.fragments.ActivityViewController
 import tech.davidburns.activitytracker.fragments.AddTimerSessionDialog
 import kotlin.collections.ArrayList
-
 
 class ActivityAdapter(
     private val activities: MutableList<Activity>,
     private val onClickListener: OnClickListener,
     private val activityViewController: ActivityViewController
 ) :
-    RecyclerView.Adapter<ActivityAdapter.ViewHolder>(), DatabaseListener {
+    RecyclerView.Adapter<ActivityAdapter.ViewHolder>(), ActivityListener {
     lateinit var title: TextView
     lateinit var secondary: TextView
     lateinit var other: TextView
@@ -79,14 +71,14 @@ class ActivityAdapter(
         }
 
         private fun btnStartOnClick() {
-            if (activityObjects[adapterPosition].button.text == "Start") {
-                activityObjects[adapterPosition].button.text = "Stop"
+            if (activityObjects[adapterPosition].timer.isRunning) {
+                activityObjects[adapterPosition].button.text = User.applicationContext.getString(R.string.stop)
                 activityObjects[adapterPosition].timer.runTimer()
             } else {
                 val dialog = AddTimerSessionDialog(activities[adapterPosition],
                     activityObjects[adapterPosition].timer)
                 activityViewController.addTimerSessionDialog(dialog)
-                activityObjects[adapterPosition].button.text = "Start"
+                activityObjects[adapterPosition].button.text = User.applicationContext.getString(R.string.start)
                 activityObjects[adapterPosition].timer.pauseTimer()
             }
         }
@@ -113,18 +105,15 @@ class ActivityAdapter(
     }
 
     fun moveItem(from: Int, to: Int) {
-        val fromActivity = activities[from]
+        User.swapActivities(from, to)
         val fromActivityObj = activityObjects[from]
-        activities.removeAt(from)
         activityObjects.removeAt(from)
         if (to < from) {
-            activities.add(to, fromActivity)
             activityObjects.add(to, fromActivityObj)
         } else { // Account for items shifting
-            activities.add(to - 1, fromActivity)
             activityObjects.add(to - 1,fromActivityObj)
         }
     }
 }
 
-data class ActivityObj(val button: Button, val timer: Timer)
+class ActivityObj(val button: Button, val timer: Timer)

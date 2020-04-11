@@ -2,33 +2,61 @@ package tech.davidburns.activitytracker
 
 import android.content.Context
 import tech.davidburns.activitytracker.interfaces.Database
-import tech.davidburns.activitytracker.interfaces.DatabaseListener
 
 object User {
+    private val listeners: MutableList<ActivityListener> = mutableListOf()
     var name: String = "UNNAMED"
     lateinit var currentActivity: Activity
     lateinit var applicationContext: Context
 
     private lateinit var database: Database
 
+    private val activitiesBack: MutableList<Activity> = mutableListOf()
+
+    /**
+     * Locally caches activities
+     */
+    val activities: MutableList<Activity>
+        /**
+         * @return cached activities
+         */
+        get() = activitiesBack
+
     fun setDatabase(database: Database) {
         this.database = database
     }
-
-    val activities: MutableList<Activity>
-        get() = database.activities
-
-    /**
-     * Add specific activity object to database.
-     * @param activity to store in the database
-     */
-    fun addActivity(activity: Activity) = database.addActivity(activity)
 
     /**
      * Create activity with given name and add to the database.
      * @param name of the [Activity] to create
      */
-    fun addActivity(name: String) = addActivity(Activity(name))
+    fun addActivity(name: String, saveToDatabase: Boolean = true) = addActivity(Activity(name), saveToDatabase)
+
+    /**
+     * Create activity with given name and add to the database.
+     * @param activity to add
+     */
+    fun addActivity(activity: Activity, saveToDatabase: Boolean = true) {
+        activitiesBack.add(activity)
+        listeners.forEach { it.itemAdded(activities.size - 1) }
+        if (saveToDatabase) database.addActivity(activity)
+    }
+
+    /**
+     * Swaps two activities by index
+     * @param from index of activity to swap
+     * @param to index to swap
+     */
+    fun swapActivities(from: Int, to: Int) {
+        val fromActivity = activitiesBack[from]
+        activitiesBack.removeAt(from)
+        if (from < to) {
+            activitiesBack.add(to, fromActivity)
+        } else { // Account for items shifting
+            activitiesBack.add(to - 1, fromActivity)
+        }
+        database.orderUpdated()
+    }
 
     /**
      * Add given session to the database attached to the given activity.
@@ -52,11 +80,26 @@ object User {
     fun getSessionsFromCurrentActivity(): MutableList<Session> =
         database.getSessionsFromActivity(currentActivity.name)
 
-    fun addActivityListener(listener: DatabaseListener) {
-        database.addListener(listener)
+    /**
+     * Add a listener who will be notified whenever activities list is changed
+     * @param listener to be notified
+     */
+    fun addActivityListener(listener: ActivityListener) {
+        listeners.add(listener)
     }
 
-    fun removeActivityListener(listener: DatabaseListener) {
-        database.removeListener(listener)
+    /**
+     * Remove a listener
+     * @param listener to be removed
+     */
+    fun removeActivityListener(listener: ActivityListener) {
+        listeners.remove(listener)
     }
+}
+
+interface ActivityListener {
+    fun itemChanged(index: Int)
+    fun itemRemoved(index: Int)
+    fun itemAdded(index: Int)
+    fun itemRangeAdded(start: Int, itemCount: Int)
 }

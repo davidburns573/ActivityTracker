@@ -16,11 +16,6 @@ class NativeDatabase : Database() {
     private val database: SQLiteDatabase by lazy { UserBaseHelper(User.applicationContext).writableDatabase }
 
     init {
-        retrieveActivities()
-    }
-
-    private fun retrieveActivities() {
-        _activities.clear()
         val cursor: Cursor = database.query(
             UserSchema.ActivityTable.NAME,
             null, null,
@@ -30,7 +25,7 @@ class NativeDatabase : Database() {
         ActivityCursorWrapper(cursor).use {
             it.moveToFirst()
             while (!(it.isAfterLast)) {
-                super.addActivity(it.getActivity())
+                User.addActivity(it.getActivity(), false)
                 it.moveToNext()
             }
         }
@@ -54,7 +49,6 @@ class NativeDatabase : Database() {
     }
 
     override fun addActivity(activity: Activity) {
-        super.addActivity(activity)
         val values: ContentValues = getActivityContentValues(activity)
         database.insert(UserSchema.ActivityTable.NAME, null, values)
     }
@@ -64,10 +58,39 @@ class NativeDatabase : Database() {
         database.insert(UserSchema.SessionTable.NAME, null, values)
     }
 
+    /*
+    https://stackoverflow.com/questions/2758415/swap-values-for-two-rows-in-the-same-table-in-sql-server
+    WITH map AS (
+        SELECT *
+        FROM (VALUES
+            (1, 2),  -- Here's an example of swapping two rows:
+            (2, 1),  -- 1 <- 2,  2 <- 1
+
+            (3, 4),  -- Here's an example of rotating three rows:
+            (4, 5),  -- 3 <- 4,  4 <- 5,  5 <- 3
+            (5, 3),
+
+            (6, 7)   -- Here's an example of just copying one row to another: 3 <- 5
+        ) AS a (destID, srcID)
+    )
+    UPDATE destination
+    SET
+        ColumnA = source.ColumnA,
+        ColumnB = source.ColumnB,
+        ColumnC = source.ColumnC
+    FROM
+        SomeTable AS destination
+        JOIN map ON map.destID = destination.ID
+        JOIN SomeTable AS source ON source.ID = map.srcID
+     */
+    override fun orderUpdated() {
+        TODO("Not yet implemented")
+    }
+
     companion object {
         fun getActivityContentValues(activity: Activity): ContentValues {
             val values = ContentValues()
-            values.put(UserSchema.ActivityTable.Cols.ACTIVITYNAME, activity.name)
+            values.put(UserSchema.ActivityTable.Cols.ACTIVITY_NAME, activity.name)
             return values
         }
 
@@ -87,7 +110,7 @@ class NativeDatabase : Database() {
 class ActivityCursorWrapper(cursor: Cursor) : CursorWrapper(cursor) {
     fun getActivity(): Activity {
         val name: String =
-            getString(getColumnIndex(UserSchema.ActivityTable.Cols.ACTIVITYNAME))
+            getString(getColumnIndex(UserSchema.ActivityTable.Cols.ACTIVITY_NAME))
         return Activity(name)
     }
 }
@@ -107,7 +130,7 @@ class UserSchema {
         const val NAME: String = "activities"
 
         object Cols {
-            const val ACTIVITYNAME = "activityname"
+            const val ACTIVITY_NAME = "activityname"
         }
     }
 
@@ -133,7 +156,7 @@ class UserBaseHelper(context: Context) :
         db?.execSQL(
             "create table " + UserSchema.ActivityTable.NAME
                     + "(" + " _id integer primary key autoincrement, "
-                    + UserSchema.ActivityTable.Cols.ACTIVITYNAME + ")"
+                    + UserSchema.ActivityTable.Cols.ACTIVITY_NAME + ")"
         )
         db?.execSQL(
             "create table " + UserSchema.SessionTable.NAME

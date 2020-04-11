@@ -1,6 +1,5 @@
 package tech.davidburns.activitytracker.interfaces
 
-import androidx.annotation.CallSuper
 import tech.davidburns.activitytracker.Activity
 import tech.davidburns.activitytracker.Session
 
@@ -13,11 +12,6 @@ import tech.davidburns.activitytracker.Session
  * @author David Burns
  */
 abstract class Database {
-    private val listeners: MutableList<DatabaseListener> = mutableListOf()
-    protected val _activities: MutableList<Activity> = mutableListOf()
-    val activities: MutableList<Activity>
-        get() = _activities
-
     /**
      * User may have a lot of sessions, so take caution when retrieving all.
      * @param activityName that contains sessions
@@ -29,13 +23,7 @@ abstract class Database {
      * Add an activity to the local activity cache and to the database.
      * @param activity is the activity to add to the database
      */
-    @CallSuper
-    open fun addActivity(activity: Activity) {
-        _activities.add(activity)
-        listeners.forEach { it.itemAdded(activities.size) }
-    }
-
-    fun addActivity(activityName: String) = addActivity(Activity(activityName))
+    abstract fun addActivity(activity: Activity)
 
     /**
      * Add a session pertaining to an activity to the database.
@@ -44,18 +32,8 @@ abstract class Database {
      */
     abstract fun addSession(session: Session, activityName: String)
 
-    fun addListener(listener: DatabaseListener) {
-        listeners.add(listener)
-    }
-
-    fun removeListener(listener: DatabaseListener) {
-        listeners.remove(listener)
-    }
-}
-
-interface DatabaseListener {
-    fun itemChanged(index: Int)
-    fun itemRemoved(index: Int)
-    fun itemAdded(index: Int)
-    fun itemRangeAdded(start: Int, itemCount: Int)
+    /**
+     * Refreshed database with activities order
+     */
+    abstract fun orderUpdated()
 }

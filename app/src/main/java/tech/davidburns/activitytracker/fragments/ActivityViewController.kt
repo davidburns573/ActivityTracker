@@ -80,9 +80,6 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
     }
 
     private val itemTouchHelper by lazy {
-        // 1. Note that I am specifying all 4 directions.
-        //    Specifying START and END also allows
-        //    more organic dragging than just specifying UP and DOWN.
         val simpleItemTouchCallback =
             object : ItemTouchHelper.SimpleCallback(
                 ItemTouchHelper.UP or
@@ -90,7 +87,6 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
                         ItemTouchHelper.START or
                         ItemTouchHelper.END, 0
             ) {
-                // 1. This callback is called when a ViewHolder is selected.
                 //    We highlight the ViewHolder here.
                 override fun onSelectedChanged(
                     viewHolder: RecyclerView.ViewHolder?,
@@ -103,8 +99,7 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
                     }
                 }
 
-                // 2. This callback is called when the ViewHolder is
-                //    unselected (dropped). We unhighlight the ViewHolder here.
+                //We unhighlight the ViewHolder here.
                 override fun clearView(
                     recyclerView: RecyclerView,
                     viewHolder: RecyclerView.ViewHolder
@@ -120,23 +115,16 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
                 ): Boolean {
                     val from = viewHolder.adapterPosition
                     val to = target.adapterPosition
-                    // 2. Update the backing model. Custom implementation in
-                    //    MainRecyclerViewAdapter. You need to implement
-                    //    reordering of the backing model inside the method.
                     viewAdapter.moveItem(from, to)
-                    // 3. Tell adapter to render the model update.
+                    // Tell adapter to render the model update.
                     viewAdapter.notifyItemMoved(from, to)
-
                     return true
                 }
 
                 override fun onSwiped(
                     viewHolder: RecyclerView.ViewHolder,
                     direction: Int
-                ) {
-                    // 4. Code block for horizontal swipe.
-                    //    ItemTouchHelper handles horizontal swipe as well, but
-                    //    it is not relevant with reordering. Ignoring here.
+                ) { //Do nothing
                 }
             }
         ItemTouchHelper(simpleItemTouchCallback)
