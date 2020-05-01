@@ -38,8 +38,8 @@ object User {
      * @param activity to add
      */
     fun addActivity(activity: Activity, saveToDatabase: Boolean = true) {
-        activitiesBack.add(activity)
-        listeners.forEach { it.itemAdded(activities.size - 1) }
+        activitiesBack.add(activity.order, activity)
+        listeners.forEach { it.itemAdded(activity.order) }
         if (saveToDatabase) database.addActivity(activity)
     }
 

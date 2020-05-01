@@ -107,16 +107,17 @@ class ActivityAdapter(
         notifyItemRangeInserted(start, itemCount)
     }
 
-//    fun moveItem(from: Int, to: Int) {
-//        User.moveActivity(from, to)
-//        val fromActivityObj = activityObjects[from]
-//        activityObjects.removeAt(from)
-//        if (to < from) {
-//            activityObjects.add(to, fromActivityObj)
-//        } else { // Account for items shifting
-//            activityObjects.add(to - 1,fromActivityObj)
-//        }
-//    }
+    fun moveItem(from: Int, to: Int) {
+        val removed = activities.removeAt(from)
+        if (to < from) {
+            activities.add(to, removed)
+        } else { // Account for items shifting
+            activities.add(to - 1, removed)
+        }
+        activities.forEachIndexed { index, activity ->
+            activity.order = index
+        }
+    }
 }
 
 //private class ActivityObj(val button: Button, val timer: Timer)

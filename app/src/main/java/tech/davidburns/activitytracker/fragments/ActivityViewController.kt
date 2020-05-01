@@ -1,6 +1,7 @@
 package tech.davidburns.activitytracker.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,6 +26,12 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
         savedInstanceState: Bundle?
     ): View? {
         viewAdapter = ActivityAdapter(User.activities, this, this)
+        viewAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
+                super.onItemRangeMoved(fromPosition, toPosition, itemCount)
+                Log.i("MOVEDPOSITION", "from: $fromPosition, to: $toPosition, count: $itemCount")
+            }
+        })
         User.addActivityListener(viewAdapter)
         return inflater.inflate(R.layout.activity_view, container, false)
     }
@@ -36,8 +43,10 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
         activity_recycler.adapter = viewAdapter
         activity_recycler.layoutManager =
             LinearLayoutManager(activity)
-//                .apply { reverseLayout = true }
-//                .apply { stackFromEnd = true }
+                .apply {
+                    reverseLayout = true
+                    stackFromEnd = true
+                }
 
         btnAddActivity.setOnClickListener {
             val fragmentTransaction = activity?.supportFragmentManager?.beginTransaction()
@@ -116,7 +125,7 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
                 ): Boolean {
                     val from = viewHolder.adapterPosition
                     val to = target.adapterPosition
-//                    viewAdapter.moveItem(from, to)
+                    viewAdapter.moveItem(from, to)
                     // Tell adapter to render the model update.
                     viewAdapter.notifyItemMoved(from, to)
                     return true

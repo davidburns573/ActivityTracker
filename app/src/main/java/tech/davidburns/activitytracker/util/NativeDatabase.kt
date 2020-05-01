@@ -118,10 +118,8 @@ class NativeDatabase : Database() {
 
 class ActivityCursorWrapper(cursor: Cursor) : CursorWrapper(cursor) {
     fun getActivity(): Activity {
-        val name: String =
-            getString(getColumnIndex(UserSchema.ActivityTable.Cols.ACTIVITY_NAME))
-        val order: Int =
-            getInt(getColumnIndex(UserSchema.ActivityTable.Cols.ORDER))
+        val name: String = getString(getColumnIndex(UserSchema.ActivityTable.Cols.ACTIVITY_NAME))
+        val order: Int = getInt(getColumnIndex(UserSchema.ActivityTable.Cols.ORDER))
         return Activity(name, order)
     }
 }
@@ -142,7 +140,7 @@ class UserSchema {
         object Cols {
             const val ACTIVITY_NAME = "activityname"
             const val CREATED: String = "created"
-            const val ORDER: String = "'order'" //Order is a reserved word, so it is in quotes
+            const val ORDER: String = "items" //Order is a reserved word
         }
     }
 
