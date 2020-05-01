@@ -35,8 +35,9 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
         itemTouchHelper.attachToRecyclerView(activity_recycler)
         activity_recycler.adapter = viewAdapter
         activity_recycler.layoutManager =
-            LinearLayoutManager(activity).apply { reverseLayout = true }
-                .apply { stackFromEnd = true }
+            LinearLayoutManager(activity)
+//                .apply { reverseLayout = true }
+//                .apply { stackFromEnd = true }
 
         btnAddActivity.setOnClickListener {
             val fragmentTransaction = activity?.supportFragmentManager?.beginTransaction()
@@ -115,7 +116,7 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
                 ): Boolean {
                     val from = viewHolder.adapterPosition
                     val to = target.adapterPosition
-                    viewAdapter.moveItem(from, to)
+//                    viewAdapter.moveItem(from, to)
                     // Tell adapter to render the model update.
                     viewAdapter.notifyItemMoved(from, to)
                     return true

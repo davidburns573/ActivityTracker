@@ -9,7 +9,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import tech.davidburns.activitytracker.fragments.ActivityViewController
 import tech.davidburns.activitytracker.fragments.AddTimerSessionDialog
-import kotlin.collections.ArrayList
 
 class ActivityAdapter(
     private val activities: MutableList<Activity>,
@@ -21,8 +20,9 @@ class ActivityAdapter(
     lateinit var secondary: TextView
     lateinit var other: TextView
     lateinit var btnStart: Button
-    lateinit var timer: TextView
-    val activityObjects: ArrayList<ActivityObj> = ArrayList()
+    lateinit var timerView: TextView
+    private lateinit var timer: Timer
+    lateinit var activity: Activity
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val context: Context = parent.context
@@ -38,13 +38,14 @@ class ActivityAdapter(
     override fun onBindViewHolder(holder: ActivityAdapter.ViewHolder, position: Int) {
         if (activities.size > 0) {
             // Get the data model based on position
-            val thisActivity = activities[position]
-            title.text = thisActivity.name
-            thisActivity.sessions.clear()
-            thisActivity.sessions.addAll(User.getSessionsFromActivity(thisActivity.name))
+            activity = activities[position]
+            holder.activity = activity
+//            activity.order = position
+            title.text = activity.name
+            activity.sessions.clear()
+            activity.sessions.addAll(User.getSessionsFromActivity(activity.name))
             secondary.text =
-                "${thisActivity.statistics.totalTimeEver().seconds} seconds"
-            activityObjects.add(0, ActivityObj(btnStart, Timer(timer)))
+                "${activity.statistics.totalTimeEver().seconds} seconds"
         }
     }
 
@@ -52,34 +53,36 @@ class ActivityAdapter(
 
     inner class ViewHolder(itemView: View, private val onClickListener: OnClickListener) :
         RecyclerView.ViewHolder(itemView), View.OnClickListener {
-
+        lateinit var activity: Activity
         init {
             title = itemView.findViewById(R.id.activity_title)
             secondary = itemView.findViewById(R.id.secondary_text)
             other = itemView.findViewById(R.id.other_text)
             btnStart = itemView.findViewById(R.id.btn_start)
-            timer = itemView.findViewById(R.id.timer)
+            timerView = itemView.findViewById(R.id.timer)
+            timer = Timer(timerView)
 
             btnStart.setOnClickListener { btnStartOnClick(); }
+//            activity.order = adapterPosition
 
             itemView.setOnClickListener(this)
         }
 
         override fun onClick(v: View?) {
-            User.currentActivity = activities[adapterPosition]
+            User.currentActivity = activity
             onClickListener.onClick()
         }
 
         private fun btnStartOnClick() {
-            if (activityObjects[adapterPosition].timer.isRunning) {
-                activityObjects[adapterPosition].button.text = User.applicationContext.getString(R.string.stop)
-                activityObjects[adapterPosition].timer.runTimer()
+            if (timer.isRunning) {
+                btnStart.text = User.applicationContext.getString(R.string.stop)
+               timer.runTimer()
             } else {
                 val dialog = AddTimerSessionDialog(activities[adapterPosition],
-                    activityObjects[adapterPosition].timer)
+                    timer)
                 activityViewController.addTimerSessionDialog(dialog)
-                activityObjects[adapterPosition].button.text = User.applicationContext.getString(R.string.start)
-                activityObjects[adapterPosition].timer.pauseTimer()
+                btnStart.text = User.applicationContext.getString(R.string.start)
+                timer.pauseTimer()
             }
         }
     }
@@ -104,16 +107,16 @@ class ActivityAdapter(
         notifyItemRangeInserted(start, itemCount)
     }
 
-    fun moveItem(from: Int, to: Int) {
-        User.swapActivities(from, to)
-        val fromActivityObj = activityObjects[from]
-        activityObjects.removeAt(from)
-        if (to < from) {
-            activityObjects.add(to, fromActivityObj)
-        } else { // Account for items shifting
-            activityObjects.add(to - 1,fromActivityObj)
-        }
-    }
+//    fun moveItem(from: Int, to: Int) {
+//        User.moveActivity(from, to)
+//        val fromActivityObj = activityObjects[from]
+//        activityObjects.removeAt(from)
+//        if (to < from) {
+//            activityObjects.add(to, fromActivityObj)
+//        } else { // Account for items shifting
+//            activityObjects.add(to - 1,fromActivityObj)
+//        }
+//    }
 }
 
-class ActivityObj(val button: Button, val timer: Timer)
+//private class ActivityObj(val button: Button, val timer: Timer)

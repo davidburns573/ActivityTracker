@@ -3,7 +3,13 @@ package tech.davidburns.activitytracker
 import java.time.Duration
 import java.time.LocalDateTime
 
-class Activity(var name: String) {
+class Activity(var name: String, order: Int) {
+    var order = order
+        set(value) {
+            User.updateOrder(order, value)
+            field = value
+        }
+
     var sessions: MutableList<Session> = mutableListOf()
     val statistics: Statistics = Statistics(sessions)
 

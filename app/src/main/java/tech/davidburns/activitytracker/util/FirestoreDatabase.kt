@@ -35,7 +35,7 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
                 for (dc in value!!.documentChanges) {
                     when (dc.type) {
                         DocumentChange.Type.ADDED -> {
-                            User.addActivity(dc.document.data["name"] as String, false)
+                            User.addActivity(Activity(dc.document.data["name"] as String, dc.document.data["order"] as Int), false)
                             Log.d(TAG, "New Activity: ${dc.document.data}")
                         }
                         DocumentChange.Type.MODIFIED -> Log.d(
@@ -94,14 +94,19 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
             .addOnFailureListener { e -> Log.w(TAG, "Error writing document", e) }
     }
 
-    override fun orderUpdated() {
-        val collection =
-            db.collection("$userPath/${firebaseUser.uid}/$activityPath")
-        db.runTransaction { transaction ->
-            User.activities.forEachIndexed { index, activity ->
-                transaction.update(collection.document(activity.name), "order", index)
-            }
-        }
+//    override fun orderUpdated() {
+//        val collection =
+//            db.collection("$userPath/${firebaseUser.uid}/$activityPath")
+//        db.runTransaction { transaction ->
+//            User.activities.forEachIndexed { index, activity ->
+//                transaction.update(collection.document(activity.name), "order", index)
+//            }
+//        }
+//    }
+
+    override fun orderUpdated(index: Int, order: Int) {
+        db.document("$userPath/${firebaseUser.uid}/$activityPath/${User.activities[index]}")
+            .update("order", order)
     }
 
 //    override fun setUserInfo() {

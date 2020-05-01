@@ -32,8 +32,5 @@ abstract class Database {
      */
     abstract fun addSession(session: Session, activityName: String)
 
-    /**
-     * Refreshed database with activities order
-     */
-    abstract fun orderUpdated()
+    abstract fun orderUpdated(index: Int, order: Int)
 }

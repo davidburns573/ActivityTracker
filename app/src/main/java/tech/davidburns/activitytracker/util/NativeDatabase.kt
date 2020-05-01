@@ -10,6 +10,7 @@ import tech.davidburns.activitytracker.Activity
 import tech.davidburns.activitytracker.Session
 import tech.davidburns.activitytracker.User
 import tech.davidburns.activitytracker.interfaces.Database
+import java.time.Instant
 import java.time.ZoneId
 
 class NativeDatabase : Database() {
@@ -59,38 +60,46 @@ class NativeDatabase : Database() {
     }
 
     /*
-    https://stackoverflow.com/questions/2758415/swap-values-for-two-rows-in-the-same-table-in-sql-server
-    WITH map AS (
-        SELECT *
-        FROM (VALUES
-            (1, 2),  -- Here's an example of swapping two rows:
-            (2, 1),  -- 1 <- 2,  2 <- 1
-
-            (3, 4),  -- Here's an example of rotating three rows:
-            (4, 5),  -- 3 <- 4,  4 <- 5,  5 <- 3
-            (5, 3),
-
-            (6, 7)   -- Here's an example of just copying one row to another: 3 <- 5
-        ) AS a (destID, srcID)
-    )
-    UPDATE destination
-    SET
-        ColumnA = source.ColumnA,
-        ColumnB = source.ColumnB,
-        ColumnC = source.ColumnC
-    FROM
-        SomeTable AS destination
-        JOIN map ON map.destID = destination.ID
-        JOIN SomeTable AS source ON source.ID = map.srcID
+    String array[] = new String[cursor.getCount()];
+    i = 0;
+    cursor.moveToFirst();
+    while (!cursor.isAfterLast()) {
+        array[i] = cursor.getString(0);
+        i++;
+        cursor.moveToNext();
+    }
      */
-    override fun orderUpdated() {
-        TODO("Not yet implemented")
+//    override fun orderUpdated() {
+//        database.query(
+//            UserSchema.ActivityTable.NAME,
+//            null, null,
+//            null, null,
+//            null, null
+//        ).use { cursor ->
+//            cursor.moveToFirst()
+//            while (!cursor.isAfterLast) {
+//                val values = ContentValues()
+//                values.put(UserSchema.ActivityTable.Cols.ORDER, User.activities.size - 1   )
+//                database.update(UserSchema.ActivityTable.NAME, )
+//            }
+//        }
+//    }
+
+    override fun orderUpdated(index: Int, order: Int) {
+        val values = ContentValues().apply {
+            put(UserSchema.ActivityTable.Cols.ORDER, order)
+        }
+        val whereArgs = arrayOf(User.activities[index].name)
+        val where = "${UserSchema.ActivityTable.Cols.ACTIVITY_NAME}=?"
+        database.update(UserSchema.ActivityTable.NAME, values, where, whereArgs)
     }
 
     companion object {
         fun getActivityContentValues(activity: Activity): ContentValues {
             val values = ContentValues()
             values.put(UserSchema.ActivityTable.Cols.ACTIVITY_NAME, activity.name)
+            values.put(UserSchema.ActivityTable.Cols.CREATED, Instant.now().epochSecond)
+            values.put(UserSchema.ActivityTable.Cols.ORDER, activity.order)
             return values
         }
 
@@ -111,7 +120,9 @@ class ActivityCursorWrapper(cursor: Cursor) : CursorWrapper(cursor) {
     fun getActivity(): Activity {
         val name: String =
             getString(getColumnIndex(UserSchema.ActivityTable.Cols.ACTIVITY_NAME))
-        return Activity(name)
+        val order: Int =
+            getInt(getColumnIndex(UserSchema.ActivityTable.Cols.ORDER))
+        return Activity(name, order)
     }
 }
 
@@ -124,13 +135,14 @@ class SessionCursorWrapper(cursor: Cursor) : CursorWrapper(cursor) {
     }
 }
 
-
 class UserSchema {
     object ActivityTable {
         const val NAME: String = "activities"
 
         object Cols {
             const val ACTIVITY_NAME = "activityname"
+            const val CREATED: String = "created"
+            const val ORDER: String = "'order'" //Order is a reserved word, so it is in quotes
         }
     }
 
@@ -143,7 +155,6 @@ class UserSchema {
             const val START = "start"
         }
     }
-
 }
 
 private const val VERSION: Int = 1
@@ -156,7 +167,9 @@ class UserBaseHelper(context: Context) :
         db?.execSQL(
             "create table " + UserSchema.ActivityTable.NAME
                     + "(" + " _id integer primary key autoincrement, "
-                    + UserSchema.ActivityTable.Cols.ACTIVITY_NAME + ")"
+                    + UserSchema.ActivityTable.Cols.ACTIVITY_NAME + ", "
+                    + UserSchema.ActivityTable.Cols.CREATED + ", "
+                    + UserSchema.ActivityTable.Cols.ORDER + ")"
         )
         db?.execSQL(
             "create table " + UserSchema.SessionTable.NAME

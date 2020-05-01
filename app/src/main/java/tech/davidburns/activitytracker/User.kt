@@ -30,7 +30,8 @@ object User {
      * Create activity with given name and add to the database.
      * @param name of the [Activity] to create
      */
-    fun addActivity(name: String, saveToDatabase: Boolean = true) = addActivity(Activity(name), saveToDatabase)
+    fun addActivity(name: String, saveToDatabase: Boolean = true) =
+        addActivity(Activity(name, activities.size), saveToDatabase) //Increases size of database by one, so does not need to be size - 1
 
     /**
      * Create activity with given name and add to the database.
@@ -42,21 +43,25 @@ object User {
         if (saveToDatabase) database.addActivity(activity)
     }
 
-    /**
-     * Swaps two activities by index
-     * @param from index of activity to swap
-     * @param to index to swap
-     */
-    fun swapActivities(from: Int, to: Int) {
-        val fromActivity = activitiesBack[from]
-        activitiesBack.removeAt(from)
-        if (from < to) {
-            activitiesBack.add(to, fromActivity)
-        } else { // Account for items shifting
-            activitiesBack.add(to - 1, fromActivity)
-        }
-        database.orderUpdated()
+    fun updateOrder(index: Int, order: Int) {
+        database.orderUpdated(index, order)
     }
+
+//    /**
+//     * Swaps two activities by index
+//     * @param from index of activity to swap
+//     * @param to index to swap
+//     */
+//    fun moveActivity(from: Int, to: Int) {
+//        val fromActivity = activitiesBack[from]
+//        activitiesBack.removeAt(from)
+//        if (from < to) {
+//            activitiesBack.add(to, fromActivity)
+//        } else { // Account for items shifting
+//            activitiesBack.add(to - 1, fromActivity)
+//        }
+//        database.orderUpdated()
+//    }
 
     /**
      * Add given session to the database attached to the given activity.
