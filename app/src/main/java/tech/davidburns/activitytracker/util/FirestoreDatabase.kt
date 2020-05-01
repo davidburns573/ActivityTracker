@@ -35,7 +35,9 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
                 for (dc in value!!.documentChanges) {
                     when (dc.type) {
                         DocumentChange.Type.ADDED -> {
-                            User.addActivity(Activity(dc.document.data["name"] as String, dc.document.data["order"] as Int), false)
+                            User.addActivity(Activity(dc.document.data["name"] as String,
+                                (dc.document.data["order"] as Long).toInt()
+                            ), false)
                             Log.d(TAG, "New Activity: ${dc.document.data}")
                         }
                         DocumentChange.Type.MODIFIED -> Log.d(
