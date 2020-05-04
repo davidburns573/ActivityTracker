@@ -106,9 +106,9 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
 //        }
 //    }
 
-    override fun orderUpdated(index: Int, order: Int) {
-        db.document("$userPath/${firebaseUser.uid}/$activityPath/${User.activities[index]}")
-            .update("order", order)
+    override fun orderUpdated(from: Int, to: Int) {
+        db.document("$userPath/${firebaseUser.uid}/$activityPath/${User.activities[from]}")
+            .update("order", to)
     }
 
 //    override fun setUserInfo() {

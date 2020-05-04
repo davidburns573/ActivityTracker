@@ -32,5 +32,5 @@ abstract class Database {
      */
     abstract fun addSession(session: Session, activityName: String)
 
-    abstract fun orderUpdated(index: Int, order: Int)
+    abstract fun orderUpdated(from: Int, to: Int)
 }

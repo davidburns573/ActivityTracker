@@ -26,12 +26,6 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
         savedInstanceState: Bundle?
     ): View? {
         viewAdapter = ActivityAdapter(User.activities, this, this)
-        viewAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
-            override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
-                super.onItemRangeMoved(fromPosition, toPosition, itemCount)
-                Log.i("MOVEDPOSITION", "from: $fromPosition, to: $toPosition, count: $itemCount")
-            }
-        })
         User.addActivityListener(viewAdapter)
         return inflater.inflate(R.layout.activity_view, container, false)
     }

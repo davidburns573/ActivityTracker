@@ -85,11 +85,11 @@ class NativeDatabase : Database() {
 //        }
 //    }
 
-    override fun orderUpdated(index: Int, order: Int) {
-        val values = ContentValues().apply {
-            put(UserSchema.ActivityTable.Cols.ORDER, order)
+    override fun orderUpdated(from: Int, to: Int) {
+         val values = ContentValues().apply {
+            put(UserSchema.ActivityTable.Cols.ORDER, to)
         }
-        val whereArgs = arrayOf(User.activities[index].name)
+        val whereArgs = arrayOf(User.activities[from].name)
         val where = "${UserSchema.ActivityTable.Cols.ACTIVITY_NAME}=?"
         database.update(UserSchema.ActivityTable.NAME, values, where, whereArgs)
     }
@@ -140,7 +140,7 @@ class UserSchema {
         object Cols {
             const val ACTIVITY_NAME = "activityname"
             const val CREATED: String = "created"
-            const val ORDER: String = "items" //Order is a reserved word
+            const val ORDER: String = "activityorder" //Order is a reserved word
         }
     }
 

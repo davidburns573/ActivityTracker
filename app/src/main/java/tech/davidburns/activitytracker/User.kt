@@ -43,8 +43,8 @@ object User {
         if (saveToDatabase) database.addActivity(activity)
     }
 
-    fun updateOrder(index: Int, order: Int) {
-        database.orderUpdated(index, order)
+    fun updateOrder(from: Int, to: Int) {
+        database.orderUpdated(from, to)
     }
 
 //    /**
