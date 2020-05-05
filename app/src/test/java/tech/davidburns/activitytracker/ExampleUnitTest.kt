@@ -1,5 +1,6 @@
 package tech.davidburns.activitytracker
 
+import android.util.Log
 import org.junit.Test
 
 import org.junit.Assert.*
@@ -15,6 +16,15 @@ class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
         assertEquals(4, 2 + 2)
+    }
+
+    @Test
+    fun addingToList() {
+        val list: MutableList<Int> = mutableListOf()
+        list.add(3, 3)
+        list.add(1,1)
+        list.add(2,2)
+        Log.i("TESTINGTEST", list.toString())
     }
 
 //    @Test
