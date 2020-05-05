@@ -9,13 +9,15 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import tech.davidburns.activitytracker.fragments.ActivityViewController
 import tech.davidburns.activitytracker.fragments.AddTimerSessionDialog
+import tech.davidburns.activitytracker.interfaces.ActivityListener
 
 class ActivityAdapter(
     private val activities: MutableList<Activity>,
     private val onClickListener: OnClickListener,
     private val activityViewController: ActivityViewController
 ) :
-    RecyclerView.Adapter<ActivityAdapter.ViewHolder>(), ActivityListener {
+    RecyclerView.Adapter<ActivityAdapter.ViewHolder>(),
+    ActivityListener {
     lateinit var title: TextView
     lateinit var secondary: TextView
     lateinit var other: TextView
@@ -40,7 +42,6 @@ class ActivityAdapter(
             activity = activities[position]
             holder.activity = activity
 
-//            activity.order = position
             title.text = activity.name
             activity.sessions.clear()
             activity.sessions.addAll(User.getSessionsFromActivity(activity.name))
@@ -63,7 +64,6 @@ class ActivityAdapter(
             timerView = itemView.findViewById(R.id.timer)
             timer = Timer(timerView)
             btnStart.setOnClickListener { btnStartOnClick(); }
-//            activity.order = adapterPosition
 
             itemView.setOnClickListener(this)
         }
@@ -109,13 +109,10 @@ class ActivityAdapter(
 
     fun moveItem(from: Int, to: Int) {
         val removed = activities.removeAt(from)
-        if (to < from) {
-            activities.add(to, removed)
-        } else { // Account for items shifting
-            activities.add(to - 1, removed)
-        }
-        activities.forEachIndexed { index, activity ->
-            activity.order = index
+        activities.add(to, removed)
+
+        for(index in from..to) {
+            User.orderUpdated(index)
         }
     }
 }

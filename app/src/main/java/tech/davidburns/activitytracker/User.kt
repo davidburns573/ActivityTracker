@@ -1,27 +1,25 @@
 package tech.davidburns.activitytracker
 
 import android.content.Context
+import tech.davidburns.activitytracker.interfaces.ActivityListener
 import tech.davidburns.activitytracker.interfaces.Database
 
 object User {
-    private val listeners: MutableList<ActivityListener> = mutableListOf()
     var name: String = "UNNAMED"
     lateinit var currentActivity: Activity
     lateinit var applicationContext: Context
 
     private lateinit var database: Database
 
-    private val activitiesBack: MutableList<Activity> = mutableListOf()
+    val activities: MutableList<Activity>
+        get() = database.activities
 
     /**
-     * Locally caches activities
+     * Sets the desired database for the current user.
+     * Must be set upon app initialization.
+     * Can be changed at any time. TODO
+     * @param database to store content in.
      */
-    val activities: MutableList<Activity>
-        /**
-         * @return cached activities
-         */
-        get() = activitiesBack
-
     fun setDatabase(database: Database) {
         this.database = database
     }
@@ -30,38 +28,24 @@ object User {
      * Create activity with given name and add to the database.
      * @param name of the [Activity] to create
      */
-    fun addActivity(name: String, saveToDatabase: Boolean = true) =
-        addActivity(Activity(name, activities.size), saveToDatabase) //Increases size of database by one, so does not need to be size - 1
+    fun addActivity(name: String) =
+        addActivity(Activity(name))
 
     /**
      * Create activity with given name and add to the database.
      * @param activity to add
      */
-    fun addActivity(activity: Activity, saveToDatabase: Boolean = true) {
-        activitiesBack.add(activity)
-        listeners.forEach { it.itemAdded(activities.size - 1) }
-        if (saveToDatabase) database.addActivity(activity)
+    fun addActivity(activity: Activity) {
+        database.addActivity(activity)
     }
 
-    fun updateOrder(from: Int, to: Int) {
-        database.orderUpdated(from, to)
+    /**
+     * Notify the database that the order of an activity at a specific index has changed.
+     * @param index at which order was changed
+     */
+    fun orderUpdated(index: Int) {
+        database.orderUpdated(index)
     }
-
-//    /**
-//     * Swaps two activities by index
-//     * @param from index of activity to swap
-//     * @param to index to swap
-//     */
-//    fun moveActivity(from: Int, to: Int) {
-//        val fromActivity = activitiesBack[from]
-//        activitiesBack.removeAt(from)
-//        if (from < to) {
-//            activitiesBack.add(to, fromActivity)
-//        } else { // Account for items shifting
-//            activitiesBack.add(to - 1, fromActivity)
-//        }
-//        database.orderUpdated()
-//    }
 
     /**
      * Add given session to the database attached to the given activity.
@@ -90,7 +74,7 @@ object User {
      * @param listener to be notified
      */
     fun addActivityListener(listener: ActivityListener) {
-        listeners.add(listener)
+        database.listeners.add(listener)
     }
 
     /**
@@ -98,13 +82,6 @@ object User {
      * @param listener to be removed
      */
     fun removeActivityListener(listener: ActivityListener) {
-        listeners.remove(listener)
+        database.listeners.remove(listener)
     }
-}
-
-interface ActivityListener {
-    fun itemChanged(index: Int)
-    fun itemRemoved(index: Int)
-    fun itemAdded(index: Int)
-    fun itemRangeAdded(start: Int, itemCount: Int)
 }

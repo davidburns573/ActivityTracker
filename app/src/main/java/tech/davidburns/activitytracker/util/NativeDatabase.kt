@@ -26,7 +26,7 @@ class NativeDatabase : Database() {
         ActivityCursorWrapper(cursor).use {
             it.moveToFirst()
             while (!(it.isAfterLast)) {
-                User.addActivity(it.getActivity(), false)
+                User.addActivity(it.getActivity())
                 it.moveToNext()
             }
         }
@@ -85,13 +85,8 @@ class NativeDatabase : Database() {
 //        }
 //    }
 
-    override fun orderUpdated(from: Int, to: Int) {
-         val values = ContentValues().apply {
-            put(UserSchema.ActivityTable.Cols.ORDER, to)
-        }
-        val whereArgs = arrayOf(User.activities[from].name)
-        val where = "${UserSchema.ActivityTable.Cols.ACTIVITY_NAME}=?"
-        database.update(UserSchema.ActivityTable.NAME, values, where, whereArgs)
+    override fun orderUpdated(index: Int) {
+         TODO()
     }
 
     companion object {
@@ -99,7 +94,7 @@ class NativeDatabase : Database() {
             val values = ContentValues()
             values.put(UserSchema.ActivityTable.Cols.ACTIVITY_NAME, activity.name)
             values.put(UserSchema.ActivityTable.Cols.CREATED, Instant.now().epochSecond)
-            values.put(UserSchema.ActivityTable.Cols.ORDER, activity.order)
+            values.put(UserSchema.ActivityTable.Cols.ORDER, -1) //TODO
             return values
         }
 
@@ -120,7 +115,7 @@ class ActivityCursorWrapper(cursor: Cursor) : CursorWrapper(cursor) {
     fun getActivity(): Activity {
         val name: String = getString(getColumnIndex(UserSchema.ActivityTable.Cols.ACTIVITY_NAME))
         val order: Int = getInt(getColumnIndex(UserSchema.ActivityTable.Cols.ORDER))
-        return Activity(name, order)
+        return Activity(name)
     }
 }
 

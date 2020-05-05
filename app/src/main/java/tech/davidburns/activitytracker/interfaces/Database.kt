@@ -12,6 +12,10 @@ import tech.davidburns.activitytracker.Session
  * @author David Burns
  */
 abstract class Database {
+    val activities: MutableList<Activity> = mutableListOf()
+
+    var listeners: MutableList<ActivityListener> = mutableListOf()
+
     /**
      * User may have a lot of sessions, so take caution when retrieving all.
      * @param activityName that contains sessions
@@ -32,5 +36,10 @@ abstract class Database {
      */
     abstract fun addSession(session: Session, activityName: String)
 
-    abstract fun orderUpdated(from: Int, to: Int)
+    /**
+     * Notify the database that the order of an activity at a specific index has changed.
+     * Should only be called after activities list has been updated to the desired order.
+     * @param index at which order was changed.
+    */
+    abstract fun orderUpdated(index: Int)
 }

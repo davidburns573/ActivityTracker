@@ -25,7 +25,7 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
     private val db: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
 
     init {
-        db.collection("$userPath/${firebaseUser.uid}/$activityPath")
+        db.collection("$userPath/${firebaseUser.uid}/$activityPath").orderBy("order")
             .addSnapshotListener { value, e ->
                 if (e != null) {
                     Log.w(TAG, "Listen failed.", e)
@@ -35,18 +35,16 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
                 for (dc in value!!.documentChanges) {
                     when (dc.type) {
                         DocumentChange.Type.ADDED -> {
-                            User.addActivity(Activity(dc.document.data["name"] as String,
-                                (dc.document.data["order"] as Long).toInt()
-                            ), false)
+                            addExternalActivity(Activity(dc.document.data["name"] as String))
                             Log.d(TAG, "New Activity: ${dc.document.data}")
                         }
                         DocumentChange.Type.MODIFIED -> Log.d(
                             TAG,
-                            "Modified Activity: ${dc.document.data}"
+                            "Modified Activity: ${dc.document.data}, NOT IMPLEMENTED"
                         )
                         DocumentChange.Type.REMOVED -> Log.d(
                             TAG,
-                            "Removed Activity: ${dc.document.data}"
+                            "Removed Activity: ${dc.document.data}, NOT IMPLEMENTED"
                         )
                     }
                 }
@@ -72,11 +70,16 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
         return list
     }
 
+    private fun addExternalActivity(activity: Activity) {
+        activities.add(activity)
+        listeners.forEach { it.itemAdded(activities.size - 1) }
+    }
+
     override fun addActivity(activity: Activity) {
         val activityHashMap = hashMapOf(
             "name" to activity.name,
             "created" to Instant.now().epochSecond,
-            "order" to User.activities.size - 1
+            "order" to User.activities.size
         )
         db.document("$userPath/${firebaseUser.uid}/$activityPath/${activity.name}")
             .set(activityHashMap)
@@ -96,19 +99,11 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
             .addOnFailureListener { e -> Log.w(TAG, "Error writing document", e) }
     }
 
-//    override fun orderUpdated() {
-//        val collection =
-//            db.collection("$userPath/${firebaseUser.uid}/$activityPath")
-//        db.runTransaction { transaction ->
-//            User.activities.forEachIndexed { index, activity ->
-//                transaction.update(collection.document(activity.name), "order", index)
-//            }
-//        }
-//    }
-
-    override fun orderUpdated(from: Int, to: Int) {
-        db.document("$userPath/${firebaseUser.uid}/$activityPath/${User.activities[from]}")
-            .update("order", to)
+    override fun orderUpdated(index: Int) {
+        db.document("$userPath/${firebaseUser.uid}/$activityPath/${User.activities[index].name}")
+            .update("order", index)
+            .addOnSuccessListener { Log.d(TAG, "DocumentSnapshot successfully updated") }
+            .addOnFailureListener { e -> Log.w(TAG, "Error updating document", e) }
     }
 
 //    override fun setUserInfo() {

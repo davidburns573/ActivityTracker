@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -119,6 +120,7 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
                 ): Boolean {
                     val from = viewHolder.adapterPosition
                     val to = target.adapterPosition
+                    Log.d("ON_MOVE", "${User.activities[from].name}, from: $from, to: $to")
                     viewAdapter.moveItem(from, to)
                     // Tell adapter to render the model update.
                     viewAdapter.notifyItemMoved(from, to)
