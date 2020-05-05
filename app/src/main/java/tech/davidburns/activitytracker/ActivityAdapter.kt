@@ -21,7 +21,6 @@ class ActivityAdapter(
     lateinit var other: TextView
     lateinit var btnStart: Button
     lateinit var timerView: TextView
-    private lateinit var timer: Timer
     lateinit var activity: Activity
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -40,6 +39,7 @@ class ActivityAdapter(
             // Get the data model based on position
             activity = activities[position]
             holder.activity = activity
+
 //            activity.order = position
             title.text = activity.name
             activity.sessions.clear()
@@ -54,6 +54,7 @@ class ActivityAdapter(
     inner class ViewHolder(itemView: View, private val onClickListener: OnClickListener) :
         RecyclerView.ViewHolder(itemView), View.OnClickListener {
         lateinit var activity: Activity
+        private val timer: Timer
         init {
             title = itemView.findViewById(R.id.activity_title)
             secondary = itemView.findViewById(R.id.secondary_text)
@@ -61,7 +62,6 @@ class ActivityAdapter(
             btnStart = itemView.findViewById(R.id.btn_start)
             timerView = itemView.findViewById(R.id.timer)
             timer = Timer(timerView)
-
             btnStart.setOnClickListener { btnStartOnClick(); }
 //            activity.order = adapterPosition
 
@@ -76,13 +76,13 @@ class ActivityAdapter(
         private fun btnStartOnClick() {
             if (timer.isRunning) {
                 btnStart.text = User.applicationContext.getString(R.string.stop)
-               timer.runTimer()
+               timer.pauseTimer()
             } else {
                 val dialog = AddTimerSessionDialog(activities[adapterPosition],
                     timer)
                 activityViewController.addTimerSessionDialog(dialog)
                 btnStart.text = User.applicationContext.getString(R.string.start)
-                timer.pauseTimer()
+                timer.runTimer()
             }
         }
     }
