@@ -29,6 +29,11 @@ abstract class Database {
      */
     abstract fun addActivity(activity: Activity)
 
+    protected fun addInternalActivity(activity: Activity) {
+        activities.add(activity)
+        listeners.forEach { it.itemAdded(activities.size - 1) }
+    }
+
     /**
      * Add a session pertaining to an activity to the database.
      * @param session is the session to add to the database

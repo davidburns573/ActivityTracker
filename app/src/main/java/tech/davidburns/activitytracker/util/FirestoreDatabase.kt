@@ -35,7 +35,7 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
                 for (dc in value!!.documentChanges) {
                     when (dc.type) {
                         DocumentChange.Type.ADDED -> {
-                            addExternalActivity(Activity(dc.document.data["name"] as String))
+                            addInternalActivity(Activity(dc.document.data["name"] as String))
                             Log.d(TAG, "New Activity: ${dc.document.data}")
                         }
                         DocumentChange.Type.MODIFIED -> Log.d(
@@ -70,11 +70,8 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
         return list
     }
 
-    private fun addExternalActivity(activity: Activity) {
-        activities.add(activity)
-        listeners.forEach { it.itemAdded(activities.size - 1) }
-    }
-
+    //Must be called before this activity is added to the local list because
+    //the order is defined as the size of the list, and not size - 1
     override fun addActivity(activity: Activity) {
         val activityHashMap = hashMapOf(
             "name" to activity.name,
@@ -100,7 +97,7 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
     }
 
     override fun orderUpdated(index: Int) {
-        db.document("$userPath/${firebaseUser.uid}/$activityPath/${User.activities[index].name}")
+        db.document("$userPath/${firebaseUser.uid}/$activityPath/${activities[index].name}")
             .update("order", index)
             .addOnSuccessListener { Log.d(TAG, "DocumentSnapshot successfully updated") }
             .addOnFailureListener { e -> Log.w(TAG, "Error updating document", e) }

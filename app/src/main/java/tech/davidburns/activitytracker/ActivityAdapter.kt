@@ -110,8 +110,13 @@ class ActivityAdapter(
     fun moveItem(from: Int, to: Int) {
         val removed = activities.removeAt(from)
         activities.add(to, removed)
+        var f = from
+        var t = to
+        if (f > t) {
+            f = t.also { t = f } //Swap f and t
+        }
 
-        for(index in from..to) {
+        for(index in f..t) {
             User.orderUpdated(index)
         }
     }

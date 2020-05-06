@@ -26,7 +26,7 @@ class NativeDatabase : Database() {
         ActivityCursorWrapper(cursor).use {
             it.moveToFirst()
             while (!(it.isAfterLast)) {
-                User.addActivity(it.getActivity())
+                addInternalActivity(it.getActivity())
                 it.moveToNext()
             }
         }
@@ -52,6 +52,7 @@ class NativeDatabase : Database() {
     override fun addActivity(activity: Activity) {
         val values: ContentValues = getActivityContentValues(activity)
         database.insert(UserSchema.ActivityTable.NAME, null, values)
+        addInternalActivity(activity)
     }
 
     override fun addSession(session: Session, activityName: String) {
@@ -59,42 +60,23 @@ class NativeDatabase : Database() {
         database.insert(UserSchema.SessionTable.NAME, null, values)
     }
 
-    /*
-    String array[] = new String[cursor.getCount()];
-    i = 0;
-    cursor.moveToFirst();
-    while (!cursor.isAfterLast()) {
-        array[i] = cursor.getString(0);
-        i++;
-        cursor.moveToNext();
-    }
-     */
-//    override fun orderUpdated() {
-//        database.query(
-//            UserSchema.ActivityTable.NAME,
-//            null, null,
-//            null, null,
-//            null, null
-//        ).use { cursor ->
-//            cursor.moveToFirst()
-//            while (!cursor.isAfterLast) {
-//                val values = ContentValues()
-//                values.put(UserSchema.ActivityTable.Cols.ORDER, User.activities.size - 1   )
-//                database.update(UserSchema.ActivityTable.NAME, )
-//            }
-//        }
-//    }
-
     override fun orderUpdated(index: Int) {
-         TODO()
+        val values = ContentValues().apply {
+            put(UserSchema.ActivityTable.Cols.ORDER, index)
+        }
+        val where = "${UserSchema.ActivityTable.Cols.ACTIVITY_NAME}=?"
+        val whereArgs = arrayOf(User.activities[index].name)
+        database.update(UserSchema.ActivityTable.NAME, values, where, whereArgs)
     }
 
     companion object {
+        //Must be called before this activity is added to the local list because
+        //the order is defined as the size of the list, and not size - 1
         fun getActivityContentValues(activity: Activity): ContentValues {
             val values = ContentValues()
             values.put(UserSchema.ActivityTable.Cols.ACTIVITY_NAME, activity.name)
             values.put(UserSchema.ActivityTable.Cols.CREATED, Instant.now().epochSecond)
-            values.put(UserSchema.ActivityTable.Cols.ORDER, -1) //TODO
+            values.put(UserSchema.ActivityTable.Cols.ORDER, User.activities.size)
             return values
         }
 
@@ -114,7 +96,6 @@ class NativeDatabase : Database() {
 class ActivityCursorWrapper(cursor: Cursor) : CursorWrapper(cursor) {
     fun getActivity(): Activity {
         val name: String = getString(getColumnIndex(UserSchema.ActivityTable.Cols.ACTIVITY_NAME))
-        val order: Int = getInt(getColumnIndex(UserSchema.ActivityTable.Cols.ORDER))
         return Activity(name)
     }
 }
