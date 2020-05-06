@@ -21,7 +21,7 @@ class NativeDatabase : Database() {
             UserSchema.ActivityTable.NAME,
             null, null,
             null, null,
-            null, null
+            null, UserSchema.ActivityTable.Cols.ORDER
         )
         ActivityCursorWrapper(cursor).use {
             it.moveToFirst()
