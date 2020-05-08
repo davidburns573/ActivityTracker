@@ -1,6 +1,5 @@
 package tech.davidburns.activitytracker.interfaces
 
-import androidx.annotation.CallSuper
 import tech.davidburns.activitytracker.Activity
 import tech.davidburns.activitytracker.Session
 
@@ -13,10 +12,9 @@ import tech.davidburns.activitytracker.Session
  * @author David Burns
  */
 abstract class Database {
-    private val listeners: MutableList<DatabaseListener> = mutableListOf()
-    protected val _activities: MutableList<Activity> = mutableListOf()
-    val activities: MutableList<Activity>
-        get() = _activities
+    val activities: MutableList<Activity> = mutableListOf()
+
+    var listeners: MutableList<ActivityListener> = mutableListOf()
 
     /**
      * User may have a lot of sessions, so take caution when retrieving all.
@@ -29,13 +27,12 @@ abstract class Database {
      * Add an activity to the local activity cache and to the database.
      * @param activity is the activity to add to the database
      */
-    @CallSuper
-    open fun addActivity(activity: Activity) {
-        _activities.add(activity)
-        listeners.forEach { it.itemAdded(activities.size) }
-    }
+    abstract fun addActivity(activity: Activity)
 
-    fun addActivity(activityName: String) = addActivity(Activity(activityName))
+    protected fun addInternalActivity(activity: Activity) {
+        activities.add(activity)
+        listeners.forEach { it.itemAdded(activities.size - 1) }
+    }
 
     /**
      * Add a session pertaining to an activity to the database.
@@ -44,18 +41,10 @@ abstract class Database {
      */
     abstract fun addSession(session: Session, activityName: String)
 
-    fun addListener(listener: DatabaseListener) {
-        listeners.add(listener)
-    }
-
-    fun removeListener(listener: DatabaseListener) {
-        listeners.remove(listener)
-    }
-}
-
-interface DatabaseListener {
-    fun itemChanged(index: Int)
-    fun itemRemoved(index: Int)
-    fun itemAdded(index: Int)
-    fun itemRangeAdded(start: Int, itemCount: Int)
+    /**
+     * Notify the database that the order of an activity at a specific index has changed.
+     * Should only be called after activities list has been updated to the desired order.
+     * @param index at which order was changed.
+    */
+    abstract fun orderUpdated(index: Int)
 }

@@ -1,8 +1,8 @@
 package tech.davidburns.activitytracker
 
 import android.content.Context
+import tech.davidburns.activitytracker.interfaces.ActivityListener
 import tech.davidburns.activitytracker.interfaces.Database
-import tech.davidburns.activitytracker.interfaces.DatabaseListener
 
 object User {
     var name: String = "UNNAMED"
@@ -11,24 +11,41 @@ object User {
 
     private lateinit var database: Database
 
-    fun setDatabase(database: Database) {
-        this.database = database
-    }
-
     val activities: MutableList<Activity>
         get() = database.activities
 
     /**
-     * Add specific activity object to database.
-     * @param activity to store in the database
+     * Sets the desired database for the current user.
+     * Must be set upon app initialization.
+     * Can be changed at any time. TODO
+     * @param database to store content in.
      */
-    fun addActivity(activity: Activity) = database.addActivity(activity)
+    fun setDatabase(database: Database) {
+        this.database = database
+    }
 
     /**
      * Create activity with given name and add to the database.
      * @param name of the [Activity] to create
      */
-    fun addActivity(name: String) = addActivity(Activity(name))
+    fun addActivity(name: String) =
+        addActivity(Activity(name))
+
+    /**
+     * Create activity with given name and add to the database.
+     * @param activity to add
+     */
+    fun addActivity(activity: Activity) {
+        database.addActivity(activity)
+    }
+
+    /**
+     * Notify the database that the order of an activity at a specific index has changed.
+     * @param index at which order was changed
+     */
+    fun orderUpdated(index: Int) {
+        database.orderUpdated(index)
+    }
 
     /**
      * Add given session to the database attached to the given activity.
@@ -52,11 +69,19 @@ object User {
     fun getSessionsFromCurrentActivity(): MutableList<Session> =
         database.getSessionsFromActivity(currentActivity.name)
 
-    fun addActivityListener(listener: DatabaseListener) {
-        database.addListener(listener)
+    /**
+     * Add a listener who will be notified whenever activities list is changed
+     * @param listener to be notified
+     */
+    fun addActivityListener(listener: ActivityListener) {
+        database.listeners.add(listener)
     }
 
-    fun removeActivityListener(listener: DatabaseListener) {
-        database.removeListener(listener)
+    /**
+     * Remove a listener
+     * @param listener to be removed
+     */
+    fun removeActivityListener(listener: ActivityListener) {
+        database.listeners.remove(listener)
     }
 }

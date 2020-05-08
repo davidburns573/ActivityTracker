@@ -6,6 +6,7 @@ import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import tech.davidburns.activitytracker.Activity
 import tech.davidburns.activitytracker.Session
+import tech.davidburns.activitytracker.User
 import tech.davidburns.activitytracker.interfaces.Database
 import java.time.Instant
 import java.time.ZoneId
@@ -24,11 +25,7 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
     private val db: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
 
     init {
-        retrieveActivities()
-    }
-
-    private fun retrieveActivities() {
-        db.collection("$userPath/${firebaseUser.uid}/$activityPath")
+        db.collection("$userPath/${firebaseUser.uid}/$activityPath").orderBy("order")
             .addSnapshotListener { value, e ->
                 if (e != null) {
                     Log.w(TAG, "Listen failed.", e)
@@ -38,16 +35,16 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
                 for (dc in value!!.documentChanges) {
                     when (dc.type) {
                         DocumentChange.Type.ADDED -> {
-                            super.addActivity(dc.document.data["name"] as String)
+                            addInternalActivity(Activity(dc.document.data["name"] as String))
                             Log.d(TAG, "New Activity: ${dc.document.data}")
                         }
                         DocumentChange.Type.MODIFIED -> Log.d(
                             TAG,
-                            "Modified Activity: ${dc.document.data}"
+                            "Modified Activity: ${dc.document.data}, NOT IMPLEMENTED"
                         )
                         DocumentChange.Type.REMOVED -> Log.d(
                             TAG,
-                            "Removed Activity: ${dc.document.data}"
+                            "Removed Activity: ${dc.document.data}, NOT IMPLEMENTED"
                         )
                     }
                 }
@@ -73,11 +70,13 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
         return list
     }
 
+    //Must be called before this activity is added to the local list because
+    //the order is defined as the size of the list, and not size - 1
     override fun addActivity(activity: Activity) {
-        super.addActivity(activity)
         val activityHashMap = hashMapOf(
             "name" to activity.name,
-            "created" to Instant.now().epochSecond
+            "created" to Instant.now().epochSecond,
+            "order" to User.activities.size
         )
         db.document("$userPath/${firebaseUser.uid}/$activityPath/${activity.name}")
             .set(activityHashMap)
@@ -96,7 +95,14 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
             .addOnSuccessListener { Log.d(TAG, "SUCCESS") }
             .addOnFailureListener { e -> Log.w(TAG, "Error writing document", e) }
     }
-//
+
+    override fun orderUpdated(index: Int) {
+        db.document("$userPath/${firebaseUser.uid}/$activityPath/${activities[index].name}")
+            .update("order", index)
+            .addOnSuccessListener { Log.d(TAG, "DocumentSnapshot successfully updated") }
+            .addOnFailureListener { e -> Log.w(TAG, "Error updating document", e) }
+    }
+
 //    override fun setUserInfo() {
 //        val userHashMap = hashMapOf(
 //            "name" to firebaseUser.displayName

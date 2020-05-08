@@ -10,27 +10,23 @@ import tech.davidburns.activitytracker.Activity
 import tech.davidburns.activitytracker.Session
 import tech.davidburns.activitytracker.User
 import tech.davidburns.activitytracker.interfaces.Database
+import java.time.Instant
 import java.time.ZoneId
 
 class NativeDatabase : Database() {
     private val database: SQLiteDatabase by lazy { UserBaseHelper(User.applicationContext).writableDatabase }
 
     init {
-        retrieveActivities()
-    }
-
-    private fun retrieveActivities() {
-        _activities.clear()
         val cursor: Cursor = database.query(
             UserSchema.ActivityTable.NAME,
             null, null,
             null, null,
-            null, null
+            null, UserSchema.ActivityTable.Cols.ORDER
         )
         ActivityCursorWrapper(cursor).use {
             it.moveToFirst()
             while (!(it.isAfterLast)) {
-                super.addActivity(it.getActivity())
+                addInternalActivity(it.getActivity())
                 it.moveToNext()
             }
         }
@@ -54,9 +50,9 @@ class NativeDatabase : Database() {
     }
 
     override fun addActivity(activity: Activity) {
-        super.addActivity(activity)
         val values: ContentValues = getActivityContentValues(activity)
         database.insert(UserSchema.ActivityTable.NAME, null, values)
+        addInternalActivity(activity)
     }
 
     override fun addSession(session: Session, activityName: String) {
@@ -64,10 +60,23 @@ class NativeDatabase : Database() {
         database.insert(UserSchema.SessionTable.NAME, null, values)
     }
 
+    override fun orderUpdated(index: Int) {
+        val values = ContentValues().apply {
+            put(UserSchema.ActivityTable.Cols.ORDER, index)
+        }
+        val where = "${UserSchema.ActivityTable.Cols.ACTIVITY_NAME}=?"
+        val whereArgs = arrayOf(User.activities[index].name)
+        database.update(UserSchema.ActivityTable.NAME, values, where, whereArgs)
+    }
+
     companion object {
+        //Must be called before this activity is added to the local list because
+        //the order is defined as the size of the list, and not size - 1
         fun getActivityContentValues(activity: Activity): ContentValues {
             val values = ContentValues()
-            values.put(UserSchema.ActivityTable.Cols.ACTIVITYNAME, activity.name)
+            values.put(UserSchema.ActivityTable.Cols.ACTIVITY_NAME, activity.name)
+            values.put(UserSchema.ActivityTable.Cols.CREATED, Instant.now().epochSecond)
+            values.put(UserSchema.ActivityTable.Cols.ORDER, User.activities.size)
             return values
         }
 
@@ -86,8 +95,7 @@ class NativeDatabase : Database() {
 
 class ActivityCursorWrapper(cursor: Cursor) : CursorWrapper(cursor) {
     fun getActivity(): Activity {
-        val name: String =
-            getString(getColumnIndex(UserSchema.ActivityTable.Cols.ACTIVITYNAME))
+        val name: String = getString(getColumnIndex(UserSchema.ActivityTable.Cols.ACTIVITY_NAME))
         return Activity(name)
     }
 }
@@ -101,13 +109,14 @@ class SessionCursorWrapper(cursor: Cursor) : CursorWrapper(cursor) {
     }
 }
 
-
 class UserSchema {
     object ActivityTable {
         const val NAME: String = "activities"
 
         object Cols {
-            const val ACTIVITYNAME = "activityname"
+            const val ACTIVITY_NAME = "activityname"
+            const val CREATED: String = "created"
+            const val ORDER: String = "activityorder" //Order is a reserved word
         }
     }
 
@@ -120,7 +129,6 @@ class UserSchema {
             const val START = "start"
         }
     }
-
 }
 
 private const val VERSION: Int = 1
@@ -133,7 +141,9 @@ class UserBaseHelper(context: Context) :
         db?.execSQL(
             "create table " + UserSchema.ActivityTable.NAME
                     + "(" + " _id integer primary key autoincrement, "
-                    + UserSchema.ActivityTable.Cols.ACTIVITYNAME + ")"
+                    + UserSchema.ActivityTable.Cols.ACTIVITY_NAME + ", "
+                    + UserSchema.ActivityTable.Cols.CREATED + ", "
+                    + UserSchema.ActivityTable.Cols.ORDER + ")"
         )
         db?.execSQL(
             "create table " + UserSchema.SessionTable.NAME
