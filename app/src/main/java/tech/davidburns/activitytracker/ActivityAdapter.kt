@@ -11,6 +11,9 @@ import kotlinx.android.synthetic.main.activity_card.view.*
 import tech.davidburns.activitytracker.fragments.ActivityViewController
 import tech.davidburns.activitytracker.fragments.AddTimerSessionDialog
 import tech.davidburns.activitytracker.interfaces.ActivityListener
+import java.util.*
+import kotlin.properties.Delegates
+import kotlin.properties.ObservableProperty
 
 class ActivityAdapter(
     private val activities: MutableList<Activity>,
@@ -19,7 +22,14 @@ class ActivityAdapter(
 ) :
     RecyclerView.Adapter<ActivityAdapter.ViewHolder>(),
     ActivityListener {
-    private lateinit var viewHolder: ViewHolder
+    private val editModeListeners = ArrayList<(Boolean) -> Unit>()
+
+    private var editMode by Delegates.observable(false) { _, _, newValue ->
+        editModeListeners.forEach {
+            it(newValue)
+        }
+    }
+
     lateinit var title: TextView
     lateinit var secondary: TextView
     lateinit var other: TextView
@@ -34,7 +44,7 @@ class ActivityAdapter(
         // Inflate the custom layout (single list item)
         val activityView: View = inflater.inflate(R.layout.activity_card, parent, false)
 
-        viewHolder = ViewHolder(activityView, onClickListener)
+        val viewHolder = ViewHolder(activityView, onClickListener)
 
 
         viewHolder.itemView.setOnLongClickListener {
@@ -47,12 +57,12 @@ class ActivityAdapter(
     }
 
     private fun enterEditMode() {
-        viewHolder.enterEditMode()
+        editMode = true
         activityViewController.enterEditMode()
     }
 
     fun exitEditMode() {
-        viewHolder.exitEditMode()
+        editMode = false
     }
 
     override fun onBindViewHolder(holder: ActivityAdapter.ViewHolder, position: Int) {
@@ -84,6 +94,8 @@ class ActivityAdapter(
             timer = Timer(timerView)
             btnStart.setOnClickListener { btnStartOnClick(); }
 
+            editModeListeners.add ( ::updateEditMode )
+
             itemView.setOnClickListener(this)
         }
 
@@ -107,12 +119,20 @@ class ActivityAdapter(
                 }
         }
 
-        fun enterEditMode() {
+        private fun updateEditMode(editMode: Boolean) {
+            if (editMode) {
+                enterEditMode()
+            } else {
+                exitEditMode()
+            }
+        }
+
+        private fun enterEditMode() {
             itemView.isEnabled = false
             itemView.btn_start.visibility = View.GONE
         }
 
-        fun exitEditMode() {
+        private fun exitEditMode() {
             itemView.isEnabled = true
             itemView.btn_start.visibility = View.VISIBLE
         }
