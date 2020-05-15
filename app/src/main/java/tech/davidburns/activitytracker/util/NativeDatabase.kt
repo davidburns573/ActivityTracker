@@ -55,6 +55,13 @@ class NativeDatabase : Database() {
         addInternalActivity(activity)
     }
 
+    override fun deleteActivityAt(index: Int) {
+        val where = "_id=?"
+        val whereArgs = arrayOf(activities[index].name)
+        database.delete(UserSchema.ActivityTable.NAME, where, whereArgs)
+        deleteInternalActivity(index)
+    }
+
     override fun addSession(session: Session, activityName: String) {
         val values = getSessionContentValues(session)
         database.insert(UserSchema.SessionTable.NAME, null, values)

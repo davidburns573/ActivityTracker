@@ -13,7 +13,6 @@ import tech.davidburns.activitytracker.fragments.AddTimerSessionDialog
 import tech.davidburns.activitytracker.interfaces.ActivityListener
 import java.util.*
 import kotlin.properties.Delegates
-import kotlin.properties.ObservableProperty
 
 class ActivityAdapter(
     private val activities: MutableList<Activity>,
@@ -45,7 +44,6 @@ class ActivityAdapter(
         val activityView: View = inflater.inflate(R.layout.activity_card, parent, false)
 
         val viewHolder = ViewHolder(activityView, onClickListener)
-
 
         viewHolder.itemView.setOnLongClickListener {
             enterEditMode()
@@ -85,6 +83,7 @@ class ActivityAdapter(
         RecyclerView.ViewHolder(itemView), View.OnClickListener {
         lateinit var activity: Activity
         private val timer: Timer
+
         init {
             title = itemView.activity_title
             secondary = itemView.secondary_text
@@ -92,9 +91,10 @@ class ActivityAdapter(
             btnStart = itemView.btn_start
             timerView = itemView.timer
             timer = Timer(timerView)
-            btnStart.setOnClickListener { btnStartOnClick(); }
+            btnStart.setOnClickListener { btnStartOnClick() }
+            itemView.btn_delete.setOnClickListener { btnDeleteOnClick() }
 
-            editModeListeners.add ( ::updateEditMode )
+            editModeListeners.add(::updateEditMode)
 
             itemView.setOnClickListener(this)
         }
@@ -107,18 +107,25 @@ class ActivityAdapter(
         }
 
         private fun btnStartOnClick() {
-                if (timer.isRunning) {
-                    itemView.btn_start.text = User.applicationContext.getString(R.string.stop)
-                    timer.pauseTimer()
-                } else {
-                    val dialog = AddTimerSessionDialog(
-                        activities[adapterPosition],
-                        timer
-                    )
-                    activityViewController.addTimerSessionDialog(dialog)
-                    btnStart.text = User.applicationContext.getString(R.string.start)
-                    timer.runTimer()
-                }
+            if (timer.isRunning) {
+                itemView.btn_start.text = User.applicationContext.getString(R.string.stop)
+                timer.pauseTimer()
+            } else {
+                val dialog = AddTimerSessionDialog(
+                    activities[adapterPosition],
+                    timer
+                )
+                activityViewController.addTimerSessionDialog(dialog)
+                btnStart.text = User.applicationContext.getString(R.string.start)
+                timer.runTimer()
+            }
+        }
+
+        private fun btnDeleteOnClick() {
+            User.deleteActivityAt(adapterPosition)
+            if (activities.size == 0) {
+                activityViewController.exitEditMode()
+            }
         }
 
         private fun updateEditMode(editMode: Boolean) {
@@ -127,14 +134,16 @@ class ActivityAdapter(
             } else {
                 exitEditMode()
             }
-    }
+        }
 
         private fun enterEditMode() {
             itemView.btn_start.visibility = View.GONE
+            itemView.btn_delete.visibility = View.VISIBLE
         }
 
         private fun exitEditMode() {
             itemView.btn_start.visibility = View.VISIBLE
+            itemView.btn_delete.visibility = View.GONE
         }
     }
 
@@ -167,7 +176,7 @@ class ActivityAdapter(
             f = t.also { t = f } //Swap f and t
         }
 
-        for(index in f..t) {
+        for (index in f..t) {
             User.orderUpdated(index)
         }
     }

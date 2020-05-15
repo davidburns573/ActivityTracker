@@ -29,9 +29,21 @@ abstract class Database {
      */
     abstract fun addActivity(activity: Activity)
 
+    /**
+     * Delete an activity at index.
+     * @param index of the activity to delete
+     */
+    abstract fun deleteActivityAt(index: Int)
+
     protected fun addInternalActivity(activity: Activity) {
         activities.add(activity)
         listeners.forEach { it.itemAdded(activities.size - 1) }
+    }
+
+    protected fun deleteInternalActivity(activityOrder: Int) {
+        activities.removeAt(activityOrder)
+        listeners.forEach { it.itemRemoved(activityOrder) }
+
     }
 
     /**

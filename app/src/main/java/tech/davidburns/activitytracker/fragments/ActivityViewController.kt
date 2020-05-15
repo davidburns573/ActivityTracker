@@ -96,7 +96,7 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
         activity?.invalidateOptionsMenu()
     }
 
-    private fun exitEditMode() {
+    fun exitEditMode() {
         editMode = false
         activity?.invalidateOptionsMenu()
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
@@ -109,7 +109,6 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
             true
         }
         android.R.id.home -> {
-            // User chose the "Settings" item, show the app settings UI...
             exitEditMode()
             true
         }

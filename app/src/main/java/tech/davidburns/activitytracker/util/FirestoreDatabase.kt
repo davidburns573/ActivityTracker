@@ -42,10 +42,10 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
                             TAG,
                             "Modified Activity: ${dc.document.data}, NOT IMPLEMENTED"
                         )
-                        DocumentChange.Type.REMOVED -> Log.d(
-                            TAG,
-                            "Removed Activity: ${dc.document.data}, NOT IMPLEMENTED"
-                        )
+                        DocumentChange.Type.REMOVED -> {
+                            deleteInternalActivity((dc.document.data["order"] as Long).toInt())
+                            Log.d(TAG, "Removed Activity: ${dc.document.data}")
+                        }
                     }
                 }
             }
@@ -82,6 +82,13 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
             .set(activityHashMap)
             .addOnSuccessListener { Log.d(TAG, "SUCCESS") }
             .addOnFailureListener { e -> Log.w(TAG, "Error writing document", e) }
+    }
+
+    override fun deleteActivityAt(index: Int) {
+        db.document("$userPath/${firebaseUser.uid}/$activityPath/${activities[index].name}")
+            .delete()
+            .addOnSuccessListener { Log.d(TAG, "DocumentSnapshot successfully deleted!") }
+            .addOnFailureListener { e -> Log.w(TAG, "Error deleting document", e) }
     }
 
     override fun addSession(session: Session, activityName: String) {
