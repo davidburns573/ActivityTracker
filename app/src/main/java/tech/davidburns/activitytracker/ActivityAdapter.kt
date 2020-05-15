@@ -22,6 +22,13 @@ class ActivityAdapter(
 ) :
     RecyclerView.Adapter<ActivityAdapter.ViewHolder>(),
     ActivityListener {
+    lateinit var title: TextView
+
+    lateinit var secondary: TextView
+    lateinit var other: TextView
+    lateinit var btnStart: Button
+    lateinit var timerView: TextView
+    lateinit var activity: Activity
     private val editModeListeners = ArrayList<(Boolean) -> Unit>()
 
     private var editMode by Delegates.observable(false) { _, _, newValue ->
@@ -29,13 +36,6 @@ class ActivityAdapter(
             it(newValue)
         }
     }
-
-    lateinit var title: TextView
-    lateinit var secondary: TextView
-    lateinit var other: TextView
-    lateinit var btnStart: Button
-    lateinit var timerView: TextView
-    lateinit var activity: Activity
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val context: Context = parent.context
@@ -100,8 +100,10 @@ class ActivityAdapter(
         }
 
         override fun onClick(v: View?) {
+            if (!editMode) {
                 User.currentActivity = activity
                 onClickListener.onClick()
+            }
         }
 
         private fun btnStartOnClick() {
@@ -125,15 +127,13 @@ class ActivityAdapter(
             } else {
                 exitEditMode()
             }
-        }
+    }
 
         private fun enterEditMode() {
-            itemView.isEnabled = false
             itemView.btn_start.visibility = View.GONE
         }
 
         private fun exitEditMode() {
-            itemView.isEnabled = true
             itemView.btn_start.visibility = View.VISIBLE
         }
     }
