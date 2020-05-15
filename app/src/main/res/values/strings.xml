@@ -17,4 +17,5 @@
     <string name="end_time">End Time</string>
     <string name="stop">Stop</string>
     <string name="start">Start</string>
+    <string name="delete_all">Delete all</string>
 </resources>
