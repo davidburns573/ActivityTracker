@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.android.synthetic.main.activity_card.view.*
 import tech.davidburns.activitytracker.fragments.ActivityViewController
 import tech.davidburns.activitytracker.fragments.AddTimerSessionDialog
 import tech.davidburns.activitytracker.interfaces.ActivityListener
@@ -18,6 +19,7 @@ class ActivityAdapter(
 ) :
     RecyclerView.Adapter<ActivityAdapter.ViewHolder>(),
     ActivityListener {
+    private lateinit var viewHolder: ViewHolder
     lateinit var title: TextView
     lateinit var secondary: TextView
     lateinit var other: TextView
@@ -32,8 +34,25 @@ class ActivityAdapter(
         // Inflate the custom layout (single list item)
         val activityView: View = inflater.inflate(R.layout.activity_card, parent, false)
 
+        viewHolder = ViewHolder(activityView, onClickListener)
+
+
+        viewHolder.itemView.setOnLongClickListener {
+            enterEditMode()
+            return@setOnLongClickListener true
+        }
+
         // Return a new holder instance
-        return ViewHolder(activityView, onClickListener)
+        return viewHolder
+    }
+
+    private fun enterEditMode() {
+        viewHolder.enterEditMode()
+        activityViewController.enterEditMode()
+    }
+
+    fun exitEditMode() {
+        viewHolder.exitEditMode()
     }
 
     override fun onBindViewHolder(holder: ActivityAdapter.ViewHolder, position: Int) {
@@ -57,11 +76,11 @@ class ActivityAdapter(
         lateinit var activity: Activity
         private val timer: Timer
         init {
-            title = itemView.findViewById(R.id.activity_title)
-            secondary = itemView.findViewById(R.id.secondary_text)
-            other = itemView.findViewById(R.id.other_text)
-            btnStart = itemView.findViewById(R.id.btn_start)
-            timerView = itemView.findViewById(R.id.timer)
+            title = itemView.activity_title
+            secondary = itemView.secondary_text
+            other = itemView.other_text
+            btnStart = itemView.btn_start
+            timerView = itemView.timer
             timer = Timer(timerView)
             btnStart.setOnClickListener { btnStartOnClick(); }
 
@@ -69,21 +88,33 @@ class ActivityAdapter(
         }
 
         override fun onClick(v: View?) {
-            User.currentActivity = activity
-            onClickListener.onClick()
+                User.currentActivity = activity
+                onClickListener.onClick()
         }
 
         private fun btnStartOnClick() {
-            if (timer.isRunning) {
-                btnStart.text = User.applicationContext.getString(R.string.stop)
-               timer.pauseTimer()
-            } else {
-                val dialog = AddTimerSessionDialog(activities[adapterPosition],
-                    timer)
-                activityViewController.addTimerSessionDialog(dialog)
-                btnStart.text = User.applicationContext.getString(R.string.start)
-                timer.runTimer()
-            }
+                if (timer.isRunning) {
+                    itemView.btn_start.text = User.applicationContext.getString(R.string.stop)
+                    timer.pauseTimer()
+                } else {
+                    val dialog = AddTimerSessionDialog(
+                        activities[adapterPosition],
+                        timer
+                    )
+                    activityViewController.addTimerSessionDialog(dialog)
+                    btnStart.text = User.applicationContext.getString(R.string.start)
+                    timer.runTimer()
+                }
+        }
+
+        fun enterEditMode() {
+            itemView.isEnabled = false
+            itemView.btn_start.visibility = View.GONE
+        }
+
+        fun exitEditMode() {
+            itemView.isEnabled = true
+            itemView.btn_start.visibility = View.VISIBLE
         }
     }
 

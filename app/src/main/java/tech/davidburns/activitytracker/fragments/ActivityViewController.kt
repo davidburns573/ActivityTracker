@@ -2,10 +2,8 @@ package tech.davidburns.activitytracker.fragments
 
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.core.view.get
+import android.view.*
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -18,8 +16,10 @@ import tech.davidburns.activitytracker.R
 import tech.davidburns.activitytracker.User
 import tech.davidburns.activitytracker.interfaces.Dialogable
 
+
 class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickListener {
     private lateinit var viewAdapter: ActivityAdapter
+    private var editMode: Boolean = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -28,12 +28,13 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
     ): View? {
         viewAdapter = ActivityAdapter(User.activities, this, this)
         User.addActivityListener(viewAdapter)
+        setHasOptionsMenu(true)
+        (activity as AppCompatActivity).supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_close_black_24dp)
         return inflater.inflate(R.layout.activity_view, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         itemTouchHelper.attachToRecyclerView(activity_recycler)
         activity_recycler.adapter = viewAdapter
         activity_recycler.layoutManager =
@@ -59,6 +60,11 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
         }
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.recyclerview_menu, menu)
+        menu.findItem(R.id.delete).apply { isVisible = editMode }
+    }
+
     override fun dialogString(str: String): Boolean {
         User.activities.forEach {
             if (it.name == str) {
@@ -82,6 +88,36 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
 
     fun addTimerSessionDialog(addTimerSessionDialog: AddTimerSessionDialog) {
         addTimerSessionDialog.show(activity?.supportFragmentManager?.beginTransaction()!!, "dialog")
+    }
+
+    fun enterEditMode() {
+        editMode = true
+        (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        activity?.invalidateOptionsMenu()
+    }
+
+    private fun exitEditMode() {
+        editMode = false
+        activity?.invalidateOptionsMenu()
+        (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
+        viewAdapter.exitEditMode()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+        R.id.delete -> {
+            val works = true
+            true
+        }
+        android.R.id.home -> {
+            // User chose the "Settings" item, show the app settings UI...
+            exitEditMode()
+            true
+        }
+        else -> {
+            // If we got here, the user's action was not recognized.
+            // Invoke the superclass to handle it.
+            super.onOptionsItemSelected(item)
+        }
     }
 
     private val itemTouchHelper by lazy {
