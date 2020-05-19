@@ -14,7 +14,6 @@ import tech.davidburns.activitytracker.interfaces.ActivityListener
 import tech.davidburns.activitytracker.util.ActivityListDiff
 import java.util.*
 import kotlin.properties.Delegates
-
 class ActivityAdapter(
     private val activities: MutableList<Activity>,
     private val onClickListener: OnClickListener,
@@ -23,13 +22,12 @@ class ActivityAdapter(
     RecyclerView.Adapter<ActivityAdapter.ViewHolder>(),
     ActivityListener {
     lateinit var title: TextView
-
+    lateinit var activityListDiff: ActivityListDiff
     lateinit var secondary: TextView
     lateinit var other: TextView
     lateinit var btnStart: Button
     lateinit var timerView: TextView
     lateinit var activity: Activity
-    lateinit var activityListDiff: ActivityListDiff
     private val editModeListeners = ArrayList<(Boolean) -> Unit>()
 
     private var editMode by Delegates.observable(false) { _, _, newValue ->
@@ -48,8 +46,10 @@ class ActivityAdapter(
         val viewHolder = ViewHolder(activityView, onClickListener)
 
         viewHolder.itemView.setOnLongClickListener {
-            enterEditMode()
-            return@setOnLongClickListener true
+            if (!editMode) {
+                enterEditMode()
+            }
+            return@setOnLongClickListener !editMode
         }
 
         // Return a new holder instance
@@ -57,9 +57,9 @@ class ActivityAdapter(
     }
 
     private fun enterEditMode() {
+        activityListDiff = ActivityListDiff() //Create new ActivityListDiff
         editMode = true
         activityViewController.enterEditMode()
-        activityListDiff = ActivityListDiff() //Create new ActivityListDiff
     }
 
     fun exitEditMode() {

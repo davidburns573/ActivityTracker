@@ -15,11 +15,13 @@ import tech.davidburns.activitytracker.ActivityAdapter
 import tech.davidburns.activitytracker.R
 import tech.davidburns.activitytracker.User
 import tech.davidburns.activitytracker.interfaces.Dialogable
+import tech.davidburns.activitytracker.util.ActivityListDiff
 
 
 class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickListener {
     private lateinit var viewAdapter: ActivityAdapter
     private var editMode: Boolean = false
+//    lateinit var activityListDiff: ActivityListDiff
 
     override fun onCreateView(
         inflater: LayoutInflater,
