@@ -43,7 +43,6 @@ abstract class Database {
     protected fun deleteInternalActivity(activityOrder: Int) {
         activities.removeAt(activityOrder)
         listeners.forEach { it.itemRemoved(activityOrder) }
-
     }
 
     /**

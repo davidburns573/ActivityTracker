@@ -92,8 +92,9 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
 
     fun enterEditMode() {
         editMode = true
-        (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
         activity?.invalidateOptionsMenu()
+        (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        btnAddActivity.visibility = View.GONE
     }
 
     fun exitEditMode() {
@@ -101,6 +102,10 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
         activity?.invalidateOptionsMenu()
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
         viewAdapter.exitEditMode()
+        btnAddActivity.visibility = View.VISIBLE
+        for (i in 0 until User.activities.size) {
+            User.orderUpdated(i)
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
