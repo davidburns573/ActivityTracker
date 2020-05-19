@@ -41,9 +41,10 @@ abstract class Database {
         listeners.forEach { it.itemAdded(activities.size - 1) }
     }
 
-    protected fun deleteInternalActivity(activityOrder: Int) {
-        activities.removeAt(activityOrder)
+    fun deleteInternalActivity(activityOrder: Int) : Activity {
+        val deletedActivity = activities.removeAt(activityOrder)
         listeners.forEach { it.itemRemoved(activityOrder) }
+        return deletedActivity
     }
 
     /**

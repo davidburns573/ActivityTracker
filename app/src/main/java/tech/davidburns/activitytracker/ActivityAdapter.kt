@@ -11,6 +11,7 @@ import kotlinx.android.synthetic.main.activity_card.view.*
 import tech.davidburns.activitytracker.fragments.ActivityViewController
 import tech.davidburns.activitytracker.fragments.AddTimerSessionDialog
 import tech.davidburns.activitytracker.interfaces.ActivityListener
+import tech.davidburns.activitytracker.util.ActivityListDiff
 import java.util.*
 import kotlin.properties.Delegates
 
@@ -28,6 +29,7 @@ class ActivityAdapter(
     lateinit var btnStart: Button
     lateinit var timerView: TextView
     lateinit var activity: Activity
+    lateinit var activityListDiff: ActivityListDiff
     private val editModeListeners = ArrayList<(Boolean) -> Unit>()
 
     private var editMode by Delegates.observable(false) { _, _, newValue ->
@@ -57,10 +59,12 @@ class ActivityAdapter(
     private fun enterEditMode() {
         editMode = true
         activityViewController.enterEditMode()
+        activityListDiff = ActivityListDiff() //Create new ActivityListDiff
     }
 
     fun exitEditMode() {
         editMode = false
+        activityListDiff.commitToDatabase() //Commit ListDiff changes to database
     }
 
     override fun onBindViewHolder(holder: ActivityAdapter.ViewHolder, position: Int) {
@@ -122,7 +126,9 @@ class ActivityAdapter(
         }
 
         private fun btnDeleteOnClick() {
-            User.deleteActivityAt(adapterPosition)
+            val index = adapterPosition
+            val deletedActivity = User.deleteActivityAt(index)
+            activityListDiff.itemDeleted(deletedActivity, index)
             if (activities.size == 0) {
                 activityViewController.exitEditMode()
             }
@@ -170,15 +176,29 @@ class ActivityAdapter(
     fun moveItem(from: Int, to: Int) {
         val removed = activities.removeAt(from)
         activities.add(to, removed)
-        var f = from
-        var t = to
-        if (f > t) {
-            f = t.also { t = f } //Swap f and t
+        activityListDiff.itemMoved(from, to)
+
+        if (from > to) {
+            for (index in (to + 1) .. from) {
+                activityListDiff.itemMoved(index - 1, index)
+            }
+        } else {
+            for (index in from until to) {
+                activityListDiff.itemMoved(index + 1, index)
+            }
         }
 
-        for (index in f..t) {
-            User.orderUpdated(index)
-        }
+
+
+
+//        var f = from
+//        var t = to
+//        if (f > t) {
+//            f = (t - 1).also { t = f } //Swap f and t
+//        }
+//        for (index in f..t) {
+//            User.orderUpdated(index)
+//        }
     }
 }
 

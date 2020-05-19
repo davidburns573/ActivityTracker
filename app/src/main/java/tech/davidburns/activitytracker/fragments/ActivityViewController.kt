@@ -103,9 +103,9 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
         viewAdapter.exitEditMode()
         btnAddActivity.visibility = View.VISIBLE
-        for (i in 0 until User.activities.size) {
-            User.orderUpdated(i)
-        }
+//        for (i in 0 until User.activities.size) {
+//            User.orderUpdated(i)
+//        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {

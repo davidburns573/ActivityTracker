@@ -26,16 +26,11 @@ class Activity(var name: String) {
         other as Activity
 
         if (name != other.name) return false
-        if (sessions != other.sessions) return false
-        if (statistics != other.statistics) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = name.hashCode()
-        result = 31 * result + sessions.hashCode()
-        result = 31 * result + statistics.hashCode()
-        return result
+        return name.hashCode()
     }
 }

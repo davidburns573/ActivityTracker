@@ -41,7 +41,10 @@ object User {
      * Delete an activity at a specific index.
      * @param index of the activity to delete
      */
-    fun deleteActivityAt(index: Int) = database.deleteActivityAt(index)
+    fun deleteActivityAt(index: Int) : Activity {
+//        database.activities.removeAt(index)
+        return database.deleteInternalActivity(index)
+    }
 
     /**
      * Notify the database that the order of an activity at a specific index has changed.
