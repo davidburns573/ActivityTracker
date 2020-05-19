@@ -1,15 +1,15 @@
 package tech.davidburns.activitytracker.util
 
-import tech.davidburns.activitytracker.interfaces.Database
-
 const val DELETED = -1
 
 enum class ListDiffEnum {
     MOVED_TO, DELETED_AT
 }
 
-class ListDiff<T>(private val list: MutableList<T>) {
-    private val map: MutableMap<T, Result> = mutableMapOf()
+typealias ListDiffMap<T> = MutableMap<T, ListDiff.Result>
+
+open class ListDiff<T>(private val list: MutableList<T>) {
+    protected val map: ListDiffMap<T> = mutableMapOf()
 
     fun itemMoved(to: Int) {
         val original = map[list[to]]
@@ -24,10 +24,6 @@ class ListDiff<T>(private val list: MutableList<T>) {
 
     fun itemDeleted(item: T) {
         map[item] = Result(ListDiffEnum.DELETED_AT, DELETED, DELETED)
-    }
-
-    fun commitToDatabase(database: Database) {
-
     }
 
     data class Result(val state: ListDiffEnum, val index: Int, val initialIndex: Int)

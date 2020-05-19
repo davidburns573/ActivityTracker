@@ -2,6 +2,7 @@ package tech.davidburns.activitytracker.interfaces
 
 import tech.davidburns.activitytracker.Activity
 import tech.davidburns.activitytracker.Session
+import tech.davidburns.activitytracker.util.ListDiffMap
 
 /**
  * Abstract class for database communication.
@@ -58,4 +59,6 @@ abstract class Database {
      * @param index at which order was changed.
     */
     abstract fun orderUpdated(index: Int)
+
+    abstract fun executeListDiff(listDiffMap: ListDiffMap<Activity>)
 }

@@ -3,6 +3,7 @@ package tech.davidburns.activitytracker
 import android.content.Context
 import tech.davidburns.activitytracker.interfaces.ActivityListener
 import tech.davidburns.activitytracker.interfaces.Database
+import tech.davidburns.activitytracker.util.ListDiffMap
 
 object User {
     var name: String = "UNNAMED"
@@ -81,4 +82,8 @@ object User {
      * @param listener to be removed
      */
     fun removeActivityListener(listener: ActivityListener) = database.listeners.remove(listener)
+
+    fun executeListDiff(activityListDiffMap: ListDiffMap<Activity>) {
+        database.executeListDiff(activityListDiffMap)
+    }
 }
