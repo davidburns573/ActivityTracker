@@ -15,11 +15,13 @@ import tech.davidburns.activitytracker.ActivityAdapter
 import tech.davidburns.activitytracker.R
 import tech.davidburns.activitytracker.User
 import tech.davidburns.activitytracker.interfaces.Dialogable
+import tech.davidburns.activitytracker.util.ActivityListDiff
 
 
 class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickListener {
     private lateinit var viewAdapter: ActivityAdapter
     private var editMode: Boolean = false
+//    lateinit var activityListDiff: ActivityListDiff
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -92,15 +94,20 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
 
     fun enterEditMode() {
         editMode = true
-        (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
         activity?.invalidateOptionsMenu()
+        (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        btnAddActivity.visibility = View.GONE
     }
 
-    private fun exitEditMode() {
+    fun exitEditMode() {
         editMode = false
         activity?.invalidateOptionsMenu()
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
         viewAdapter.exitEditMode()
+        btnAddActivity.visibility = View.VISIBLE
+//        for (i in 0 until User.activities.size) {
+//            User.orderUpdated(i)
+//        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
@@ -109,7 +116,6 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
             true
         }
         android.R.id.home -> {
-            // User chose the "Settings" item, show the app settings UI...
             exitEditMode()
             true
         }

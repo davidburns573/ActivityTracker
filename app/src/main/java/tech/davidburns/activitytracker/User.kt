@@ -3,6 +3,7 @@ package tech.davidburns.activitytracker
 import android.content.Context
 import tech.davidburns.activitytracker.interfaces.ActivityListener
 import tech.davidburns.activitytracker.interfaces.Database
+import tech.davidburns.activitytracker.util.ListDiffMap
 
 object User {
     var name: String = "UNNAMED"
@@ -28,24 +29,28 @@ object User {
      * Create activity with given name and add to the database.
      * @param name of the [Activity] to create
      */
-    fun addActivity(name: String) =
-        addActivity(Activity(name))
+    fun addActivity(name: String) = addActivity(Activity(name))
 
     /**
      * Create activity with given name and add to the database.
      * @param activity to add
      */
-    fun addActivity(activity: Activity) {
-        database.addActivity(activity)
+    fun addActivity(activity: Activity) = database.addActivity(activity)
+
+    /**
+     * Delete an activity at a specific index.
+     * @param index of the activity to delete
+     */
+    fun deleteActivityAt(index: Int) : Activity {
+//        database.activities.removeAt(index)
+        return database.deleteInternalActivity(index)
     }
 
     /**
      * Notify the database that the order of an activity at a specific index has changed.
      * @param index at which order was changed
      */
-    fun orderUpdated(index: Int) {
-        database.orderUpdated(index)
-    }
+    fun orderUpdated(index: Int) = database.orderUpdated(index)
 
     /**
      * Add given session to the database attached to the given activity.
@@ -73,15 +78,15 @@ object User {
      * Add a listener who will be notified whenever activities list is changed
      * @param listener to be notified
      */
-    fun addActivityListener(listener: ActivityListener) {
-        database.listeners.add(listener)
-    }
+    fun addActivityListener(listener: ActivityListener) = database.listeners.add(listener)
 
     /**
      * Remove a listener
      * @param listener to be removed
      */
-    fun removeActivityListener(listener: ActivityListener) {
-        database.listeners.remove(listener)
+    fun removeActivityListener(listener: ActivityListener) = database.listeners.remove(listener)
+
+    fun executeListDiff(activityListDiffMap: ListDiffMap<Activity>) {
+        database.executeListDiff(activityListDiffMap)
     }
 }

@@ -2,6 +2,7 @@ package tech.davidburns.activitytracker.interfaces
 
 import tech.davidburns.activitytracker.Activity
 import tech.davidburns.activitytracker.Session
+import tech.davidburns.activitytracker.util.ListDiffMap
 
 /**
  * Abstract class for database communication.
@@ -29,9 +30,21 @@ abstract class Database {
      */
     abstract fun addActivity(activity: Activity)
 
+    /**
+     * Delete an activity at index.
+     * @param index of the activity to delete
+     */
+    abstract fun deleteActivityAt(index: Int)
+
     protected fun addInternalActivity(activity: Activity) {
         activities.add(activity)
         listeners.forEach { it.itemAdded(activities.size - 1) }
+    }
+
+    fun deleteInternalActivity(activityOrder: Int) : Activity {
+        val deletedActivity = activities.removeAt(activityOrder)
+        listeners.forEach { it.itemRemoved(activityOrder) }
+        return deletedActivity
     }
 
     /**
@@ -47,4 +60,6 @@ abstract class Database {
      * @param index at which order was changed.
     */
     abstract fun orderUpdated(index: Int)
+
+    abstract fun executeListDiff(listDiffMap: ListDiffMap<Activity>)
 }

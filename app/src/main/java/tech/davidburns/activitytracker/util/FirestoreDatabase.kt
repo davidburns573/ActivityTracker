@@ -42,10 +42,10 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
                             TAG,
                             "Modified Activity: ${dc.document.data}, NOT IMPLEMENTED"
                         )
-                        DocumentChange.Type.REMOVED -> Log.d(
-                            TAG,
-                            "Removed Activity: ${dc.document.data}, NOT IMPLEMENTED"
-                        )
+                        DocumentChange.Type.REMOVED -> {
+//                            deleteInternalActivity((dc.document.data["order"] as Long).toInt())
+                            Log.d(TAG, "Removed Activity: ${dc.document.data}")
+                        }
                     }
                 }
             }
@@ -84,6 +84,13 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
             .addOnFailureListener { e -> Log.w(TAG, "Error writing document", e) }
     }
 
+    override fun deleteActivityAt(index: Int) {
+        db.document("$userPath/${firebaseUser.uid}/$activityPath/${activities[index].name}")
+            .delete()
+            .addOnSuccessListener { Log.d(TAG, "DocumentSnapshot successfully deleted!") }
+            .addOnFailureListener { e -> Log.w(TAG, "Error deleting document", e) }
+    }
+
     override fun addSession(session: Session, activityName: String) {
         val sessionHashMap = hashMapOf(
             "name" to session.name,
@@ -101,6 +108,30 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
             .update("order", index)
             .addOnSuccessListener { Log.d(TAG, "DocumentSnapshot successfully updated") }
             .addOnFailureListener { e -> Log.w(TAG, "Error updating document", e) }
+    }
+
+    override fun executeListDiff(listDiffMap: ListDiffMap<Activity>) {
+        db.runBatch { batch ->
+            for ((activity, result) in listDiffMap) {
+                val activityDocument =
+                    db.document("$userPath/${firebaseUser.uid}/$activityPath/${activity.name}")
+                when (result.state) {
+                    ListDiffEnum.MOVED_TO -> {
+                        batch.update(
+                            activityDocument,
+                            mapOf("order" to result.index)
+                        )
+                    }
+                    ListDiffEnum.DELETED_AT -> {
+                        batch.delete(
+                            activityDocument
+                        )
+                    }
+                }
+            }
+        }.addOnCompleteListener {
+            Log.d(TAG, "Successful Batch")
+        }
     }
 
 //    override fun setUserInfo() {
