@@ -1,6 +1,9 @@
 package tech.davidburns.activitytracker
 
-import java.time.*
+import java.time.Duration
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 class Session(
     val name: String,
@@ -24,7 +27,9 @@ class Session(
     constructor(name: String, length: Long, start: Long) : this(
         name,
         Duration.ofMillis(length),
-        LocalDateTime.ofEpochSecond(start, 0,
-            ZoneId.systemDefault().rules.getOffset(Instant.now()))
+        LocalDateTime.ofEpochSecond(
+            start, 0,
+            ZoneId.systemDefault().rules.getOffset(Instant.now())
+        )
     )
 }

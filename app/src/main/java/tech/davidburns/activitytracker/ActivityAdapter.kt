@@ -11,10 +11,9 @@ import kotlinx.android.synthetic.main.activity_card.view.*
 import tech.davidburns.activitytracker.fragments.ActivityViewController
 import tech.davidburns.activitytracker.fragments.AddTimerSessionDialog
 import tech.davidburns.activitytracker.interfaces.ActivityListener
+import tech.davidburns.activitytracker.util.ActivityListDiff
 import java.util.*
 import kotlin.properties.Delegates
-import kotlin.properties.ObservableProperty
-
 class ActivityAdapter(
     private val activities: MutableList<Activity>,
     private val onClickListener: OnClickListener,
@@ -23,7 +22,7 @@ class ActivityAdapter(
     RecyclerView.Adapter<ActivityAdapter.ViewHolder>(),
     ActivityListener {
     lateinit var title: TextView
-
+    lateinit var activityListDiff: ActivityListDiff
     lateinit var secondary: TextView
     lateinit var other: TextView
     lateinit var btnStart: Button
@@ -46,10 +45,11 @@ class ActivityAdapter(
 
         val viewHolder = ViewHolder(activityView, onClickListener)
 
-
         viewHolder.itemView.setOnLongClickListener {
-            enterEditMode()
-            return@setOnLongClickListener true
+            if (!editMode) {
+                enterEditMode()
+            }
+            return@setOnLongClickListener !editMode
         }
 
         // Return a new holder instance
@@ -57,12 +57,14 @@ class ActivityAdapter(
     }
 
     private fun enterEditMode() {
+        activityListDiff = ActivityListDiff() //Create new ActivityListDiff
         editMode = true
         activityViewController.enterEditMode()
     }
 
     fun exitEditMode() {
         editMode = false
+        activityListDiff.commitToDatabase() //Commit ListDiff changes to database
     }
 
     override fun onBindViewHolder(holder: ActivityAdapter.ViewHolder, position: Int) {
@@ -85,6 +87,7 @@ class ActivityAdapter(
         RecyclerView.ViewHolder(itemView), View.OnClickListener {
         lateinit var activity: Activity
         private val timer: Timer
+
         init {
             title = itemView.activity_title
             secondary = itemView.secondary_text
@@ -92,9 +95,10 @@ class ActivityAdapter(
             btnStart = itemView.btn_start
             timerView = itemView.timer
             timer = Timer(timerView)
-            btnStart.setOnClickListener { btnStartOnClick(); }
+            btnStart.setOnClickListener { btnStartOnClick() }
+            itemView.btn_delete.setOnClickListener { btnDeleteOnClick() }
 
-            editModeListeners.add ( ::updateEditMode )
+            editModeListeners.add(::updateEditMode)
 
             itemView.setOnClickListener(this)
         }
@@ -107,18 +111,27 @@ class ActivityAdapter(
         }
 
         private fun btnStartOnClick() {
-                if (timer.isRunning) {
-                    itemView.btn_start.text = User.applicationContext.getString(R.string.stop)
-                    timer.pauseTimer()
-                } else {
-                    val dialog = AddTimerSessionDialog(
-                        activities[adapterPosition],
-                        timer
-                    )
-                    activityViewController.addTimerSessionDialog(dialog)
-                    btnStart.text = User.applicationContext.getString(R.string.start)
-                    timer.runTimer()
-                }
+            if (timer.isRunning) {
+                itemView.btn_start.text = User.applicationContext.getString(R.string.stop)
+                timer.pauseTimer()
+            } else {
+                val dialog = AddTimerSessionDialog(
+                    activities[adapterPosition],
+                    timer
+                )
+                activityViewController.addTimerSessionDialog(dialog)
+                btnStart.text = User.applicationContext.getString(R.string.start)
+                timer.runTimer()
+            }
+        }
+
+        private fun btnDeleteOnClick() {
+            val index = adapterPosition
+            val deletedActivity = User.deleteActivityAt(index)
+            activityListDiff.itemDeleted(deletedActivity, index)
+            if (activities.size == 0) {
+                activityViewController.exitEditMode()
+            }
         }
 
         private fun updateEditMode(editMode: Boolean) {
@@ -127,14 +140,16 @@ class ActivityAdapter(
             } else {
                 exitEditMode()
             }
-    }
+        }
 
         private fun enterEditMode() {
             itemView.btn_start.visibility = View.GONE
+            itemView.btn_delete.visibility = View.VISIBLE
         }
 
         private fun exitEditMode() {
             itemView.btn_start.visibility = View.VISIBLE
+            itemView.btn_delete.visibility = View.GONE
         }
     }
 
@@ -161,15 +176,29 @@ class ActivityAdapter(
     fun moveItem(from: Int, to: Int) {
         val removed = activities.removeAt(from)
         activities.add(to, removed)
-        var f = from
-        var t = to
-        if (f > t) {
-            f = t.also { t = f } //Swap f and t
+        activityListDiff.itemMoved(from, to)
+
+        if (from > to) {
+            for (index in (to + 1) .. from) {
+                activityListDiff.itemMoved(index - 1, index)
+            }
+        } else {
+            for (index in from until to) {
+                activityListDiff.itemMoved(index + 1, index)
+            }
         }
 
-        for(index in f..t) {
-            User.orderUpdated(index)
-        }
+
+
+
+//        var f = from
+//        var t = to
+//        if (f > t) {
+//            f = (t - 1).also { t = f } //Swap f and t
+//        }
+//        for (index in f..t) {
+//            User.orderUpdated(index)
+//        }
     }
 }
 
