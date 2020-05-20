@@ -29,28 +29,15 @@ object User {
      * Create activity with given name and add to the database.
      * @param name of the [Activity] to create
      */
-    fun addActivity(name: String) = addActivity(Activity(name))
-
-    /**
-     * Create activity with given name and add to the database.
-     * @param activity to add
-     */
-    fun addActivity(activity: Activity) = database.addActivity(activity)
+    fun addActivity(name: String) = database.addActivity(Activity(name))
 
     /**
      * Delete an activity at a specific index.
      * @param index of the activity to delete
      */
     fun deleteActivityAt(index: Int) : Activity {
-//        database.activities.removeAt(index)
         return database.deleteInternalActivity(index)
     }
-
-    /**
-     * Notify the database that the order of an activity at a specific index has changed.
-     * @param index at which order was changed
-     */
-    fun orderUpdated(index: Int) = database.orderUpdated(index)
 
     /**
      * Add given session to the database attached to the given activity.

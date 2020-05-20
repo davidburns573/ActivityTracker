@@ -10,7 +10,6 @@ open class ListDiff<T>(private val list: MutableList<T>) {
     protected val map: ListDiffMap<T> = hashMapOf()
 
     fun itemMoved(from: Int, to: Int) {
-        val check = 0
         if (map[list[to]]?.initialIndex == to) {
             map.remove(list[to])
         } else {

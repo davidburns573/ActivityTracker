@@ -30,12 +30,6 @@ abstract class Database {
      */
     abstract fun addActivity(activity: Activity)
 
-    /**
-     * Delete an activity at index.
-     * @param index of the activity to delete
-     */
-    abstract fun deleteActivityAt(index: Int)
-
     protected fun addInternalActivity(activity: Activity) {
         activities.add(activity)
         listeners.forEach { it.itemAdded(activities.size - 1) }
@@ -59,7 +53,7 @@ abstract class Database {
      * Should only be called after activities list has been updated to the desired order.
      * @param index at which order was changed.
     */
-    abstract fun orderUpdated(index: Int)
+    protected abstract fun orderUpdated(index: Int)
 
     abstract fun executeListDiff(listDiffMap: ListDiffMap<Activity>)
 }

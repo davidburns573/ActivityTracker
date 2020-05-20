@@ -55,13 +55,6 @@ class NativeDatabase : Database() {
         addInternalActivity(activity)
     }
 
-    override fun deleteActivityAt(index: Int) {
-        val where = "${UserSchema.ActivityTable.Cols.ACTIVITY_NAME}=?"
-        val whereArgs = arrayOf(activities[index].name)
-        database.delete(UserSchema.ActivityTable.NAME, where, whereArgs)
-        deleteInternalActivity(index)
-    }
-
     private fun deleteActivity(activity: Activity) {
         val where = "${UserSchema.ActivityTable.Cols.ACTIVITY_NAME}=?"
         val whereArgs = arrayOf(activity.name)

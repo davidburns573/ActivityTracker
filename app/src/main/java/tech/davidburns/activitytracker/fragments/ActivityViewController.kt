@@ -21,7 +21,6 @@ import tech.davidburns.activitytracker.util.ActivityListDiff
 class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickListener {
     private lateinit var viewAdapter: ActivityAdapter
     private var editMode: Boolean = false
-//    lateinit var activityListDiff: ActivityListDiff
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -105,9 +104,6 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
         viewAdapter.exitEditMode()
         btnAddActivity.visibility = View.VISIBLE
-//        for (i in 0 until User.activities.size) {
-//            User.orderUpdated(i)
-//        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
@@ -124,6 +120,10 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
             // Invoke the superclass to handle it.
             super.onOptionsItemSelected(item)
         }
+    }
+
+    fun startDragging(viewHolder: RecyclerView.ViewHolder) {
+        itemTouchHelper.startDrag(viewHolder)
     }
 
     private val itemTouchHelper by lazy {
