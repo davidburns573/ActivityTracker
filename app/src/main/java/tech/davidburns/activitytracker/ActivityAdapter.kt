@@ -52,15 +52,6 @@ class ActivityAdapter(
             return@setOnLongClickListener true
         }
 
-        viewHolder.itemView.setOnTouchListener { _, event ->
-            if (editMode) {
-                if (event.actionMasked == MotionEvent.ACTION_DOWN) {
-                    activityViewController.startDragging(viewHolder)
-                }
-            }
-            return@setOnTouchListener editMode
-        }
-
         // Return a new holder instance
         return viewHolder
     }
@@ -157,12 +148,19 @@ class ActivityAdapter(
             itemView.btn_start.visibility = View.GONE
             itemView.btn_delete.visibility = View.VISIBLE
             itemView.isLongClickable = false
+            itemView.setOnTouchListener { _, event ->
+                if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+                    activityViewController.startDragging(this)
+                }
+                return@setOnTouchListener false //Stop view from being highlighted
+            }
         }
 
         private fun exitEditMode() {
             itemView.btn_start.visibility = View.VISIBLE
             itemView.btn_delete.visibility = View.GONE
             itemView.isLongClickable = true
+            itemView.setOnTouchListener(null) //Clear onTouchListener (Ignore touch)
         }
     }
 
