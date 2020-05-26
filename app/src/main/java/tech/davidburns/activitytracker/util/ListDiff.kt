@@ -23,6 +23,10 @@ open class ListDiff<T>(private val list: MutableList<T>) {
             index,
             map[item]?.initialIndex ?: index
         )
+
+        for (i in index until list.size) {
+            itemMoved(i + 1, i)
+        }
     }
 
     class Result(val state: ListDiffEnum, val index: Int, val initialIndex: Int)

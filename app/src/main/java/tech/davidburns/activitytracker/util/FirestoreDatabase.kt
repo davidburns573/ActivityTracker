@@ -103,23 +103,17 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
             .addOnFailureListener { e -> Log.w(TAG, "Error updating document", e) }
     }
 
-    override fun executeListDiff(listDiffMap: ListDiffMap<Activity>) {
+    override fun executeListDiff(activityListDiffMap: ListDiffMap<Activity>) {
         db.runBatch { batch ->
-            for ((activity, result) in listDiffMap) {
+            for ((activity, result) in activityListDiffMap) {
                 val activityDocument =
                     db.document("$userPath/${firebaseUser.uid}/$activityPath/${activity.name}")
                 when (result.state) {
-                    ListDiffEnum.MOVED_TO -> {
-                        batch.update(
-                            activityDocument,
-                            mapOf("order" to result.index)
-                        )
-                    }
-                    ListDiffEnum.DELETED_AT -> {
-                        batch.delete(
-                            activityDocument
-                        )
-                    }
+                    ListDiffEnum.MOVED_TO -> batch.update(
+                        activityDocument,
+                        mapOf("order" to result.index)
+                    )
+                    ListDiffEnum.DELETED_AT -> batch.delete(activityDocument)
                 }
             }
         }.addOnCompleteListener {

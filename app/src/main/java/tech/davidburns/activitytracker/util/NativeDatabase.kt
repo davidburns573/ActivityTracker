@@ -75,8 +75,8 @@ class NativeDatabase : Database() {
         database.update(UserSchema.ActivityTable.NAME, values, where, whereArgs)
     }
 
-    override fun executeListDiff(listDiffMap: ListDiffMap<Activity>) {
-        for ((activity, result) in listDiffMap) {
+    override fun executeListDiff(activityListDiffMap: ListDiffMap<Activity>) {
+        for ((activity, result) in activityListDiffMap) {
             when (result.state) {
                 ListDiffEnum.MOVED_TO -> orderUpdated(result.index)
                 ListDiffEnum.DELETED_AT -> deleteActivity(activity)
