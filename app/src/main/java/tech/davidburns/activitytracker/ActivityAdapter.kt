@@ -23,16 +23,17 @@ class ActivityAdapter(
 ) :
     RecyclerView.Adapter<ActivityAdapter.ViewHolder>(),
     ActivityListener {
-    lateinit var title: TextView
-    lateinit var activityListDiff: ActivityListDiff
-    lateinit var secondary: TextView
-    lateinit var other: TextView
-    lateinit var btnStart: Button
-    lateinit var timerView: TextView
-    lateinit var activity: Activity
+    private lateinit var title: TextView
+    private lateinit var activityListDiff: ActivityListDiff
+    private lateinit var secondary: TextView
+    private lateinit var other: TextView
+    private lateinit var btnStart: Button
+    private lateinit var timerView: TextView
+    private lateinit var activity: Activity
     private val editModeListeners = ArrayList<(Boolean) -> Unit>()
+    private val selectedActivities: MutableList<ViewHolder> = mutableListOf()
 
-    private var editMode by Delegates.observable(false) { _, _, newValue ->
+    private var editMode: Boolean by Delegates.observable(false) { _, _, newValue ->
         editModeListeners.forEach {
             it(newValue)
         }
@@ -106,7 +107,14 @@ class ActivityAdapter(
         }
 
         override fun onClick(v: View?) {
-            if (!editMode) {
+            if (editMode) {
+                if (itemView.isActivated) {
+                    selectedActivities.remove(this)
+                } else {
+                    selectedActivities.add(this)
+                }
+                itemView.isActivated = !itemView.isActivated
+            } else {
                 User.currentActivity = activity
                 onClickListener.onClick()
             }
