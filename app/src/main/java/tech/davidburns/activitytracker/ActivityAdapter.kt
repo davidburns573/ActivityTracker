@@ -2,6 +2,7 @@ package tech.davidburns.activitytracker
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -14,6 +15,7 @@ import tech.davidburns.activitytracker.interfaces.ActivityListener
 import tech.davidburns.activitytracker.util.ActivityListDiff
 import java.util.*
 import kotlin.properties.Delegates
+
 class ActivityAdapter(
     private val activities: MutableList<Activity>,
     private val onClickListener: OnClickListener,
@@ -46,10 +48,8 @@ class ActivityAdapter(
         val viewHolder = ViewHolder(activityView, onClickListener)
 
         viewHolder.itemView.setOnLongClickListener {
-            if (!editMode) {
-                enterEditMode()
-            }
-            return@setOnLongClickListener !editMode
+            enterEditMode()
+            return@setOnLongClickListener true
         }
 
         // Return a new holder instance
@@ -76,8 +76,10 @@ class ActivityAdapter(
             title.text = activity.name
             activity.sessions.clear()
             activity.sessions.addAll(User.getSessionsFromActivity(activity.name))
-            secondary.text =
-                "${activity.statistics.totalTimeEver().seconds} seconds"
+            secondary.text = User.applicationContext.getString(
+                R.string.seconds_text,
+                activity.statistics.totalTimeEver().seconds.toString()
+            )
         }
     }
 
@@ -145,11 +147,20 @@ class ActivityAdapter(
         private fun enterEditMode() {
             itemView.btn_start.visibility = View.GONE
             itemView.btn_delete.visibility = View.VISIBLE
+            itemView.isLongClickable = false
+            itemView.setOnTouchListener { _, event ->
+                if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+                    activityViewController.startDragging(this)
+                }
+                return@setOnTouchListener false //Stop view from being highlighted
+            }
         }
 
         private fun exitEditMode() {
             itemView.btn_start.visibility = View.VISIBLE
             itemView.btn_delete.visibility = View.GONE
+            itemView.isLongClickable = true
+            itemView.setOnTouchListener(null) //Clear onTouchListener (Ignore touch)
         }
     }
 
@@ -179,7 +190,7 @@ class ActivityAdapter(
         activityListDiff.itemMoved(from, to)
 
         if (from > to) {
-            for (index in (to + 1) .. from) {
+            for (index in (to + 1)..from) {
                 activityListDiff.itemMoved(index - 1, index)
             }
         } else {
@@ -187,18 +198,6 @@ class ActivityAdapter(
                 activityListDiff.itemMoved(index + 1, index)
             }
         }
-
-
-
-
-//        var f = from
-//        var t = to
-//        if (f > t) {
-//            f = (t - 1).also { t = f } //Swap f and t
-//        }
-//        for (index in f..t) {
-//            User.orderUpdated(index)
-//        }
     }
 }
 

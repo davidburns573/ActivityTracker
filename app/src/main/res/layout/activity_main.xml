@@ -17,6 +17,7 @@
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         app:layout_constraintTop_toTopOf="parent"
+        app:titleTextColor="@android:color/white"
         />
 
     <!--Create the Nav Host Fragment that will control all navigation-->
