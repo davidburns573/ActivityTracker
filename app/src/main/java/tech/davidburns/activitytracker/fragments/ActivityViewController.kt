@@ -15,7 +15,6 @@ import tech.davidburns.activitytracker.ActivityAdapter
 import tech.davidburns.activitytracker.R
 import tech.davidburns.activitytracker.User
 import tech.davidburns.activitytracker.interfaces.Dialogable
-import tech.davidburns.activitytracker.util.ActivityListDiff
 
 
 class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickListener {
@@ -104,6 +103,19 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
         viewAdapter.exitEditMode()
         btnAddActivity.visibility = View.VISIBLE
+    }
+
+    fun updateNumberSelected(numSelected: Int) {
+        if (numSelected > 0) {
+            (activity as AppCompatActivity).supportActionBar?.title =
+                User.applicationContext.getString(
+                    R.string.counter_text,
+                    numSelected,
+                    User.applicationContext.getString(R.string.app_name)
+                )
+        } else {
+            (activity as AppCompatActivity).supportActionBar?.title = User.applicationContext.getString(R.string.app_name)
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
