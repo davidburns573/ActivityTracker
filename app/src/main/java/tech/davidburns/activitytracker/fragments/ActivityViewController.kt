@@ -10,8 +10,10 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_DRAG
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_view.*
 import tech.davidburns.activitytracker.ActivityAdapter
+import tech.davidburns.activitytracker.MainActivity
 import tech.davidburns.activitytracker.R
 import tech.davidburns.activitytracker.User
 import tech.davidburns.activitytracker.interfaces.Dialogable
@@ -106,15 +108,15 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
     }
 
     fun updateNumberSelected(numSelected: Int) {
+        val selectedViewHolderCounter = (activity as MainActivity).selectedViewHolderCounter
+
         if (numSelected > 0) {
-            (activity as AppCompatActivity).supportActionBar?.title =
-                User.applicationContext.getString(
-                    R.string.counter_text,
-                    numSelected,
-                    User.applicationContext.getString(R.string.app_name)
-                )
+            selectedViewHolderCounter.apply {
+                visibility = View.VISIBLE
+                text = numSelected.toString()
+            }
         } else {
-            (activity as AppCompatActivity).supportActionBar?.title = User.applicationContext.getString(R.string.app_name)
+            selectedViewHolderCounter.visibility = View.GONE
         }
     }
 
