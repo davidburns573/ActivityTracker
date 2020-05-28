@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_card.view.*
 import tech.davidburns.activitytracker.fragments.ActivityViewController
@@ -31,6 +32,23 @@ class ActivityAdapter(
     lateinit var timerView: TextView
     lateinit var activity: Activity
     private val editModeListeners = ArrayList<(Boolean) -> Unit>()
+    private val selectedActivities: MutableList<ViewHolder> = mutableListOf()
+
+    private val defaultColor by lazy {
+        ResourcesCompat.getColor(
+            User.applicationContext.resources,
+            R.color.offWhite,
+            null
+        )
+    }
+
+    private val selectedColor by lazy {
+        ResourcesCompat.getColor(
+            User.applicationContext.resources,
+            R.color.colorAccent,
+            null
+        )
+    }
 
     private var editMode by Delegates.observable(false) { _, _, newValue ->
         editModeListeners.forEach {
@@ -106,7 +124,16 @@ class ActivityAdapter(
         }
 
         override fun onClick(v: View?) {
-            if (!editMode) {
+            if (editMode) {
+                if (itemView.isActivated) {
+                    selectedActivities.remove(this)
+                } else {
+                    selectedActivities.add(this)
+                }
+                itemView.isActivated = !itemView.isActivated
+                itemView.activity_card.setCardBackgroundColor(if (itemView.isActivated) selectedColor else defaultColor)
+                activityViewController.updateNumberSelected(selectedActivities.size)
+            } else {
                 User.currentActivity = activity
                 onClickListener.onClick()
             }
