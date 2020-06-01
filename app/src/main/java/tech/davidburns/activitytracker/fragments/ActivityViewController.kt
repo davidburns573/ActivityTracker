@@ -16,11 +16,17 @@ import tech.davidburns.activitytracker.MainActivity
 import tech.davidburns.activitytracker.R
 import tech.davidburns.activitytracker.User
 import tech.davidburns.activitytracker.interfaces.Dialogable
+import kotlin.properties.Delegates
 
 class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickListener {
     private lateinit var viewAdapter: ActivityAdapter
     private var editMode: Boolean = false
-    private var selectMode: Boolean = false
+
+    var selectMode by Delegates.observable(false) { _, oldValue, newValue ->
+        if (newValue != oldValue) {
+            activity?.invalidateOptionsMenu()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -66,13 +72,6 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
         menu.findItem(R.id.delete_selected).apply { isVisible = selectMode }
     }
 
-    fun selectMode(activated: Boolean) {
-        if (activated != selectMode) {
-            selectMode = activated
-            activity?.invalidateOptionsMenu()
-        }
-    }
-
     override fun dialogString(str: String): Boolean {
         User.activities.forEach {
             if (it.name == str) {
@@ -109,7 +108,6 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
     fun exitEditMode() {
         editMode = false
         selectMode = false
-        activity?.invalidateOptionsMenu()
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
         viewAdapter.exitEditMode()
         btnAddActivity.visibility = View.VISIBLE

@@ -138,7 +138,7 @@ class ActivityAdapter(
                 activityViewController.apply {
                     val size = selectedActivities.size
                     updateNumberSelected(size)
-                    selectMode(size > 0)
+                    selectMode = size > 0
                 }
             } else {
                 User.currentActivity = activity
@@ -242,6 +242,7 @@ class ActivityAdapter(
             viewHolder.deleteActivity()
         }
         clearCounter()
+        activityViewController.selectMode = false
     }
 
     private fun clearCounter() {
