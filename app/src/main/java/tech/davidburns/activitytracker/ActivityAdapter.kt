@@ -82,6 +82,8 @@ class ActivityAdapter(
 
     fun exitEditMode() {
         editMode = false
+        selectedActivities.clear()
+        activityViewController.updateNumberSelected(0) //Disable counter
         activityListDiff.commitToDatabase() //Commit ListDiff changes to database
     }
 
@@ -132,7 +134,11 @@ class ActivityAdapter(
                 }
                 itemView.isActivated = !itemView.isActivated
                 itemView.activity_card.setCardBackgroundColor(if (itemView.isActivated) selectedColor else defaultColor)
-                activityViewController.updateNumberSelected(selectedActivities.size)
+                activityViewController.apply {
+                    val size = selectedActivities.size
+                    updateNumberSelected(size)
+                    selectMode(size > 0)
+                }
             } else {
                 User.currentActivity = activity
                 onClickListener.onClick()
@@ -188,7 +194,10 @@ class ActivityAdapter(
             itemView.btn_delete.visibility = View.GONE
             itemView.isLongClickable = true
             itemView.setOnTouchListener(null) //Clear onTouchListener (Ignore touch)
+            itemView.isActivated = false
+            itemView.activity_card.setCardBackgroundColor(defaultColor)
         }
+
     }
 
     interface OnClickListener {

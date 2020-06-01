@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_DRAG
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_view.*
 import tech.davidburns.activitytracker.ActivityAdapter
 import tech.davidburns.activitytracker.MainActivity
@@ -22,6 +21,7 @@ import tech.davidburns.activitytracker.interfaces.Dialogable
 class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickListener {
     private lateinit var viewAdapter: ActivityAdapter
     private var editMode: Boolean = false
+    private var selectMode: Boolean = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -64,7 +64,15 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.recyclerview_menu, menu)
-        menu.findItem(R.id.delete).apply { isVisible = editMode }
+
+        menu.findItem(R.id.delete_selected).apply { isVisible = selectMode }
+    }
+
+    fun selectMode(activated: Boolean) {
+        if (activated != selectMode) {
+            selectMode = activated
+            activity?.invalidateOptionsMenu()
+        }
     }
 
     override fun dialogString(str: String): Boolean {
@@ -101,6 +109,7 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
 
     fun exitEditMode() {
         editMode = false
+        selectMode = false
         activity?.invalidateOptionsMenu()
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
         viewAdapter.exitEditMode()
@@ -121,7 +130,7 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
-        R.id.delete -> {
+        R.id.delete_selected -> {
             val works = true
             true
         }
