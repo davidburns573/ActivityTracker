@@ -89,7 +89,7 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
     }
 
     fun addTimerSessionDialog(addTimerSessionDialog: AddTimerSessionDialog) {
-        addTimerSessionDialog.show(activity?.supportFragmentManager?.beginTransaction()!!, "dialog")
+        activity?.supportFragmentManager?.beginTransaction()?.let { addTimerSessionDialog.show(it, "dialog") }
     }
 
     fun enterEditMode() {

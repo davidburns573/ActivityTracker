@@ -1,5 +1,6 @@
 package tech.davidburns.activitytracker
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -171,6 +172,7 @@ class ActivityAdapter(
             }
         }
 
+        @SuppressLint("ClickableViewAccessibility")
         private fun enterEditMode() {
             itemView.btn_start.visibility = View.GONE
             itemView.btn_delete.visibility = View.VISIBLE
