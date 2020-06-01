@@ -185,6 +185,8 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
                     viewAdapter.moveItem(from, to)
                     // Tell adapter to render the model update.
                     viewAdapter.notifyItemMoved(from, to)
+                    viewHolder as ActivityAdapter.ViewHolder
+                    viewHolder.notifyItemMoved(to)
                     return true
                 }
 

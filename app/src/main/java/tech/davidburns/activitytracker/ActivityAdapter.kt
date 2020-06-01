@@ -186,9 +186,19 @@ class ActivityAdapter(
             itemView.setOnTouchListener { _, event ->
                 if (event.actionMasked == MotionEvent.ACTION_DOWN) {
                     activityViewController.startDragging(this)
+                    if (itemView.isActivated) {
+                        selectedActivities.forEach {
+                            if (it != this) it.removeFromRecyclerView()
+                        }
+                    }
                 }
                 return@setOnTouchListener false //Stop view from being highlighted
             }
+        }
+
+        private fun removeFromRecyclerView() {
+            activities.removeAt(adapterPosition)
+            notifyItemRemoved(adapterPosition)
         }
 
         private fun exitEditMode() {
@@ -198,6 +208,17 @@ class ActivityAdapter(
             itemView.setOnTouchListener(null) //Clear onTouchListener (Ignore touch)
             itemView.isActivated = false
             itemView.activity_card.setCardBackgroundColor(defaultColor)
+        }
+
+        fun notifyItemMoved(to: Int) {
+            if (selectedActivities.isNotEmpty()) {
+                var i = to + 1
+                for (viewHolder in selectedActivities) {
+                    if (viewHolder != this) {
+                        activities.add(i++, viewHolder.activity)
+                    }
+                }
+            }
         }
     }
 
