@@ -83,8 +83,7 @@ class ActivityAdapter(
 
     fun exitEditMode() {
         editMode = false
-        selectedActivities.clear()
-        activityViewController.updateNumberSelected(0) //Disable counter
+        clearCounter()
         activityListDiff.commitToDatabase() //Commit ListDiff changes to database
     }
 
@@ -119,7 +118,7 @@ class ActivityAdapter(
             timerView = itemView.timer
             timer = Timer(timerView)
             btnStart.setOnClickListener { btnStartOnClick() }
-            itemView.btn_delete.setOnClickListener { btnDeleteOnClick() }
+            itemView.btn_delete.setOnClickListener { deleteActivity() }
 
             editModeListeners.add(::updateEditMode)
 
@@ -162,7 +161,7 @@ class ActivityAdapter(
             }
         }
 
-        private fun btnDeleteOnClick() {
+        internal fun deleteActivity() {
             val index = adapterPosition
             val deletedActivity = User.deleteActivityAt(index)
             activityListDiff.itemDeleted(deletedActivity, index)
@@ -236,6 +235,18 @@ class ActivityAdapter(
                 activityListDiff.itemMoved(index + 1, index)
             }
         }
+    }
+
+    fun deleteSelected() {
+        for (viewHolder in selectedActivities) {
+            viewHolder.deleteActivity()
+        }
+        clearCounter()
+    }
+
+    private fun clearCounter() {
+        selectedActivities.clear()
+        activityViewController.updateNumberSelected(0) //Disable counter
     }
 }
 

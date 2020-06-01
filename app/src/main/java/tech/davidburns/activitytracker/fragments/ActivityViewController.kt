@@ -10,14 +10,12 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_DRAG
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_view.*
 import tech.davidburns.activitytracker.ActivityAdapter
 import tech.davidburns.activitytracker.MainActivity
 import tech.davidburns.activitytracker.R
 import tech.davidburns.activitytracker.User
 import tech.davidburns.activitytracker.interfaces.Dialogable
-
 
 class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickListener {
     private lateinit var viewAdapter: ActivityAdapter
@@ -97,7 +95,8 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
     }
 
     fun addTimerSessionDialog(addTimerSessionDialog: AddTimerSessionDialog) {
-        activity?.supportFragmentManager?.beginTransaction()?.let { addTimerSessionDialog.show(it, "dialog") }
+        activity?.supportFragmentManager?.beginTransaction()
+            ?.let { addTimerSessionDialog.show(it, "dialog") }
     }
 
     fun enterEditMode() {
@@ -118,7 +117,6 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
 
     fun updateNumberSelected(numSelected: Int) {
         val selectedViewHolderCounter = (activity as MainActivity).selectedViewHolderCounter
-
         if (numSelected > 0) {
             selectedViewHolderCounter.apply {
                 visibility = View.VISIBLE
@@ -131,7 +129,7 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.delete_selected -> {
-            val works = true
+            viewAdapter.deleteSelected()
             true
         }
         android.R.id.home -> {
