@@ -19,12 +19,13 @@ import java.util.*
 import kotlin.properties.Delegates
 
 class ActivityAdapter(
-    private val activities: MutableList<Activity>,
+    _activities: MutableList<Activity>,
     private val onClickListener: OnClickListener,
     private val activityViewController: ActivityViewController
 ) :
     RecyclerView.Adapter<ActivityAdapter.ViewHolder>(),
     ActivityListener {
+    private val activities: MutableList<Activity> = _activities.deepCopy()
     lateinit var title: TextView
     lateinit var activityListDiff: ActivityListDiff
     lateinit var secondary: TextView
@@ -186,19 +187,21 @@ class ActivityAdapter(
             itemView.setOnTouchListener { _, event ->
                 if (event.actionMasked == MotionEvent.ACTION_DOWN) {
                     activityViewController.startDragging(this)
-                    if (itemView.isActivated) {
-                        selectedActivities.forEach {
-                            if (it != this) it.removeFromRecyclerView()
-                        }
-                    }
+//                    if (itemView.isActivated) {
+//                        selectedActivities.forEach {
+//                            if (it != this) it.removeFromRecyclerView()
+//                        }
+//                    }
                 }
                 return@setOnTouchListener false //Stop view from being highlighted
             }
         }
 
         private fun removeFromRecyclerView() {
-            activities.removeAt(adapterPosition)
-            notifyItemRemoved(adapterPosition)
+            if (activities[adapterPosition] == activity) { //Executes only if accurate
+                activities.removeAt(adapterPosition)
+                notifyItemRemoved(adapterPosition)
+            }
         }
 
         private fun exitEditMode() {
@@ -215,7 +218,11 @@ class ActivityAdapter(
                 var i = to + 1
                 for (viewHolder in selectedActivities) {
                     if (viewHolder != this) {
-                        activities.add(i++, viewHolder.activity)
+                        val startPosition = viewHolder.adapterPosition
+                        val finalPosition = i++ - if (viewHolder.adapterPosition < to) 1 else 0
+                        val activity = activities.removeAt(startPosition)
+                        activities.add(finalPosition, activity)
+                        notifyItemMoved(startPosition, finalPosition)
                     }
                 }
             }
@@ -270,6 +277,12 @@ class ActivityAdapter(
         selectedActivities.clear()
         activityViewController.updateNumberSelected(0) //Disable counter
     }
+}
+
+private fun MutableList<Activity>.deepCopy(): MutableList<Activity> {
+    val newList = mutableListOf<Activity>()
+    forEach { newList.add(Activity(it)) }
+    return newList
 }
 
 //private class ActivityObj(val button: Button, val timer: Timer)
