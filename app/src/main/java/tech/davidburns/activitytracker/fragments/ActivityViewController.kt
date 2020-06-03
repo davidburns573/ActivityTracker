@@ -1,5 +1,6 @@
 package tech.davidburns.activitytracker.fragments
 
+import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -11,10 +12,7 @@ import androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_DRAG
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_view.*
-import tech.davidburns.activitytracker.ActivityAdapter
-import tech.davidburns.activitytracker.MainActivity
-import tech.davidburns.activitytracker.R
-import tech.davidburns.activitytracker.User
+import tech.davidburns.activitytracker.*
 import tech.davidburns.activitytracker.interfaces.Dialogable
 import kotlin.properties.Delegates
 
@@ -36,7 +34,10 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
         viewAdapter = ActivityAdapter(User.activities, this, this)
         User.addActivityListener(viewAdapter)
         setHasOptionsMenu(true)
-        (activity as AppCompatActivity).supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_close_black_24dp)
+        (activity as AppCompatActivity).supportActionBar?.apply {
+            setHomeAsUpIndicator(R.drawable.ic_undo_black_24dp)
+            setHomeActionContentDescription(R.string.undo_all)
+        }
         return inflater.inflate(R.layout.activity_view, container, false)
     }
 
@@ -50,19 +51,22 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
                     reverseLayout = true
                     stackFromEnd = true
                 }
-
-        btnAddActivity.setOnClickListener {
-            val fragmentTransaction = activity?.supportFragmentManager?.beginTransaction()
-            val prev = activity?.supportFragmentManager?.findFragmentByTag("dialog")
-            if (prev != null) {
-                fragmentTransaction?.remove(prev)
-            }
-            fragmentTransaction?.addToBackStack(null)
-            val dialogFragment =
-                MyDialog(R.string.enter_activity_name) //here MyDialog is my custom dialog
-            dialogFragment.setFragment(this)
-            if (fragmentTransaction != null) {
-                dialogFragment.show(fragmentTransaction, "dialog")
+        fab.setOnClickListener {
+            if (editMode) {
+                exitEditMode()
+            } else {
+                val fragmentTransaction = activity?.supportFragmentManager?.beginTransaction()
+                val prev = activity?.supportFragmentManager?.findFragmentByTag("dialog")
+                if (prev != null) {
+                    fragmentTransaction?.remove(prev)
+                }
+                fragmentTransaction?.addToBackStack(null)
+                val dialogFragment =
+                    MyDialog(R.string.enter_activity_name) //here MyDialog is my custom dialog
+                dialogFragment.setFragment(this)
+                if (fragmentTransaction != null) {
+                    dialogFragment.show(fragmentTransaction, "dialog")
+                }
             }
         }
     }
@@ -102,15 +106,27 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
         editMode = true
         activity?.invalidateOptionsMenu()
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        btnAddActivity.visibility = View.GONE
+        fab.setImageIcon(Icon.createWithResource(User.applicationContext, R.drawable.ic_check_black_24dp))
+        fab.contentDescription = getString(R.string.commit_changes)
+        fab.tooltipText = getString(R.string.commit_changes)
     }
 
     fun exitEditMode() {
+        exit()
+        viewAdapter.exitEditMode()
+    }
+
+    private fun abortEditMode() {
+        exit()
+    }
+
+    private fun exit() {
         editMode = false
         selectMode = false
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
-        viewAdapter.exitEditMode()
-        btnAddActivity.visibility = View.VISIBLE
+        fab.setImageIcon(Icon.createWithResource(User.applicationContext, R.drawable.ic_add_black_24dp))
+        fab.contentDescription = getString(R.string.add_activity)
+        fab.tooltipText = getString(R.string.add_activity)
     }
 
     fun updateNumberSelected(numSelected: Int) {
@@ -130,15 +146,18 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
             viewAdapter.deleteSelected()
             true
         }
-        android.R.id.home -> {
-            exitEditMode()
+        android.R.id.home -> { //Undo selected
+            undoRecyclerviewChanges()
             true
         }
         else -> {
-            // If we got here, the user's action was not recognized.
-            // Invoke the superclass to handle it.
             super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun undoRecyclerviewChanges() {
+        viewAdapter.undoChanges()
+        abortEditMode()
     }
 
     fun startDragging(viewHolder: RecyclerView.ViewHolder) {

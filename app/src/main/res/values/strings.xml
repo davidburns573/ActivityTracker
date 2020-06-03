@@ -22,4 +22,7 @@
     <string name="delete">Delete</string>
     <string name="seconds_text">%1$s seconds</string>
     <string name="counter_text">%1$d &#160;&#160;&#160; %2$s</string>
+    <string name="undo_all">Undo All</string>
+    <string name="commit_changes">Commit Changes</string>
+    <string name="add_activity">Add Activity</string>
 </resources>

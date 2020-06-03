@@ -15,6 +15,7 @@ import tech.davidburns.activitytracker.fragments.ActivityViewController
 import tech.davidburns.activitytracker.fragments.AddTimerSessionDialog
 import tech.davidburns.activitytracker.interfaces.ActivityListener
 import tech.davidburns.activitytracker.util.ActivityListDiff
+import tech.davidburns.activitytracker.util.ListDiffEnum
 import java.util.*
 import kotlin.properties.Delegates
 
@@ -34,6 +35,10 @@ class ActivityAdapter(
     lateinit var activity: Activity
     private val editModeListeners = ArrayList<(Boolean) -> Unit>()
     private val selectedActivities: MutableList<ViewHolder> = mutableListOf()
+    private var activitiesBackup: MutableList<Backup> = mutableListOf()
+    private val backupListeners: MutableList<() -> Unit> = mutableListOf()
+
+    private class Backup(val activity: Activity, val viewHolder: ViewHolder)
 
     private val defaultColor by lazy {
         ResourcesCompat.getColor(
@@ -51,9 +56,13 @@ class ActivityAdapter(
         )
     }
 
-    private var editMode by Delegates.observable(false) { _, _, newValue ->
+    private var editMode by Delegates.observable(false) { _, oldValue, newValue ->
         editModeListeners.forEach {
             it(newValue)
+        }
+        if (!oldValue && newValue) {
+            activitiesBackup.clear()
+            backup()
         }
     }
 
@@ -121,6 +130,7 @@ class ActivityAdapter(
             itemView.btn_delete.setOnClickListener { deleteActivity() }
 
             editModeListeners.add(::updateEditMode)
+            backupListeners.add { activitiesBackup.add(Backup(activity, this)) }
 
             itemView.setOnClickListener(this)
         }
@@ -248,6 +258,25 @@ class ActivityAdapter(
     private fun clearCounter() {
         selectedActivities.clear()
         activityViewController.updateNumberSelected(0) //Disable counter
+    }
+
+    fun undoChanges() {
+        val backupSize = activitiesBackup.size
+        activities.clear()
+        activitiesBackup.forEachIndexed { i, backup ->
+            activities.add(backup.activity)
+            bindViewHolder(backup.viewHolder, backupSize - i)
+        }
+        editMode = false
+        clearCounter()
+    }
+
+    private class MovedList(val activity: Activity, val initialIndex: Int)
+
+    private fun backup() {
+        backupListeners.forEach {
+            it() //Backup
+        }
     }
 }
 
