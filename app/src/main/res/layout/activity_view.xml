@@ -8,13 +8,12 @@
     tools:context=".fragments.ActivityViewController">
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
+        android:id="@+id/btnAddActivity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:clickable="true"
-        android:contentDescription="@string/add_activity"
-        android:tooltipText="@string/add_activity"
         android:longClickable="true"
+
         android:scaleType="center"
         android:src="@drawable/ic_add_black_24dp"
         app:layout_constraintBottom_toBottomOf="parent"
