@@ -55,6 +55,12 @@ class NativeDatabase : Database() {
         addInternalActivity(activity)
     }
 
+    private fun deleteActivity(activity: Activity) {
+        val where = "${UserSchema.ActivityTable.Cols.ACTIVITY_NAME}=?"
+        val whereArgs = arrayOf(activity.name)
+        database.delete(UserSchema.ActivityTable.NAME, where, whereArgs)
+    }
+
     override fun addSession(session: Session, activityName: String) {
         val values = getSessionContentValues(session)
         database.insert(UserSchema.SessionTable.NAME, null, values)
@@ -67,6 +73,15 @@ class NativeDatabase : Database() {
         val where = "${UserSchema.ActivityTable.Cols.ACTIVITY_NAME}=?"
         val whereArgs = arrayOf(User.activities[index].name)
         database.update(UserSchema.ActivityTable.NAME, values, where, whereArgs)
+    }
+
+    override fun executeListDiff(activityListDiffMap: ListDiffMap<Activity>) {
+        for ((activity, result) in activityListDiffMap) {
+            when (result.state) {
+                ListDiffEnum.MOVED_TO -> orderUpdated(result.index)
+                ListDiffEnum.DELETED_AT -> deleteActivity(activity)
+            }
+        }
     }
 
     companion object {

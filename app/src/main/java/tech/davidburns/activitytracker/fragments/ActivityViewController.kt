@@ -1,25 +1,38 @@
 package tech.davidburns.activitytracker.fragments
 
+import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.core.view.get
+import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_DRAG
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_view.*
 import tech.davidburns.activitytracker.ActivityAdapter
 import tech.davidburns.activitytracker.R
 import tech.davidburns.activitytracker.User
 import tech.davidburns.activitytracker.interfaces.Dialogable
+import kotlin.properties.Delegates
 
 class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickListener {
     private lateinit var viewAdapter: ActivityAdapter
+    private var editMode: Boolean = false
+
+    var selectMode by Delegates.observable(false) { _, oldValue, newValue ->
+        if (newValue != oldValue) {
+            activity?.invalidateOptionsMenu()
+        }
+    }
+
+    fun createNewAdapter() {
+        viewAdapter = ActivityAdapter(User.activities, this, this)
+        User.addActivityListener(viewAdapter)
+        activity_recycler.adapter = viewAdapter
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -28,12 +41,13 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
     ): View? {
         viewAdapter = ActivityAdapter(User.activities, this, this)
         User.addActivityListener(viewAdapter)
+        setHasOptionsMenu(true)
+        activity?.undo_all?.setOnClickListener { undoRecyclerviewChanges() }
         return inflater.inflate(R.layout.activity_view, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         itemTouchHelper.attachToRecyclerView(activity_recycler)
         activity_recycler.adapter = viewAdapter
         activity_recycler.layoutManager =
@@ -42,21 +56,29 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
                     reverseLayout = true
                     stackFromEnd = true
                 }
-
-        btnAddActivity.setOnClickListener {
-            val fragmentTransaction = activity?.supportFragmentManager?.beginTransaction()
-            val prev = activity?.supportFragmentManager?.findFragmentByTag("dialog")
-            if (prev != null) {
-                fragmentTransaction?.remove(prev)
-            }
-            fragmentTransaction?.addToBackStack(null)
-            val dialogFragment =
-                MyDialog(R.string.enter_activity_name) //here MyDialog is my custom dialog
-            dialogFragment.setFragment(this)
-            if (fragmentTransaction != null) {
-                dialogFragment.show(fragmentTransaction, "dialog")
+        fab.setOnClickListener {
+            if (editMode) {
+                exitEditMode()
+            } else {
+                val fragmentTransaction = activity?.supportFragmentManager?.beginTransaction()
+                val prev = activity?.supportFragmentManager?.findFragmentByTag("dialog")
+                if (prev != null) {
+                    fragmentTransaction?.remove(prev)
+                }
+                fragmentTransaction?.addToBackStack(null)
+                val dialogFragment =
+                    MyDialog(R.string.enter_activity_name) //here MyDialog is my custom dialog
+                dialogFragment.setFragment(this)
+                if (fragmentTransaction != null) {
+                    dialogFragment.show(fragmentTransaction, "dialog")
+                }
             }
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.recyclerview_menu, menu)
+        menu.findItem(R.id.delete_selected).apply { isVisible = selectMode }
     }
 
     override fun dialogString(str: String): Boolean {
@@ -77,11 +99,81 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
 
     override fun onDestroyView() {
         User.removeActivityListener(viewAdapter)
+        activity?.undo_all?.setOnClickListener(null)
         super.onDestroyView()
     }
 
     fun addTimerSessionDialog(addTimerSessionDialog: AddTimerSessionDialog) {
-        addTimerSessionDialog.show(activity?.supportFragmentManager?.beginTransaction()!!, "dialog")
+        activity?.supportFragmentManager?.beginTransaction()
+            ?.let { addTimerSessionDialog.show(it, "dialog") }
+    }
+
+    fun enterEditMode() {
+        editMode = true
+        activity?.invalidateOptionsMenu()
+        activity?.undo_all?.visibility = View.VISIBLE
+        fab.setImageIcon(
+            Icon.createWithResource(
+                User.applicationContext,
+                R.drawable.ic_check_black_24dp
+            )
+        )
+        fab.contentDescription = getString(R.string.commit_changes)
+        fab.tooltipText = getString(R.string.commit_changes)
+    }
+
+    fun exitEditMode() {
+        exit()
+        viewAdapter.exitEditMode()
+    }
+
+    private fun abortEditMode() {
+        exit()
+    }
+
+    private fun exit() {
+        editMode = false
+        selectMode = false
+        activity?.undo_all?.visibility = View.GONE
+        fab.setImageIcon(
+            Icon.createWithResource(
+                User.applicationContext,
+                R.drawable.ic_add_black_24dp
+            )
+        )
+        fab.contentDescription = getString(R.string.add_activity)
+        fab.tooltipText = getString(R.string.add_activity)
+    }
+
+    fun updateNumberSelected(numSelected: Int) {
+        val selectedViewHolderCounter = activity?.number_selected
+        if (numSelected > 0) {
+            selectedViewHolderCounter?.apply {
+                visibility = View.VISIBLE
+                text = numSelected.toString()
+            }
+        } else {
+            selectedViewHolderCounter?.visibility = View.GONE
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+        R.id.delete_selected -> {
+            viewAdapter.deleteSelected()
+            true
+        }
+        else -> {
+            super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun undoRecyclerviewChanges() {
+        viewAdapter.undoChanges()
+        abortEditMode()
+    }
+
+    fun startDragging(viewHolder: RecyclerView.ViewHolder) {
+        itemTouchHelper.startDrag(viewHolder)
     }
 
     private val itemTouchHelper by lazy {
