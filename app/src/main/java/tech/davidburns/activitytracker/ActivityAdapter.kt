@@ -15,7 +15,6 @@ import tech.davidburns.activitytracker.fragments.ActivityViewController
 import tech.davidburns.activitytracker.fragments.AddTimerSessionDialog
 import tech.davidburns.activitytracker.interfaces.ActivityListener
 import tech.davidburns.activitytracker.util.ActivityListDiff
-import tech.davidburns.activitytracker.util.ListDiffEnum
 import java.util.*
 import kotlin.properties.Delegates
 
@@ -263,14 +262,14 @@ class ActivityAdapter(
 
     private fun backup() {
         activitiesBackup.clear()
-        activitiesBackup.addAll(activities.deepCopy())
+        activitiesBackup.addAll(activities.shallowCopy())
     }
 }
 
-private fun MutableList<Activity>.deepCopy(): Collection<Activity> {
+private fun MutableList<Activity>.shallowCopy(): Collection<Activity> {
     val tempList: MutableList<Activity> = mutableListOf()
     forEach {
-        tempList.add(Activity(it))
+        tempList.add(it)
     }
     return tempList
 }
