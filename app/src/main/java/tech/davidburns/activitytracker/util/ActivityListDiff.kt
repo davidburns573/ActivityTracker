@@ -7,6 +7,4 @@ class ActivityListDiff : ListDiff<Activity>(User.activities) {
     fun commitToDatabase() {
         User.executeListDiff(map)
     }
-
-    fun getListDiff() = map
 }

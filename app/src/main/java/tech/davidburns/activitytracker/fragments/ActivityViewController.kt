@@ -26,6 +26,12 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
         }
     }
 
+    fun createNewAdapter() {
+        viewAdapter = ActivityAdapter(User.activities, this, this)
+        User.addActivityListener(viewAdapter)
+        activity_recycler.adapter = viewAdapter
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

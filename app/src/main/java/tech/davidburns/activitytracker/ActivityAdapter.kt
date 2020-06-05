@@ -26,19 +26,15 @@ class ActivityAdapter(
 ) :
     RecyclerView.Adapter<ActivityAdapter.ViewHolder>(),
     ActivityListener {
-    lateinit var title: TextView
-    lateinit var activityListDiff: ActivityListDiff
-    lateinit var secondary: TextView
-    lateinit var other: TextView
-    lateinit var btnStart: Button
-    lateinit var timerView: TextView
-    lateinit var activity: Activity
+    private lateinit var title: TextView
+    private lateinit var activityListDiff: ActivityListDiff
+    private lateinit var secondary: TextView
+    private lateinit var other: TextView
+    private lateinit var btnStart: Button
+    private lateinit var timerView: TextView
     private val editModeListeners = ArrayList<(Boolean) -> Unit>()
     private val selectedActivities: MutableList<ViewHolder> = mutableListOf()
-    private var activitiesBackup: MutableList<Backup> = mutableListOf()
-    private val backupListeners: MutableList<() -> Unit> = mutableListOf()
-
-    private class Backup(val activity: Activity, val viewHolder: ViewHolder)
+    private var activitiesBackup: MutableList<Activity> = mutableListOf()
 
     private val defaultColor by lazy {
         ResourcesCompat.getColor(
@@ -61,7 +57,6 @@ class ActivityAdapter(
             it(newValue)
         }
         if (!oldValue && newValue) {
-            activitiesBackup.clear()
             backup()
         }
     }
@@ -99,15 +94,13 @@ class ActivityAdapter(
     override fun onBindViewHolder(holder: ActivityAdapter.ViewHolder, position: Int) {
         if (activities.size > 0) {
             // Get the data model based on position
-            activity = activities[position]
-            holder.activity = activity
-
-            title.text = activity.name
-            activity.sessions.clear()
-            activity.sessions.addAll(User.getSessionsFromActivity(activity.name))
+            holder.activity = activities[position]
+            title.text = holder.activity.name
+            holder.activity.sessions.clear()
+            holder.activity.sessions.addAll(User.getSessionsFromActivity(holder.activity.name))
             secondary.text = User.applicationContext.getString(
                 R.string.seconds_text,
-                activity.statistics.totalTimeEver().seconds.toString()
+                holder.activity.statistics.totalTimeEver().seconds.toString()
             )
         }
     }
@@ -130,8 +123,6 @@ class ActivityAdapter(
             itemView.btn_delete.setOnClickListener { deleteActivity() }
 
             editModeListeners.add(::updateEditMode)
-            backupListeners.add { activitiesBackup.add(Backup(activity, this)) }
-
             itemView.setOnClickListener(this)
         }
 
@@ -261,23 +252,27 @@ class ActivityAdapter(
     }
 
     fun undoChanges() {
-        val backupSize = activitiesBackup.size
         activities.clear()
-        activitiesBackup.forEachIndexed { i, backup ->
-            activities.add(backup.activity)
-            bindViewHolder(backup.viewHolder, backupSize - i)
+        activitiesBackup.forEach {
+            activities.add(it)
         }
         editMode = false
         clearCounter()
+        activityViewController.createNewAdapter()
     }
-
-    private class MovedList(val activity: Activity, val initialIndex: Int)
 
     private fun backup() {
-        backupListeners.forEach {
-            it() //Backup
-        }
+        activitiesBackup.clear()
+        activitiesBackup.addAll(activities.deepCopy())
     }
+}
+
+private fun MutableList<Activity>.deepCopy(): Collection<Activity> {
+    val tempList: MutableList<Activity> = mutableListOf()
+    forEach {
+        tempList.add(Activity(it))
+    }
+    return tempList
 }
 
 //private class ActivityObj(val button: Button, val timer: Timer)
