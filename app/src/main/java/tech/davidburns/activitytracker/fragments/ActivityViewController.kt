@@ -4,15 +4,17 @@ import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_DRAG
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_view.*
-import tech.davidburns.activitytracker.*
+import tech.davidburns.activitytracker.ActivityAdapter
+import tech.davidburns.activitytracker.R
+import tech.davidburns.activitytracker.User
 import tech.davidburns.activitytracker.interfaces.Dialogable
 import kotlin.properties.Delegates
 
@@ -40,10 +42,7 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
         viewAdapter = ActivityAdapter(User.activities, this, this)
         User.addActivityListener(viewAdapter)
         setHasOptionsMenu(true)
-        (activity as AppCompatActivity).supportActionBar?.apply {
-            setHomeAsUpIndicator(R.drawable.ic_undo_black_24dp)
-            setHomeActionContentDescription(R.string.undo_all)
-        }
+        activity?.undo_all?.setOnClickListener { undoRecyclerviewChanges() }
         return inflater.inflate(R.layout.activity_view, container, false)
     }
 
@@ -100,6 +99,7 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
 
     override fun onDestroyView() {
         User.removeActivityListener(viewAdapter)
+        activity?.undo_all?.setOnClickListener(null)
         super.onDestroyView()
     }
 
@@ -111,8 +111,13 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
     fun enterEditMode() {
         editMode = true
         activity?.invalidateOptionsMenu()
-        (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        fab.setImageIcon(Icon.createWithResource(User.applicationContext, R.drawable.ic_check_black_24dp))
+        activity?.undo_all?.visibility = View.VISIBLE
+        fab.setImageIcon(
+            Icon.createWithResource(
+                User.applicationContext,
+                R.drawable.ic_check_black_24dp
+            )
+        )
         fab.contentDescription = getString(R.string.commit_changes)
         fab.tooltipText = getString(R.string.commit_changes)
     }
@@ -129,31 +134,32 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
     private fun exit() {
         editMode = false
         selectMode = false
-        (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
-        fab.setImageIcon(Icon.createWithResource(User.applicationContext, R.drawable.ic_add_black_24dp))
+        activity?.undo_all?.visibility = View.GONE
+        fab.setImageIcon(
+            Icon.createWithResource(
+                User.applicationContext,
+                R.drawable.ic_add_black_24dp
+            )
+        )
         fab.contentDescription = getString(R.string.add_activity)
         fab.tooltipText = getString(R.string.add_activity)
     }
 
     fun updateNumberSelected(numSelected: Int) {
-        val selectedViewHolderCounter = (activity as MainActivity).selectedViewHolderCounter
+        val selectedViewHolderCounter = activity?.number_selected
         if (numSelected > 0) {
-            selectedViewHolderCounter.apply {
+            selectedViewHolderCounter?.apply {
                 visibility = View.VISIBLE
                 text = numSelected.toString()
             }
         } else {
-            selectedViewHolderCounter.visibility = View.GONE
+            selectedViewHolderCounter?.visibility = View.GONE
         }
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.delete_selected -> {
             viewAdapter.deleteSelected()
-            true
-        }
-        android.R.id.home -> { //Undo selected
-            undoRecyclerviewChanges()
             true
         }
         else -> {
