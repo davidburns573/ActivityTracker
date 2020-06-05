@@ -176,6 +176,7 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
         itemTouchHelper.startDrag(viewHolder)
     }
 
+    //Adapted from: https://medium.com/@yfujiki/drag-and-reorder-recyclerview-items-in-a-user-friendly-manner-1282335141e9
     private val itemTouchHelper by lazy {
         val simpleItemTouchCallback =
             object : ItemTouchHelper.SimpleCallback(

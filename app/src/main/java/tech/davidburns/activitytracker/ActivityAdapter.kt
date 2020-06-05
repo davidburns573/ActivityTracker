@@ -60,6 +60,13 @@ class ActivityAdapter(
         }
     }
 
+    //Anonymous class stored as a value
+    private val longClick =
+        View.OnLongClickListener {
+            enterEditMode()
+            true
+        }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val context: Context = parent.context
         val inflater = LayoutInflater.from(context)
@@ -69,10 +76,8 @@ class ActivityAdapter(
 
         val viewHolder = ViewHolder(activityView, onClickListener)
 
-        viewHolder.itemView.setOnLongClickListener {
-            enterEditMode()
-            return@setOnLongClickListener true
-        }
+        viewHolder.itemView.setOnLongClickListener(longClick)
+        viewHolder.itemView.btn_start.setOnLongClickListener(longClick) //Allows entry to edit mode if start button is long pressed
 
         // Return a new holder instance
         return viewHolder
