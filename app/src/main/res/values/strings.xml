@@ -17,8 +17,12 @@
     <string name="end_time">End Time</string>
     <string name="stop">Stop</string>
     <string name="start">Start</string>
-    <string name="delete_all">Delete all</string>
+    <string name="delete_selected">Delete selected</string>
     <string name="delete_button">Delete Button</string>
     <string name="delete">Delete</string>
     <string name="seconds_text">%1$s seconds</string>
+    <string name="counter_text">%1$d &#160;&#160;&#160; %2$s</string>
+    <string name="undo_all">Undo All</string>
+    <string name="commit_changes">Commit Changes</string>
+    <string name="add_activity">Add Activity</string>
 </resources>

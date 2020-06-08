@@ -4,6 +4,8 @@ import java.time.Duration
 import java.time.LocalDateTime
 
 class Activity(var name: String) {
+    constructor(activity: Activity) : this(activity.name)
+
     var sessions: MutableList<Session> = mutableListOf()
     val statistics: Statistics = Statistics(sessions)
 

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:id="@+id/activity_card"
     android:layout_width="match_parent"
@@ -7,7 +8,7 @@
     android:clickable="true"
     android:foreground="?android:attr/selectableItemBackground"
     android:background="@drawable/activity_card_background"
-    card_view:cardBackgroundColor="#E6E6E6"
+    card_view:cardBackgroundColor="@color/offWhite"
     card_view:cardElevation="8dp"
     card_view:cardCornerRadius="8dp"
     android:layout_margin="10dp">

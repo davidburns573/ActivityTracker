@@ -1,5 +1,6 @@
 package tech.davidburns.activitytracker
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -7,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_card.view.*
 import tech.davidburns.activitytracker.fragments.ActivityViewController
@@ -29,15 +31,41 @@ class ActivityAdapter(
     private lateinit var other: TextView
     private lateinit var btnStart: Button
     private lateinit var timerView: TextView
-    private lateinit var activity: Activity
     private val editModeListeners = ArrayList<(Boolean) -> Unit>()
     private val selectedActivities: MutableList<ViewHolder> = mutableListOf()
+    private var activitiesBackup: MutableList<Activity> = mutableListOf()
 
-    private var editMode: Boolean by Delegates.observable(false) { _, _, newValue ->
+    private val defaultColor by lazy {
+        ResourcesCompat.getColor(
+            User.applicationContext.resources,
+            R.color.offWhite,
+            null
+        )
+    }
+
+    private val selectedColor by lazy {
+        ResourcesCompat.getColor(
+            User.applicationContext.resources,
+            R.color.colorAccent,
+            null
+        )
+    }
+
+    private var editMode by Delegates.observable(false) { _, oldValue, newValue ->
         editModeListeners.forEach {
             it(newValue)
         }
+        if (!oldValue && newValue) {
+            backup()
+        }
     }
+
+    //Anonymous class stored as a value
+    private val longClick =
+        View.OnLongClickListener {
+            enterEditMode()
+            true
+        }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val context: Context = parent.context
@@ -48,10 +76,8 @@ class ActivityAdapter(
 
         val viewHolder = ViewHolder(activityView, onClickListener)
 
-        viewHolder.itemView.setOnLongClickListener {
-            enterEditMode()
-            return@setOnLongClickListener true
-        }
+        viewHolder.itemView.setOnLongClickListener(longClick)
+        viewHolder.itemView.btn_start.setOnLongClickListener(longClick) //Allows entry to edit mode if start button is long pressed
 
         // Return a new holder instance
         return viewHolder
@@ -65,21 +91,20 @@ class ActivityAdapter(
 
     fun exitEditMode() {
         editMode = false
+        clearCounter()
         activityListDiff.commitToDatabase() //Commit ListDiff changes to database
     }
 
     override fun onBindViewHolder(holder: ActivityAdapter.ViewHolder, position: Int) {
         if (activities.size > 0) {
             // Get the data model based on position
-            activity = activities[position]
-            holder.activity = activity
-
-            title.text = activity.name
-            activity.sessions.clear()
-            activity.sessions.addAll(User.getSessionsFromActivity(activity.name))
+            holder.activity = activities[position]
+            title.text = holder.activity.name
+            holder.activity.sessions.clear()
+            holder.activity.sessions.addAll(User.getSessionsFromActivity(holder.activity.name))
             secondary.text = User.applicationContext.getString(
                 R.string.seconds_text,
-                activity.statistics.totalTimeEver().seconds.toString()
+                holder.activity.statistics.totalTimeEver().seconds.toString()
             )
         }
     }
@@ -99,10 +124,9 @@ class ActivityAdapter(
             timerView = itemView.timer
             timer = Timer(timerView)
             btnStart.setOnClickListener { btnStartOnClick() }
-            itemView.btn_delete.setOnClickListener { btnDeleteOnClick() }
+            itemView.btn_delete.setOnClickListener { deleteActivity() }
 
             editModeListeners.add(::updateEditMode)
-
             itemView.setOnClickListener(this)
         }
 
@@ -114,6 +138,13 @@ class ActivityAdapter(
                     selectedActivities.add(this)
                 }
                 itemView.isActivated = !itemView.isActivated
+                itemView.activity_card.setCardBackgroundColor(if (itemView.isActivated) selectedColor else defaultColor)
+                activityViewController.updateNumberSelected(selectedActivities.size)
+                activityViewController.apply {
+                    val size = selectedActivities.size
+                    updateNumberSelected(size)
+                    selectMode = size > 0
+                }
             } else {
                 User.currentActivity = activity
                 onClickListener.onClick()
@@ -135,7 +166,7 @@ class ActivityAdapter(
             }
         }
 
-        private fun btnDeleteOnClick() {
+        internal fun deleteActivity() {
             val index = adapterPosition
             val deletedActivity = User.deleteActivityAt(index)
             activityListDiff.itemDeleted(deletedActivity, index)
@@ -152,6 +183,7 @@ class ActivityAdapter(
             }
         }
 
+        @SuppressLint("ClickableViewAccessibility")
         private fun enterEditMode() {
             itemView.btn_start.visibility = View.GONE
             itemView.btn_delete.visibility = View.VISIBLE
@@ -169,6 +201,8 @@ class ActivityAdapter(
             itemView.btn_delete.visibility = View.GONE
             itemView.isLongClickable = true
             itemView.setOnTouchListener(null) //Clear onTouchListener (Ignore touch)
+            itemView.isActivated = false
+            itemView.activity_card.setCardBackgroundColor(defaultColor)
         }
     }
 
@@ -207,6 +241,42 @@ class ActivityAdapter(
             }
         }
     }
+
+    fun deleteSelected() {
+        for (viewHolder in selectedActivities) {
+            viewHolder.deleteActivity()
+        }
+        clearCounter()
+        activityViewController.selectMode = false
+    }
+
+    private fun clearCounter() {
+        selectedActivities.clear()
+        activityViewController.updateNumberSelected(0) //Disable counter
+    }
+
+    fun undoChanges() {
+        activities.clear()
+        activitiesBackup.forEach {
+            activities.add(it)
+        }
+        editMode = false
+        clearCounter()
+        activityViewController.createNewAdapter()
+    }
+
+    private fun backup() {
+        activitiesBackup.clear()
+        activitiesBackup.addAll(activities.shallowCopy())
+    }
+}
+
+private fun MutableList<Activity>.shallowCopy(): Collection<Activity> {
+    val tempList: MutableList<Activity> = mutableListOf()
+    forEach {
+        tempList.add(it)
+    }
+    return tempList
 }
 
 //private class ActivityObj(val button: Button, val timer: Timer)
