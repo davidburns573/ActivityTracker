@@ -211,6 +211,9 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
                     viewHolder: RecyclerView.ViewHolder,
                     target: RecyclerView.ViewHolder
                 ): Boolean {
+                    if (!editMode) {
+                        viewAdapter.enterEditMode()
+                    }
                     val from = viewHolder.adapterPosition
                     val to = target.adapterPosition
                     Log.d("ON_MOVE", "${User.activities[from].name}, from: $from, to: $to")

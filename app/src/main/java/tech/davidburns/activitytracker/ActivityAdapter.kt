@@ -83,7 +83,7 @@ class ActivityAdapter(
         return viewHolder
     }
 
-    private fun enterEditMode() {
+    fun enterEditMode() {
         activityListDiff = ActivityListDiff() //Create new ActivityListDiff
         editMode = true
         activityViewController.enterEditMode()
