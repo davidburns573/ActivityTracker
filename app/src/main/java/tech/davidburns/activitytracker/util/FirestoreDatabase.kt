@@ -42,10 +42,10 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
                             TAG,
                             "Modified Activity: ${dc.document.data}, NOT IMPLEMENTED"
                         )
-                        DocumentChange.Type.REMOVED -> Log.d(
-                            TAG,
-                            "Removed Activity: ${dc.document.data}, NOT IMPLEMENTED"
-                        )
+                        DocumentChange.Type.REMOVED -> {
+//                            deleteInternalActivity((dc.document.data["order"] as Long).toInt())
+                            Log.d(TAG, "Removed Activity: ${dc.document.data}")
+                        }
                     }
                 }
             }
@@ -101,6 +101,24 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
             .update("order", index)
             .addOnSuccessListener { Log.d(TAG, "DocumentSnapshot successfully updated") }
             .addOnFailureListener { e -> Log.w(TAG, "Error updating document", e) }
+    }
+
+    override fun executeListDiff(activityListDiffMap: ListDiffMap<Activity>) {
+        db.runBatch { batch ->
+            for ((activity, result) in activityListDiffMap) {
+                val activityDocument =
+                    db.document("$userPath/${firebaseUser.uid}/$activityPath/${activity.name}")
+                when (result.state) {
+                    ListDiffEnum.MOVED_TO -> batch.update(
+                        activityDocument,
+                        mapOf("order" to result.index)
+                    )
+                    ListDiffEnum.DELETED_AT -> batch.delete(activityDocument)
+                }
+            }
+        }.addOnCompleteListener {
+            Log.d(TAG, "Successful Batch")
+        }
     }
 
 //    override fun setUserInfo() {

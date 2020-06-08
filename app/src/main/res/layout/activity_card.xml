@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clickable="true"
     android:foreground="?android:attr/selectableItemBackground"
-    card_view:cardBackgroundColor="#E6E6E6"
+    android:background="@drawable/activity_card_background"
+    card_view:cardBackgroundColor="@color/offWhite"
     card_view:cardElevation="8dp"
     card_view:cardCornerRadius="8dp"
     android:layout_margin="10dp">
@@ -62,6 +63,20 @@
             card_view:layout_constraintBottom_toBottomOf="parent"
             card_view:layout_constraintEnd_toEndOf="parent"
             card_view:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
+            android:foreground="?android:attr/selectableItemBackground"
+            android:background="@drawable/ic_delete_black_24dp"
+            android:id="@+id/btn_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:text="@string/delete"
+            card_view:layout_constraintBottom_toBottomOf="parent"
+            card_view:layout_constraintEnd_toEndOf="parent"
+            card_view:layout_constraintTop_toTopOf="parent"
+            android:contentDescription="@string/delete_button"
+            android:visibility="gone"/>
 
         <TextView
             android:id="@+id/timer"
