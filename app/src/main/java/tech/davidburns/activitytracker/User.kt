@@ -8,6 +8,7 @@ import tech.davidburns.activitytracker.util.ListDiffMap
 
 object User {
     var name: String = "UNNAMED"
+    lateinit var mainActivity: MainActivity
     lateinit var currentActivity: Activity
     lateinit var applicationContext: Context
 

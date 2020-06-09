@@ -29,7 +29,6 @@ class ActivityAdapter(
     private lateinit var activityListDiff: ActivityListDiff
     private lateinit var secondary: TextView
     private lateinit var other: TextView
-    private lateinit var btnStart: Button
     private lateinit var timerView: TextView
     private val editModeListeners = ArrayList<(Boolean) -> Unit>()
     private val selectedActivities: MutableList<ViewHolder> = mutableListOf()
@@ -99,6 +98,8 @@ class ActivityAdapter(
         if (activities.size > 0) {
             // Get the data model based on position
             holder.activity = activities[position]
+            holder.timer = Timer(holder.activity.name,holder)
+
             title.text = holder.activity.name
             holder.activity.sessions.clear()
             holder.activity.sessions.addAll(User.getSessionsFromActivity(holder.activity.name))
@@ -114,16 +115,14 @@ class ActivityAdapter(
     inner class ViewHolder(itemView: View, private val onClickListener: OnClickListener) :
         RecyclerView.ViewHolder(itemView), View.OnClickListener {
         lateinit var activity: Activity
-        private val timer: Timer
+        lateinit var timer: Timer
 
         init {
             title = itemView.activity_title
             secondary = itemView.secondary_text
             other = itemView.other_text
-            btnStart = itemView.btn_start
             timerView = itemView.timer
-            timer = Timer(timerView)
-            btnStart.setOnClickListener { btnStartOnClick() }
+            itemView.btn_start.setOnClickListener { btnStartOnClick() }
             itemView.btn_delete.setOnClickListener { deleteActivity() }
 
             editModeListeners.add(::updateEditMode)
@@ -153,15 +152,15 @@ class ActivityAdapter(
 
         private fun btnStartOnClick() {
             if (timer.isRunning) {
-                itemView.btn_start.text = User.applicationContext.getString(R.string.stop)
+                itemView.btn_start.text = User.applicationContext.getString(R.string.start)
                 timer.pauseTimer()
-            } else {
                 val dialog = AddTimerSessionDialog(
                     activities[adapterPosition],
                     timer
                 )
                 activityViewController.addTimerSessionDialog(dialog)
-                btnStart.text = User.applicationContext.getString(R.string.start)
+            } else {
+                itemView.btn_start.text = User.applicationContext.getString(R.string.stop)
                 timer.runTimer()
             }
         }
@@ -203,6 +202,12 @@ class ActivityAdapter(
             itemView.setOnTouchListener(null) //Clear onTouchListener (Ignore touch)
             itemView.isActivated = false
             itemView.activity_card.setCardBackgroundColor(defaultColor)
+        }
+
+        fun changeTimerText(text: String) {
+            User.mainActivity.runOnUiThread {
+                itemView.timer.text = text
+            }
         }
     }
 
