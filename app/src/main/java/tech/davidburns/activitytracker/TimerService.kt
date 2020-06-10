@@ -3,7 +3,6 @@ package tech.davidburns.activitytracker
 import android.app.*
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.os.Binder
 import android.os.HandlerThread
 import android.os.IBinder
@@ -29,22 +28,32 @@ class TimerService : Service(), GlobalTimerListener {
                 PendingIntent.getActivity(this, 0, notificationIntent, 0)
             }
 
-        val notification: Notification = NotificationCompat.Builder(User.mainActivity, CHANNEL_NAME)
-            .setContentTitle(title)
-            .setSmallIcon(R.drawable.ic_delete_black_24dp)
-            .setContentIntent(pendingIntent)
-            .setOngoing(true)
-            .setGroup(GROUP_NAME)
-            .build()
+        val notification =
+            NotificationCompat.Builder(User.mainActivity, CHANNEL_NAME)
+                .setContentTitle(title)
+                .setSmallIcon(R.drawable.ic_delete_black_24dp)
+                .setContentIntent(pendingIntent)
+                .setOngoing(true)
+                .setGroup(GROUP_NAME)
+                .build()
 
-        if (!GlobalTimer.foreground) {
-            startForeground(FOREGROUND_ID, notification)
-            GlobalTimer.foreground = true
-        } else {
+        if (GlobalTimer.foreground) {
             with(NotificationManagerCompat.from(User.mainActivity)) {
                 notify(id, notification)
             }
             id += 100
+        } else {
+            val summary = NotificationCompat.Builder(User.mainActivity, CHANNEL_NAME)
+                .setSmallIcon(R.drawable.ic_delete_black_24dp)
+                .setGroupSummary(true)
+                .setGroup(GROUP_NAME)
+                .build()
+
+            with(NotificationManagerCompat.from(User.mainActivity)) {
+                notify(SUMMARY_ID, summary)
+            }
+            startForeground(FOREGROUND_ID, notification)
+            GlobalTimer.foreground = true
         }
     }
 
@@ -54,8 +63,6 @@ class TimerService : Service(), GlobalTimerListener {
             CHANNEL_NAME,
             getString(R.string.app_name), NotificationManager.IMPORTANCE_DEFAULT
         )
-        channel.lightColor = Color.BLUE
-        channel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
         val service = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         service.createNotificationChannel(channel)
         // Start up the thread running the service.  Note that we create a
