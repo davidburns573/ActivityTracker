@@ -3,9 +3,17 @@ package tech.davidburns.activitytracker
 import java.util.*
 import kotlin.concurrent.timer
 
-class Timer(private val onTimeUpdated: () -> Unit, private val onTimerStopped: () -> Unit) {
+private var id: Int = 2
+
+class Timer(
+    private val timerService: TimerService,
+    private val viewHolder: ActivityAdapter.ViewHolder,
+    private val title: String
+) {
     private val timer = timer("timer", period = 1000, action = { updateTime() })
-    private var  paused = false
+    private var paused = false
+    private val myId = id++
+    var bound = true
     var seconds = 0
     val formattedTime: String
         get() {
@@ -24,7 +32,8 @@ class Timer(private val onTimeUpdated: () -> Unit, private val onTimerStopped: (
     private fun updateTime() {
         if (!paused) {
             seconds++
-            onTimeUpdated()
+            TimerManager.createNotification(title, formattedTime, timerService, myId)
+            viewHolder.updateTime(formattedTime)
         }
     }
 
@@ -38,6 +47,7 @@ class Timer(private val onTimeUpdated: () -> Unit, private val onTimerStopped: (
 
     fun stop() {
         timer.cancel()
-        onTimerStopped()
+        TimerManager.dismissNotification(myId)
+        viewHolder.clearTimer()
     }
 }

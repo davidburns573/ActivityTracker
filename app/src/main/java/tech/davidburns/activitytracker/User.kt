@@ -12,7 +12,6 @@ import tech.davidburns.activitytracker.util.ActivityListDiff
 import tech.davidburns.activitytracker.util.ListDiffMap
 
 object User {
-    val connections: MutableList<ServiceConnection> = mutableListOf()
     var name: String = "UNNAMED"
     lateinit var mainActivity: MainActivity
     lateinit var currentActivity: Activity
@@ -87,50 +86,5 @@ object User {
      */
     fun executeListDiff(activityListDiffMap: ListDiffMap<Activity>) {
         database.executeListDiff(activityListDiffMap)
-    }
-
-    /**
-     * Start a service to run a timer
-     * @param viewHolder to display time
-     */
-    fun initializeTimer(viewHolder: ActivityAdapter.ViewHolder) {
-        val serviceIntent = Intent(mainActivity, TimerService::class.java)
-        /** Defines callbacks for service binding, passed to bindService()  */
-        val connection = object : ServiceConnection {
-            lateinit var timerService: TimerService
-
-            override fun onServiceConnected(className: ComponentName, service: IBinder) {
-                // We've bound to LocalService, cast the IBinder and get LocalService instance
-                val binder = service as TimerService.LocalBinder
-                timerService = binder.getService()
-                timerService.viewHolder = viewHolder
-                timerService.startTimer()
-                timerService.createNotification(viewHolder.itemView.activity_title.text.toString())
-            }
-
-            override fun onServiceDisconnected(arg0: ComponentName) {
-                timerService.viewHolder = null
-            }
-        }
-
-        mainActivity.startService(serviceIntent)
-        // Bind to LocalService
-        Intent(mainActivity, TimerService::class.java).also { bindingIntent ->
-            mainActivity.bindService(bindingIntent, connection, Context.BIND_AUTO_CREATE)
-        }
-    }
-
-    fun unbindServices() {
-        connections.forEach {
-            mainActivity.unbindService(it)
-        }
-    }
-
-    fun rebindServices() {
-        connections.forEach {
-            Intent(mainActivity, TimerService::class.java).also { intent ->
-                mainActivity.bindService(intent, it, Context.BIND_AUTO_CREATE)
-            }
-        }
     }
 }

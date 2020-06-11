@@ -10,6 +10,7 @@ import android.os.IBinder
 import android.os.Process
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import kotlinx.android.synthetic.main.activity_card.view.*
 
 private const val SUMMARY_ID = 1
 private const val GROUP_NAME = "timerGroup"
@@ -124,7 +125,7 @@ class TimerService : Service(), GlobalTimerListener {
         seconds++
     }
 
-    fun startTimer() {
-        timer = Timer(::onTimerIncrement, ::onTimerStopped)
+    fun startTimer(viewHolder: ActivityAdapter.ViewHolder): Timer {
+        return Timer(this, viewHolder, viewHolder.itemView.activity_title.text.toString())
     }
 }

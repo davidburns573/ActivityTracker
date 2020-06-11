@@ -14,12 +14,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
-        User.unbindServices()
+        TimerManager.unbindServices()
         super.onStop()
     }
 
     override fun onRestart() {
-        User.rebindServices()
+        TimerManager.rebindServices()
         super.onRestart()
     }
 }

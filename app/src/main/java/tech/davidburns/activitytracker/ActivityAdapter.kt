@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -146,7 +145,8 @@ class ActivityAdapter(
         }
 
         private fun btnStartOnClick() {
-            User.initializeTimer(this)
+            TimerManager.initializeTimer(this)
+            itemView.btn_start.text = User.applicationContext.getString(R.string.stop)
 //            if (timer.isRunning) {
 //                itemView.btn_start.text = User.applicationContext.getString(R.string.start)
 //                timer.pauseTimer()
@@ -159,6 +159,14 @@ class ActivityAdapter(
 //                itemView.btn_start.text = User.applicationContext.getString(R.string.stop)
 //                timer.runTimer()
 //            }
+        }
+
+        fun btnStopOnClick(timer: Timer) {
+            val dialog = AddTimerSessionDialog(
+                activities[adapterPosition],
+                timer
+            )
+            activityViewController.addTimerSessionDialog(dialog)
         }
 
         internal fun deleteActivity() {
@@ -200,9 +208,17 @@ class ActivityAdapter(
             itemView.activity_card.setCardBackgroundColor(defaultColor)
         }
 
-        fun changeTimerText(text: String) {
+        fun updateTime(formattedTime: String) {
             User.mainActivity.runOnUiThread {
-                itemView.timer.text = text
+                itemView.timer.text = formattedTime
+            }
+        }
+
+        fun clearTimer() {
+            itemView.timer.text = ""
+            itemView.btn_start.apply {
+                text = User.applicationContext.getText(R.string.start)
+                setOnClickListener { btnStartOnClick() }
             }
         }
     }
