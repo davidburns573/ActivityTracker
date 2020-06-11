@@ -90,12 +90,12 @@ class AddTimerSessionDialog(val activity: Activity, val timer: Timer) : DialogFr
 
         btn_yes.setOnClickListener {
             activity.addSession(Duration.ofSeconds(seconds.toLong()))
-            timer.reset()
+            timer.stop()
             dismiss()
         }
 
         btn_no.setOnClickListener {
-            timer.reset()
+            timer.stop()
             dismiss()
         }
 
