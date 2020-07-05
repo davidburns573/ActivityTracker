@@ -57,7 +57,7 @@ class MyDialog(@StringRes private val hint: Int) : DialogFragment() {
     }
 }
 
-class AddTimerSessionDialog(val activity: Activity, val timer: Timer) : DialogFragment() {
+class AddTimerSessionDialog(val activity: Activity, private val timer: Timer, private val onCanceledCallback: () -> Unit) : DialogFragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -82,6 +82,7 @@ class AddTimerSessionDialog(val activity: Activity, val timer: Timer) : DialogFr
         btn_yes.setOnClickListener {
             activity.addSession(Duration.ofSeconds(timer.seconds.toLong()))
             timer.stop()
+            onCanceledCallback()
             dismiss()
         }
 

@@ -16,6 +16,7 @@ private const val CHANNEL_NAME = "timerChannel"
 private var foreground = false
 
 object TimerManager {
+    val mapOfTimers = mutableMapOf<Activity, Timer>()
     private val connections: MutableList<ServiceConnection> = mutableListOf()
     private lateinit var timerService: TimerService
     private var foregroundId: Int = -1
@@ -24,27 +25,23 @@ object TimerManager {
      * Start a service to run a timer
      * @param viewHolder to display time
      */
-    fun initializeTimer(viewHolder: ActivityAdapter.ViewHolder) {
-        lateinit var timer: Timer
-
+    fun initializeTimer(activity: Activity, title: String, callback: (Timer) -> Unit) {
         if (::timerService.isInitialized) {
-            timer = timerService.startTimer(viewHolder)
+            mapOfTimers[activity] = timerService.startTimer(title).apply(callback)
         } else {
             val serviceIntent = Intent(User.mainActivity, TimerService::class.java)
 
-            /** Defines callbacks for service binding, passed to bindService()  */
             /** Defines callbacks for service binding, passed to bindService()  */
             val connection = object : ServiceConnection {
                 override fun onServiceConnected(className: ComponentName, service: IBinder) {
                     // We've bound to LocalService, cast the IBinder and get LocalService instance
                     val binder = service as TimerService.LocalBinder
                     timerService = binder.getService()
-                    timer = timerService.startTimer(viewHolder)
-                    timer.bound = true
+                    mapOfTimers[activity] = timerService.startTimer(title).apply(callback)
                 }
 
                 override fun onServiceDisconnected(arg0: ComponentName) {
-                    timer.bound = false
+                    //Don't care?
                 }
             }
 
@@ -54,12 +51,6 @@ object TimerManager {
                 User.mainActivity.bindService(bindingIntent, connection, Context.BIND_AUTO_CREATE)
             }
         }
-        viewHolder.itemView.btn_start.setOnClickListener { stopOnClick(viewHolder, timer) }
-    }
-
-    private fun stopOnClick(viewHolder: ActivityAdapter.ViewHolder, timer: Timer) {
-        timer.pause()
-        viewHolder.btnStopOnClick(timer)
     }
 
     fun unbindServices() {

@@ -3,16 +3,15 @@ package tech.davidburns.activitytracker
 import java.util.*
 import kotlin.concurrent.timer
 
-private var id: Int = 2
-
 class Timer(
     private val timerService: TimerService,
-    private val viewHolder: ActivityAdapter.ViewHolder,
     private val title: String
 ) {
     private val timer = timer("timer", period = 1000, action = { updateTime() })
     private var paused = false
     private val myId = id++
+    private var listeners: MutableList<((String) -> Unit)> = mutableListOf()
+
     var bound = true
     var seconds = 0
     val formattedTime: String
@@ -33,7 +32,7 @@ class Timer(
         if (!paused) {
             seconds++
             TimerManager.createNotification(title, formattedTime, timerService, myId)
-            viewHolder.updateTime(formattedTime)
+            listeners.forEach { it(formattedTime) }
         }
     }
 
@@ -48,6 +47,18 @@ class Timer(
     fun stop() {
         timer.cancel()
         TimerManager.dismissNotification(myId)
-        viewHolder.clearTimer()
+//        viewHolder.clearTimer()
+    }
+
+    fun addListener(listener: (formattedTime: String) -> Unit) {
+        listeners.add(listener)
+    }
+
+    fun removeListener(listener: (formattedTime: String) -> Unit) {
+        listeners.remove(listener)
+    }
+
+    private companion object {
+        private var id: Int = 2
     }
 }

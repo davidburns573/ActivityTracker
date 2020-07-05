@@ -25,6 +25,7 @@ class TimerService : Service(), GlobalTimerListener {
     private lateinit var timer: Timer
     private var myID: Int = -1
     private lateinit var notification: NotificationCompat.Builder
+    var bound = false
     var viewHolder: ActivityAdapter.ViewHolder? = null
 
     private fun onTimerIncrement() {
@@ -103,11 +104,6 @@ class TimerService : Service(), GlobalTimerListener {
         return START_STICKY
     }
 
-    override fun onDestroy() {
-        GlobalTimer.unsubscribe(this)
-        super.onDestroy()
-    }
-
     /**
      * Class used for the client Binder.  Because we know this service always
      * runs in the same process as its clients, we don't need to deal with IPC.
@@ -125,7 +121,7 @@ class TimerService : Service(), GlobalTimerListener {
         seconds++
     }
 
-    fun startTimer(viewHolder: ActivityAdapter.ViewHolder): Timer {
-        return Timer(this, viewHolder, viewHolder.itemView.activity_title.text.toString())
+    fun startTimer(title: String): Timer {
+        return Timer(this,title)
     }
 }
