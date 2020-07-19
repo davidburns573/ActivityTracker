@@ -1,5 +1,6 @@
 package tech.davidburns.activitytracker
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
@@ -11,6 +12,13 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
         User.mainActivity = this
+    }
+
+    override fun onResume() {
+        super.onResume()
+        intent?.extras?.getString("ACTIVITY")?.let { activity ->
+            User.intentActivity = activity
+        }
     }
 
     override fun onStop() {

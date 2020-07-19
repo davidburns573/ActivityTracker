@@ -47,7 +47,6 @@ class Timer(
     fun stop() {
         timer.cancel()
         TimerManager.dismissNotification(myId)
-//        viewHolder.clearTimer()
     }
 
     fun addListener(listener: (formattedTime: String) -> Unit) {

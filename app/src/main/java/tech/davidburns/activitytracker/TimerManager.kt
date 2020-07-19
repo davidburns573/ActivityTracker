@@ -5,7 +5,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.os.Bundle
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -81,8 +80,15 @@ object TimerManager {
             }
 
         val stopIntent = Intent(timerService.baseContext, MainActivity::class.java).let { intent ->
-            val activityBundle = Bundle().apply { putString("ACTIVITY", activity.name) }
-            PendingIntent.getActivity(timerService.baseContext, 0, intent, 0, activityBundle)
+            with(intent) {
+                putExtra("ACTIVITY", activity.name)
+            }
+            PendingIntent.getActivity(
+                timerService.baseContext,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+            )
         }
 
         val notification = NotificationCompat.Builder(User.mainActivity, CHANNEL_NAME)

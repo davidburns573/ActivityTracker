@@ -114,6 +114,11 @@ class ActivityAdapter(
             holder.itemView.btn_start.setOnClickListener { holder.btnStartOnClick() }
             holder.itemView.btn_delete.setOnClickListener { holder.deleteActivity() }
             holder.itemView.setOnClickListener(holder)
+
+            if (User.intentActivity == holder.activity.name) {
+                TimerManager.mapOfTimers[holder.activity]?.let { holder.btnStopOnClick(it) }
+                User.intentActivity = null
+            }
         }
     }
 
@@ -161,7 +166,7 @@ class ActivityAdapter(
             }
         }
 
-        private fun btnStopOnClick(timer: Timer) {
+        internal fun btnStopOnClick(timer: Timer) {
             timer.pause()
             val dialog = AddTimerSessionDialog(
                 activities[adapterPosition],

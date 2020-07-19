@@ -28,12 +28,6 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
         }
     }
 
-    fun createNewAdapter() {
-        viewAdapter = ActivityAdapter(User.activities, this, this)
-        User.addActivityListener(viewAdapter)
-        activity_recycler.adapter = viewAdapter
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -101,6 +95,15 @@ class ActivityViewController : Fragment(), Dialogable, ActivityAdapter.OnClickLi
         User.removeActivityListener(viewAdapter)
         activity?.undo_all?.setOnClickListener(null)
         super.onDestroyView()
+    }
+
+    /**
+     * Revert activity adapter to previous state
+     */
+    fun createNewAdapter() {
+        viewAdapter = ActivityAdapter(User.activities, this, this)
+        User.addActivityListener(viewAdapter)
+        activity_recycler.adapter = viewAdapter
     }
 
     fun addTimerSessionDialog(addTimerSessionDialog: AddTimerSessionDialog) {
