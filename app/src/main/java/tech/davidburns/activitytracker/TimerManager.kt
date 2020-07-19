@@ -5,10 +5,10 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.os.Bundle
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import kotlinx.android.synthetic.main.activity_card.view.*
 
 private const val SUMMARY_ID = 1
 private const val GROUP_NAME = "timerGroup"
@@ -22,12 +22,12 @@ object TimerManager {
     private var foregroundId: Int = -1
 
     /**
-     * Start a service to run a timer
-     * @param viewHolder to display time
+     * Start a service to run a timer.
+     * Uses callback to return created timer.
      */
     fun initializeTimer(activity: Activity, title: String, callback: (Timer) -> Unit) {
         if (::timerService.isInitialized) {
-            mapOfTimers[activity] = timerService.startTimer(title).apply(callback)
+            mapOfTimers[activity] = timerService.startTimer(title, activity).apply(callback)
         } else {
             val serviceIntent = Intent(User.mainActivity, TimerService::class.java)
 
@@ -37,7 +37,7 @@ object TimerManager {
                     // We've bound to LocalService, cast the IBinder and get LocalService instance
                     val binder = service as TimerService.LocalBinder
                     timerService = binder.getService()
-                    mapOfTimers[activity] = timerService.startTimer(title).apply(callback)
+                    mapOfTimers[activity] = timerService.startTimer(title, activity).apply(callback)
                 }
 
                 override fun onServiceDisconnected(arg0: ComponentName) {
@@ -67,21 +67,37 @@ object TimerManager {
         }
     }
 
-    fun createNotification(title: String, content: String, timerService: TimerService, id: Int) {
+    fun createNotification(
+        title: String,
+        content: String,
+        timerService: TimerService,
+        id: Int,
+        activity: Activity
+    ) {
         //Opens this app on notification click
-        val pendingIntent: PendingIntent =
-            Intent(timerService, MainActivity::class.java).let { notificationIntent ->
-                PendingIntent.getActivity(timerService, 0, notificationIntent, 0)
+        val pendingIntent =
+            Intent(timerService.baseContext, MainActivity::class.java).let { notificationIntent ->
+                PendingIntent.getActivity(timerService.baseContext, 0, notificationIntent, 0)
             }
 
+        val stopIntent = Intent(timerService.baseContext, MainActivity::class.java).let { intent ->
+            val activityBundle = Bundle().apply { putString("ACTIVITY", activity.name) }
+            PendingIntent.getActivity(timerService.baseContext, 0, intent, 0, activityBundle)
+        }
+
         val notification = NotificationCompat.Builder(User.mainActivity, CHANNEL_NAME)
+            .setGroup(GROUP_NAME)
+            .setSmallIcon(R.drawable.ic_baseline_timer_24)
             .setContentTitle(title)
-            .setSmallIcon(R.drawable.ic_delete_black_24dp)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
-            .setGroup(GROUP_NAME)
             .setOnlyAlertOnce(true)
             .setContentText(content)
+            .addAction(
+                R.drawable.ic_baseline_stop_24,
+                User.applicationContext.getString(R.string.stop),
+                stopIntent
+            )
 
         if (foreground) {
             with(NotificationManagerCompat.from(User.mainActivity)) {
@@ -90,7 +106,7 @@ object TimerManager {
         } else {
             val summaryNotification = NotificationCompat.Builder(User.mainActivity, CHANNEL_NAME)
                 .setGroup(GROUP_NAME)
-                .setSmallIcon(R.drawable.ic_delete_black_24dp)
+                .setSmallIcon(R.drawable.ic_baseline_timer_24)
                 .setContentIntent(pendingIntent)
                 .setGroupSummary(true)
                 .build()

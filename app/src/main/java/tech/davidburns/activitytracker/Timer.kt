@@ -5,14 +5,14 @@ import kotlin.concurrent.timer
 
 class Timer(
     private val timerService: TimerService,
-    private val title: String
+    private val title: String,
+    private val activity: Activity
 ) {
     private val timer = timer("timer", period = 1000, action = { updateTime() })
     private var paused = false
     private val myId = id++
     private var listeners: MutableList<((String) -> Unit)> = mutableListOf()
 
-    var bound = true
     var seconds = 0
     val formattedTime: String
         get() {
@@ -31,7 +31,7 @@ class Timer(
     private fun updateTime() {
         if (!paused) {
             seconds++
-            TimerManager.createNotification(title, formattedTime, timerService, myId)
+            TimerManager.createNotification(title, formattedTime, timerService, myId, activity)
             listeners.forEach { it(formattedTime) }
         }
     }
