@@ -1,6 +1,11 @@
 package tech.davidburns.activitytracker
 
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
+import android.os.IBinder
+import kotlinx.android.synthetic.main.activity_card.view.*
 import tech.davidburns.activitytracker.interfaces.ActivityListener
 import tech.davidburns.activitytracker.interfaces.Database
 import tech.davidburns.activitytracker.util.ActivityListDiff

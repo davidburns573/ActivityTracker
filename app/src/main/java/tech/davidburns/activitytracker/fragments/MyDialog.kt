@@ -57,7 +57,7 @@ class MyDialog(@StringRes private val hint: Int) : DialogFragment() {
     }
 }
 
-class AddTimerSessionDialog(val activity: Activity, val timer: Timer) : DialogFragment() {
+class AddTimerSessionDialog(val activity: Activity, private val timer: Timer, private val onCanceledCallback: () -> Unit) : DialogFragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -75,31 +75,24 @@ class AddTimerSessionDialog(val activity: Activity, val timer: Timer) : DialogFr
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        add_session_title.text = "Would you like to add this session to " + activity.name + "?"
+        add_session_title.text = getString(R.string.add_session_title, activity.name)
 
-        val seconds = timer.seconds
-        val hours: Int = seconds / 3600
-        val minutes: Int = seconds % 3600 / 60
-        val secs: Int = seconds % 60
-
-        val time: String = java.lang.String
-            .format(Locale.getDefault(),
-                "%d:%02d:%02d", hours,
-                minutes, secs)
-        length_of_session.text = time
+        length_of_session.text = timer.formattedTime
 
         btn_yes.setOnClickListener {
-            activity.addSession(Duration.ofSeconds(seconds.toLong()))
-            timer.reset()
+            activity.addSession(Duration.ofSeconds(timer.seconds.toLong()))
+            timer.stop()
+            onCanceledCallback()
             dismiss()
         }
 
         btn_no.setOnClickListener {
-            timer.reset()
+            timer.stop()
             dismiss()
         }
 
         btn_back.setOnClickListener {
+            timer.resume()
             dismiss()
         }
     }

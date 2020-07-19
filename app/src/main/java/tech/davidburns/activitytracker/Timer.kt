@@ -1,100 +1,64 @@
 package tech.davidburns.activitytracker
 
-import android.content.ComponentName
-import android.content.Intent
-import android.content.ServiceConnection
-import android.os.Handler
-import android.os.IBinder
-import kotlinx.android.synthetic.main.activity_card.view.*
 import java.util.*
-import kotlin.properties.Delegates
+import kotlin.concurrent.timer
 
-class Timer(private val title: String, private val viewHolder: ActivityAdapter.ViewHolder) : GlobalTimerListener {
-    var seconds: Int by Delegates.observable(0) { _, _, _ ->
-        updateTime()
-    }
+class Timer(
+    private val timerService: TimerService,
+    private val title: String
+) {
+    private val timer = timer("timer", period = 1000, action = { updateTime() })
+    private var paused = false
+    private val myId = id++
+    private var listeners: MutableList<((String) -> Unit)> = mutableListOf()
 
-    var isRunning: Boolean = false
-    private val handler: Handler = Handler()
-    private lateinit var runnable: Runnable
-    private lateinit var service: TimerService
-    var bound: Boolean = false
-    private lateinit var intent: Intent
+    var bound = true
+    var seconds = 0
+    val formattedTime: String
+        get() {
+            val hours: Int = seconds / 3600
+            val minutes: Int = seconds % 3600 / 60
+            val secs: Int = seconds % 60
 
-    override fun incrementTime() {
-        seconds++
-    }
+            return String
+                .format(
+                    Locale.getDefault(),
+                    "%d:%02d:%02d", hours,
+                    minutes, secs
+                )
+        }
 
     private fun updateTime() {
-        val hours: Int = seconds / 3600
-        val minutes: Int = seconds % 3600 / 60
-        val secs: Int = seconds % 60
-
-        val time: String = java.lang.String
-            .format(
-                Locale.getDefault(),
-                "%d:%02d:%02d", hours,
-                minutes, secs
-            )
-
-        viewHolder.changeTimerText(time)
-    }
-
-    fun runTimer() {
-        isRunning = true
-        User.mainActivity.startTimer(this)
-//        runnable = Runnable {
-//            val hours: Int = seconds / 3600
-//            val minutes: Int = seconds % 3600 / 60
-//            val secs: Int = seconds % 60
-//
-//            val time: String = java.lang.String
-//                .format(
-//                    Locale.getDefault(),
-//                    "%d:%02d:%02d", hours,
-//                    minutes, secs
-//                )
-//
-//            viewHolder.itemView.timer.text = time
-//
-//            seconds++
-//            handler.postDelayed(runnable, 1000)
-//        }
-//        handler.post(runnable)
-    }
-
-    fun endTimer() {
-        User.mainActivity.stopService(intent)
-//        handler.removeCallbacks(runnable)
-        GlobalTimer.unsubscribe(this)
-        reset()
-    }
-
-    fun pauseTimer() {
-        GlobalTimer.unsubscribe(this)
-//        handler.removeCallbacks(runnable)
-//        isRunning = false
-    }
-
-    fun reset() {
-        seconds = 0;
-        viewHolder.changeTimerText("")
-        isRunning = false
-    }
-
-    /** Defines callbacks for service binding, passed to bindService()  */
-    val connection = object : ServiceConnection {
-
-        override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            val binder = service as TimerService.LocalBinder
-            this@Timer.service = binder.getService()
-            bound = true
-            this@Timer.service.createNotification(title)
+        if (!paused) {
+            seconds++
+            TimerManager.createNotification(title, formattedTime, timerService, myId)
+            listeners.forEach { it(formattedTime) }
         }
+    }
 
-        override fun onServiceDisconnected(arg0: ComponentName) {
-            bound = false
-        }
+    fun pause() {
+        paused = true
+    }
+
+    fun resume() {
+        paused = false
+    }
+
+    fun stop() {
+        timer.cancel()
+        TimerManager.dismissNotification(myId)
+//        viewHolder.clearTimer()
+    }
+
+    fun addListener(listener: (formattedTime: String) -> Unit) {
+        listeners.add(listener)
+    }
+
+    fun removeListener(listener: (formattedTime: String) -> Unit) {
+        listeners.remove(listener)
+    }
+
+    private companion object {
+        private var id: Int = 2
     }
 }

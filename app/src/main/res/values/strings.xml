@@ -25,4 +25,5 @@
     <string name="undo_all">Undo All</string>
     <string name="commit_changes">Commit Changes</string>
     <string name="add_activity">Add Activity</string>
+    <string name="add_session_title">Would you like to add this session to %1$s ?</string>
 </resources>

@@ -3,23 +3,43 @@ package tech.davidburns.activitytracker
 import android.app.*
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Binder
 import android.os.HandlerThread
 import android.os.IBinder
 import android.os.Process
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import kotlinx.android.synthetic.main.activity_card.view.*
 
-private const val SUMMARY_ID = 0
+private const val SUMMARY_ID = 1
 private const val GROUP_NAME = "timerGroup"
 private const val CHANNEL_NAME = "timerChannel"
-private const val FOREGROUND_ID = 2
+private var id = 2
+private var foreground = false
 
 class TimerService : Service(), GlobalTimerListener {
     // Binder given to clients
     private val binder = LocalBinder()
     private var seconds = 0
-    private var id = 1
+    private lateinit var timer: Timer
+    private var myID: Int = -1
+    private lateinit var notification: NotificationCompat.Builder
+    var bound = false
+    var viewHolder: ActivityAdapter.ViewHolder? = null
+
+    private fun onTimerIncrement() {
+        if (::notification.isInitialized) {
+            notification.setContentText(timer.formattedTime)
+            with(NotificationManagerCompat.from(User.mainActivity)) {
+                notify(myID, notification.build())
+            }
+        }
+    }
+
+    private fun onTimerStopped() {
+
+    }
 
     fun createNotification(title: String) {
         //Opens this app on notification click
@@ -28,33 +48,34 @@ class TimerService : Service(), GlobalTimerListener {
                 PendingIntent.getActivity(this, 0, notificationIntent, 0)
             }
 
-        val notification =
-            NotificationCompat.Builder(User.mainActivity, CHANNEL_NAME)
+        notification = NotificationCompat.Builder(User.mainActivity, CHANNEL_NAME)
+            .setContentTitle(title)
+            .setSmallIcon(R.drawable.ic_delete_black_24dp)
+            .setContentIntent(pendingIntent)
+            .setOngoing(true)
+            .setGroup(GROUP_NAME)
+            .setOnlyAlertOnce(true)
+
+        if (foreground) {
+            with(NotificationManagerCompat.from(User.mainActivity)) {
+                notify(id, notification.build())
+            }
+        } else {
+            val summaryNotification = NotificationCompat.Builder(User.mainActivity, CHANNEL_NAME)
+                .setGroup(GROUP_NAME)
                 .setContentTitle(title)
                 .setSmallIcon(R.drawable.ic_delete_black_24dp)
                 .setContentIntent(pendingIntent)
-                .setOngoing(true)
-                .setGroup(GROUP_NAME)
+                .setGroupSummary(true)
                 .build()
-
-        if (GlobalTimer.foreground) {
             with(NotificationManagerCompat.from(User.mainActivity)) {
-                notify(id, notification)
+                notify(SUMMARY_ID, summaryNotification)
             }
             id += 100
-        } else {
-            val summary = NotificationCompat.Builder(User.mainActivity, CHANNEL_NAME)
-                .setSmallIcon(R.drawable.ic_delete_black_24dp)
-                .setGroupSummary(true)
-                .setGroup(GROUP_NAME)
-                .build()
-
-            with(NotificationManagerCompat.from(User.mainActivity)) {
-                notify(SUMMARY_ID, summary)
-            }
-            startForeground(FOREGROUND_ID, notification)
-            GlobalTimer.foreground = true
+            startForeground(id, notification.build())
+            foreground = true
         }
+        myID = id++
     }
 
     override fun onCreate() {
@@ -63,6 +84,9 @@ class TimerService : Service(), GlobalTimerListener {
             CHANNEL_NAME,
             getString(R.string.app_name), NotificationManager.IMPORTANCE_DEFAULT
         )
+        channel.lightColor = Color.BLUE
+        channel.enableLights(true)
+        channel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
         val service = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         service.createNotificationChannel(channel)
         // Start up the thread running the service.  Note that we create a
@@ -75,15 +99,10 @@ class TimerService : Service(), GlobalTimerListener {
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        GlobalTimer.subscribe(this)
+//        timer = Timer().apply { start(::onTimerIncrement) }
 
         // If we get killed, after returning from here, restart
         return START_STICKY
-    }
-
-    override fun onDestroy() {
-        GlobalTimer.unsubscribe(this)
-        super.onDestroy()
     }
 
     /**
@@ -101,5 +120,9 @@ class TimerService : Service(), GlobalTimerListener {
 
     override fun incrementTime() {
         seconds++
+    }
+
+    fun startTimer(title: String): Timer {
+        return Timer(this,title)
     }
 }
