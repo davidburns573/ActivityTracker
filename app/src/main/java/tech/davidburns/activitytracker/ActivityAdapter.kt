@@ -93,17 +93,27 @@ class ActivityAdapter(
         if (activities.size > 0) {
             // Get the data model based on position
             holder.activity = activities[position]
-            holder.title.text = holder.activity.name
+
+            //Settle sessions TODO this should not happen in onBindViewHolder
             holder.activity.sessions.clear()
             holder.activity.sessions.addAll(User.getSessionsFromActivity(holder.activity.name))
+
+            //Set texts
+            holder.title.text = holder.activity.name
             holder.secondary.text = User.applicationContext.getString(
                 R.string.seconds_text,
                 holder.activity.statistics.totalTimeEver().seconds.toString()
             )
+
+            //Setup timer
             TimerManager.mapOfTimers[holder.activity]?.addListener {
                 holder.updateTime(it)
             }
+
+            //Setup on click listeners
             holder.itemView.btn_start.setOnClickListener { holder.btnStartOnClick() }
+            holder.itemView.btn_delete.setOnClickListener { holder.deleteActivity() }
+            holder.itemView.setOnClickListener(holder)
         }
     }
 
@@ -112,14 +122,12 @@ class ActivityAdapter(
     inner class ViewHolder(itemView: View, private val onClickListener: OnClickListener) :
         RecyclerView.ViewHolder(itemView), View.OnClickListener {
         lateinit var activity: Activity
-        var title: TextView = itemView.activity_title
-        var secondary: TextView = itemView.secondary_text
-        var other = itemView.other_text
+        val title: TextView = itemView.activity_title
+        val secondary: TextView = itemView.secondary_text
+        val other = itemView.other_text
 
         init {
-            itemView.btn_delete.setOnClickListener { deleteActivity() }
             editModeListeners.add(::updateEditMode)
-            itemView.setOnClickListener(this)
         }
 
         override fun onClick(v: View?) {
@@ -151,19 +159,6 @@ class ActivityAdapter(
                     btnStopOnClick(timer)
                 }
             }
-
-//            if (timer.isRunning) {
-//                itemView.btn_start.text = User.applicationContext.getString(R.string.start)
-//                timer.pauseTimer()
-//                val dialog = AddTimerSessionDialog(
-//                    activities[adapterPosition],
-//                    timer
-//                )
-//                activityViewController.addTimerSessionDialog(dialog)
-//            } else {
-//                itemView.btn_start.text = User.applicationContext.getString(R.string.stop)
-//                timer.runTimer()
-//            }
         }
 
         private fun btnStopOnClick(timer: Timer) {
@@ -178,6 +173,9 @@ class ActivityAdapter(
 
         private fun onTimerStopped() {
             TimerManager.mapOfTimers[activity]?.removeListener(::updateTime)
+            itemView.btn_start.text = User.applicationContext.getString(R.string.start)
+            itemView.btn_start.setOnClickListener { btnStartOnClick() }
+            itemView.timer.text = ""
         }
 
         internal fun deleteActivity() {

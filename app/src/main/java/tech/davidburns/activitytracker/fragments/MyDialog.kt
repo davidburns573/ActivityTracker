@@ -16,7 +16,6 @@ import tech.davidburns.activitytracker.R
 import tech.davidburns.activitytracker.Timer
 import tech.davidburns.activitytracker.interfaces.Dialogable
 import java.time.Duration
-import java.util.*
 
 class MyDialog(@StringRes private val hint: Int) : DialogFragment() {
     private var fragment: Dialogable? = null
@@ -57,7 +56,7 @@ class MyDialog(@StringRes private val hint: Int) : DialogFragment() {
     }
 }
 
-class AddTimerSessionDialog(val activity: Activity, private val timer: Timer, private val onCanceledCallback: () -> Unit) : DialogFragment() {
+class AddTimerSessionDialog(val activity: Activity, private val timer: Timer, private val onTimerStopped: () -> Unit) : DialogFragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -82,7 +81,7 @@ class AddTimerSessionDialog(val activity: Activity, private val timer: Timer, pr
         btn_yes.setOnClickListener {
             activity.addSession(Duration.ofSeconds(timer.seconds.toLong()))
             timer.stop()
-            onCanceledCallback()
+            onTimerStopped()
             dismiss()
         }
 
