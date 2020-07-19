@@ -62,7 +62,7 @@ class TimerService : Service(), GlobalTimerListener {
         seconds++
     }
 
-    fun startTimer(title: String, activity: Activity): Timer {
-        return Timer(this,title, activity)
+    fun startTimer(title: String, activityId: Int): Timer {
+        return Timer(this,title, activityId)
     }
 }

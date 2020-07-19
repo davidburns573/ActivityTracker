@@ -1,10 +1,10 @@
 package tech.davidburns.activitytracker
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 
+const val ACTIVITY_ID = "ACTIVITY_ID"
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -16,7 +16,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        intent?.extras?.getString("ACTIVITY")?.let { activity ->
+        intent?.extras?.getInt(ACTIVITY_ID)?.let { activity ->
             User.intentActivity = activity
         }
     }

@@ -106,7 +106,7 @@ class ActivityAdapter(
             )
 
             //Setup timer
-            TimerManager.mapOfTimers[holder.activity]?.addListener {
+            TimerManager.mapOfTimers[holder.activity.id]?.addListener {
                 holder.updateTime(it)
             }
 
@@ -115,8 +115,8 @@ class ActivityAdapter(
             holder.itemView.btn_delete.setOnClickListener { holder.deleteActivity() }
             holder.itemView.setOnClickListener(holder)
 
-            if (User.intentActivity == holder.activity.name) {
-                TimerManager.mapOfTimers[holder.activity]?.let { holder.btnStopOnClick(it) }
+            if (User.intentActivity == holder.activity.id) {
+                TimerManager.mapOfTimers[holder.activity.id]?.let { holder.btnStopOnClick(it) }
                 User.intentActivity = null
             }
         }
@@ -157,7 +157,7 @@ class ActivityAdapter(
         }
 
         internal fun btnStartOnClick() {
-            TimerManager.initializeTimer(activity, title.text.toString()) { timer ->
+            TimerManager.initializeTimer(activity.id, title.text.toString()) { timer ->
                 timer.addListener(::updateTime)
                 itemView.btn_start.text = User.applicationContext.getString(R.string.stop)
                 itemView.btn_start.setOnClickListener {
@@ -177,10 +177,8 @@ class ActivityAdapter(
         }
 
         private fun onTimerStopped() {
-            TimerManager.mapOfTimers[activity]?.removeListener(::updateTime)
-            itemView.btn_start.text = User.applicationContext.getString(R.string.start)
-            itemView.btn_start.setOnClickListener { btnStartOnClick() }
-            itemView.timer.text = ""
+            TimerManager.mapOfTimers[activity.id]?.removeListener(::updateTime)
+            clearTimer()
         }
 
         internal fun deleteActivity() {

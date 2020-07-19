@@ -3,9 +3,7 @@ package tech.davidburns.activitytracker
 import java.time.Duration
 import java.time.LocalDateTime
 
-class Activity(var name: String) {
-    constructor(activity: Activity) : this(activity.name)
-
+class Activity(var name: String, val id: Int) {
     var sessions: MutableList<Session> = mutableListOf()
     val statistics: Statistics = Statistics(sessions)
 
@@ -27,7 +25,7 @@ class Activity(var name: String) {
 
         other as Activity
 
-        if (name != other.name) return false
+        if (id != other.id) return false
 
         return true
     }

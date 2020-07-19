@@ -15,7 +15,7 @@ private const val CHANNEL_NAME = "timerChannel"
 private var foreground = false
 
 object TimerManager {
-    val mapOfTimers = mutableMapOf<Activity, Timer>()
+    val mapOfTimers = mutableMapOf<Int, Timer>()
     private val connections: MutableList<ServiceConnection> = mutableListOf()
     private lateinit var timerService: TimerService
     private var foregroundId: Int = -1
@@ -24,9 +24,9 @@ object TimerManager {
      * Start a service to run a timer.
      * Uses callback to return created timer.
      */
-    fun initializeTimer(activity: Activity, title: String, callback: (Timer) -> Unit) {
+    fun initializeTimer(activityId: Int, title: String, callback: (Timer) -> Unit) {
         if (::timerService.isInitialized) {
-            mapOfTimers[activity] = timerService.startTimer(title, activity).apply(callback)
+            mapOfTimers[activityId] = timerService.startTimer(title, activityId).apply(callback)
         } else {
             val serviceIntent = Intent(User.mainActivity, TimerService::class.java)
 
@@ -36,7 +36,7 @@ object TimerManager {
                     // We've bound to LocalService, cast the IBinder and get LocalService instance
                     val binder = service as TimerService.LocalBinder
                     timerService = binder.getService()
-                    mapOfTimers[activity] = timerService.startTimer(title, activity).apply(callback)
+                    mapOfTimers[activityId] = timerService.startTimer(title, activityId).apply(callback)
                 }
 
                 override fun onServiceDisconnected(arg0: ComponentName) {
@@ -71,7 +71,7 @@ object TimerManager {
         content: String,
         timerService: TimerService,
         id: Int,
-        activity: Activity
+        activityId: Int
     ) {
         //Opens this app on notification click
         val pendingIntent =
@@ -81,7 +81,7 @@ object TimerManager {
 
         val stopIntent = Intent(timerService.baseContext, MainActivity::class.java).let { intent ->
             with(intent) {
-                putExtra("ACTIVITY", activity.name)
+                putExtra(ACTIVITY_ID, activityId)
             }
             PendingIntent.getActivity(
                 timerService.baseContext,

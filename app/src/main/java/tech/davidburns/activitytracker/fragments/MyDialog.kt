@@ -87,6 +87,7 @@ class AddTimerSessionDialog(val activity: Activity, private val timer: Timer, pr
 
         btn_no.setOnClickListener {
             timer.stop()
+            onTimerStopped()
             dismiss()
         }
 

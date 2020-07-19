@@ -6,7 +6,7 @@ import tech.davidburns.activitytracker.interfaces.Database
 import tech.davidburns.activitytracker.util.ListDiffMap
 
 object User {
-    var intentActivity: String? = null
+    var intentActivity: Int? = null
     var name: String = "UNNAMED"
     lateinit var mainActivity: MainActivity
     lateinit var currentActivity: Activity
@@ -31,7 +31,7 @@ object User {
      * Create activity with given name and add to the database.
      * @param name of the [Activity] to create
      */
-    fun addActivity(name: String) = database.addActivity(Activity(name))
+    fun addActivity(name: String) = database.addActivity(Activity(name, activities.size))
 
     /**
      * Delete an activity at a specific index.

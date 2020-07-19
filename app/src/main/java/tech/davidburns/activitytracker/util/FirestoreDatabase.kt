@@ -35,7 +35,12 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
                 for (dc in value!!.documentChanges) {
                     when (dc.type) {
                         DocumentChange.Type.ADDED -> {
-                            addInternalActivity(Activity(dc.document.data["name"] as String))
+                            addInternalActivity(
+                                Activity(
+                                    dc.document.data["name"] as String,
+                                    dc.document.data["id"] as Int
+                                )
+                            )
                             Log.d(TAG, "New Activity: ${dc.document.data}")
                         }
                         DocumentChange.Type.MODIFIED -> Log.d(
@@ -76,7 +81,8 @@ class FirestoreDatabase(private val firebaseUser: FirebaseUser) : Database() {
         val activityHashMap = hashMapOf(
             "name" to activity.name,
             "created" to Instant.now().epochSecond,
-            "order" to User.activities.size
+            "order" to User.activities.size,
+            "id" to activity.id
         )
         db.document("$userPath/${firebaseUser.uid}/$activityPath/${activity.name}")
             .set(activityHashMap)

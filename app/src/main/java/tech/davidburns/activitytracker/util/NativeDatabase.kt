@@ -50,7 +50,7 @@ class NativeDatabase : Database() {
     }
 
     override fun addActivity(activity: Activity) {
-        val values: ContentValues = getActivityContentValues(activity)
+        val values: ContentValues = getActivityContentValues(activity, activity.id)
         database.insert(UserSchema.ActivityTable.NAME, null, values)
         addInternalActivity(activity)
     }
@@ -87,11 +87,12 @@ class NativeDatabase : Database() {
     companion object {
         //Must be called before this activity is added to the local list because
         //the order is defined as the size of the list, and not size - 1
-        fun getActivityContentValues(activity: Activity): ContentValues {
+        fun getActivityContentValues(activity: Activity, id: Int): ContentValues {
             val values = ContentValues()
             values.put(UserSchema.ActivityTable.Cols.ACTIVITY_NAME, activity.name)
             values.put(UserSchema.ActivityTable.Cols.CREATED, Instant.now().epochSecond)
             values.put(UserSchema.ActivityTable.Cols.ORDER, User.activities.size)
+            values.put(UserSchema.ActivityTable.Cols.ID, id)
             return values
         }
 
@@ -111,7 +112,8 @@ class NativeDatabase : Database() {
 class ActivityCursorWrapper(cursor: Cursor) : CursorWrapper(cursor) {
     fun getActivity(): Activity {
         val name: String = getString(getColumnIndex(UserSchema.ActivityTable.Cols.ACTIVITY_NAME))
-        return Activity(name)
+        val id: Int = getInt(getColumnIndex(UserSchema.ActivityTable.Cols.ID))
+        return Activity(name, id)
     }
 }
 
@@ -130,6 +132,7 @@ class UserSchema {
 
         object Cols {
             const val ACTIVITY_NAME = "activityname"
+            const val ID = "id"
             const val CREATED: String = "created"
             const val ORDER: String = "activityorder" //Order is a reserved word
         }
@@ -157,6 +160,7 @@ class UserBaseHelper(context: Context) :
             "create table " + UserSchema.ActivityTable.NAME
                     + "(" + " _id integer primary key autoincrement, "
                     + UserSchema.ActivityTable.Cols.ACTIVITY_NAME + ", "
+                    + UserSchema.ActivityTable.Cols.ID + ", "
                     + UserSchema.ActivityTable.Cols.CREATED + ", "
                     + UserSchema.ActivityTable.Cols.ORDER + ")"
         )
