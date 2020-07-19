@@ -1,5 +1,6 @@
 package tech.davidburns.activitytracker
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
@@ -16,8 +17,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        intent?.extras?.getInt(ACTIVITY_ID)?.let { activity ->
-            User.intentActivity = activity
+        if(intent != null) {
+            if ((intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) != 0)
+                intent.extras?.getInt(ACTIVITY_ID)?.let { activity ->
+                    User.intentActivity = activity
+                }
         }
     }
 

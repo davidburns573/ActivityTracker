@@ -14,6 +14,8 @@ class Timer(
     private var listeners: MutableList<((String) -> Unit)> = mutableListOf()
 
     var seconds = 0
+    var inLimbo = false
+
     val formattedTime: String
         get() {
             val hours: Int = seconds / 3600

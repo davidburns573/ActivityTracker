@@ -36,7 +36,8 @@ object TimerManager {
                     // We've bound to LocalService, cast the IBinder and get LocalService instance
                     val binder = service as TimerService.LocalBinder
                     timerService = binder.getService()
-                    mapOfTimers[activityId] = timerService.startTimer(title, activityId).apply(callback)
+                    mapOfTimers[activityId] =
+                        timerService.startTimer(title, activityId).apply(callback)
                 }
 
                 override fun onServiceDisconnected(arg0: ComponentName) {
@@ -73,23 +74,18 @@ object TimerManager {
         id: Int,
         activityId: Int
     ) {
+        val context = User.applicationContext
         //Opens this app on notification click
         val pendingIntent =
-            Intent(timerService.baseContext, MainActivity::class.java).let { notificationIntent ->
-                PendingIntent.getActivity(timerService.baseContext, 0, notificationIntent, 0)
+            Intent(
+                context,
+                MainActivity::class.java
+            ).addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS).let { notificationIntent ->
+                PendingIntent.getActivity(context, 0, notificationIntent, 0)
             }
 
-        val stopIntent = Intent(timerService.baseContext, MainActivity::class.java).let { intent ->
-            with(intent) {
-                putExtra(ACTIVITY_ID, activityId)
-            }
-            PendingIntent.getActivity(
-                timerService.baseContext,
-                0,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT
-            )
-        }
+        val stopIntent =
+            Intent(context, LaunchAppBroadcast::class.java).putExtra(ACTIVITY_ID, activityId)
 
         val notification = NotificationCompat.Builder(User.mainActivity, CHANNEL_NAME)
             .setGroup(GROUP_NAME)
@@ -102,7 +98,12 @@ object TimerManager {
             .addAction(
                 R.drawable.ic_baseline_stop_24,
                 User.applicationContext.getString(R.string.stop),
-                stopIntent
+                PendingIntent.getBroadcast(
+                    context,
+                    1,
+                    stopIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                )
             )
 
         if (foreground) {

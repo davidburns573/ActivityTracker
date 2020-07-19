@@ -1,5 +1,6 @@
 package tech.davidburns.activitytracker.fragments;
 
+import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -71,6 +72,11 @@ class AddTimerSessionDialog(val activity: Activity, private val timer: Timer, pr
         return inflater.inflate(R.layout.add_timer_session_dialog, container, false)
     }
 
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        timer.resume()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -92,7 +98,6 @@ class AddTimerSessionDialog(val activity: Activity, private val timer: Timer, pr
         }
 
         btn_back.setOnClickListener {
-            timer.resume()
             dismiss()
         }
     }

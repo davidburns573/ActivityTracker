@@ -105,19 +105,18 @@ class ActivityAdapter(
                 holder.activity.statistics.totalTimeEver().seconds.toString()
             )
 
-            //Setup timer
-            TimerManager.mapOfTimers[holder.activity.id]?.addListener {
-                holder.updateTime(it)
-            }
-
             //Setup on click listeners
             holder.itemView.btn_start.setOnClickListener { holder.btnStartOnClick() }
             holder.itemView.btn_delete.setOnClickListener { holder.deleteActivity() }
             holder.itemView.setOnClickListener(holder)
 
-            if (User.intentActivity == holder.activity.id) {
-                TimerManager.mapOfTimers[holder.activity.id]?.let { holder.btnStopOnClick(it) }
-                User.intentActivity = null
+            //Setup timer
+            TimerManager.mapOfTimers[holder.activity.id]?.also {
+                holder.linkTimer(it) //Overrides line 109
+                if (it.inLimbo) {
+                    holder.btnStopOnClick(it)
+                    it.inLimbo = false
+                }
             }
         }
     }
@@ -157,12 +156,14 @@ class ActivityAdapter(
         }
 
         internal fun btnStartOnClick() {
-            TimerManager.initializeTimer(activity.id, title.text.toString()) { timer ->
-                timer.addListener(::updateTime)
-                itemView.btn_start.text = User.applicationContext.getString(R.string.stop)
-                itemView.btn_start.setOnClickListener {
-                    btnStopOnClick(timer)
-                }
+            TimerManager.initializeTimer(activity.id, title.text.toString(), ::linkTimer)
+        }
+
+        fun linkTimer(timer: Timer) {
+            timer.addListener(::updateTime)
+            itemView.btn_start.text = User.applicationContext.getString(R.string.stop)
+            itemView.btn_start.setOnClickListener {
+                btnStopOnClick(timer)
             }
         }
 
@@ -220,13 +221,13 @@ class ActivityAdapter(
             itemView.activity_card.setCardBackgroundColor(defaultColor)
         }
 
-        internal fun updateTime(formattedTime: String) {
+        private fun updateTime(formattedTime: String) {
             User.mainActivity.runOnUiThread {
                 itemView.timer.text = formattedTime
             }
         }
 
-        fun clearTimer() {
+        private fun clearTimer() {
             itemView.timer.text = ""
             itemView.btn_start.apply {
                 text = User.applicationContext.getText(R.string.start)

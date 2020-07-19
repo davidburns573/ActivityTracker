@@ -19,6 +19,7 @@
             </intent-filter>
         </activity>
         <service android:name=".TimerService" />
+        <receiver android:name=".LaunchAppBroadcast"/>
     </application>
 
 </manifest>
